@@ -18,4 +18,5 @@ public interface IUserService
     Task<bool> UserNameExistsAsync(string userName, CancellationToken cancellationToken = default);
     Task<bool> ValidateUserPasswordAsync(string userName, string password);
     void SetUserPassword(AppUser user, string newPassword);
+    public Task<bool> UserExistsByIdAsync(string userId);
 }

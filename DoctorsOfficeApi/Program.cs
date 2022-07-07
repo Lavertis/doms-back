@@ -4,6 +4,7 @@ using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Middleware;
 using DoctorsOfficeApi.Models.Requests;
+using DoctorsOfficeApi.Services.AppointmentService;
 using DoctorsOfficeApi.Services.AuthService;
 using DoctorsOfficeApi.Services.JwtService;
 using DoctorsOfficeApi.Services.UserService;
@@ -40,9 +41,9 @@ builder.Services.AddSwaggerGen(options =>
     options.TagActionsBy(api =>
     {
         if (api.GroupName != null)
-            return new[] {api.GroupName};
+            return new[] { api.GroupName };
         if (api.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
-            return new[] {controllerActionDescriptor.ControllerName};
+            return new[] { controllerActionDescriptor.ControllerName };
 
         throw new InvalidOperationException("Unable to determine tag for endpoint.");
     });
@@ -98,9 +99,12 @@ builder.Services.AddScoped<ExceptionHandlerMiddleware>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 builder.Services.AddFluentValidation();
 builder.Services.AddTransient<IValidator<AuthenticateRequest>, AuthenticateRequestValidator>();
+builder.Services.AddTransient<IValidator<CreateAppointmentRequest>, CreateAppointmentRequestValidator>();
+builder.Services.AddTransient<IValidator<UpdateAppointmentRequest>, UpdateAppointmentRequestValidator>();
 
 var app = builder.Build();
 
@@ -122,4 +126,6 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program { };
+public partial class Program
+{
+};

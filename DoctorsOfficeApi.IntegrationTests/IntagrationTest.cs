@@ -1,4 +1,6 @@
-﻿using DoctorsOfficeApi.Data;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
@@ -39,8 +41,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
                 if (dbContextOptions is not null)
                     services.Remove(dbContextOptions);
-                
-                var inMemoryDbName = "InMemoryDb_"+DateTime.Now.ToFileTimeUtc(); // workaround for concurrent integration tests using same db
+
+                var inMemoryDbName = "InMemoryDb_" + DateTime.Now.ToFileTimeUtc(); // workaround for concurrent integration tests using same db
                 services.AddDbContext<AppDbContext>(options => { options.UseInMemoryDatabase(inMemoryDbName); });
 
                 DbContext = services.BuildServiceProvider().GetService<AppDbContext>()!;
@@ -51,10 +53,10 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     protected void RefreshDbContext() // refreshes context for assertions
     {
         var scope = _factory.Services.GetService<IServiceScopeFactory>()!.CreateScope();
-        var context =  scope.ServiceProvider.GetService<AppDbContext>()!;
+        var context = scope.ServiceProvider.GetService<AppDbContext>()!;
         DbContext = context;
     }
-    
+
     protected HttpClient GetHttpClient()
     {
         var client = _factory.CreateClient();
@@ -76,8 +78,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             NormalizedUserName = TestAdminUserName.ToUpper(),
             PasswordHash = hasher.HashPassword(null!, TestAdminPassword),
         };
-        dbContext.Users.Add(testAdminUser);
-        var adminRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleType.Admin)!.Id;
+        var testAdmin = new Admin { AppUser = testAdminUser };
+        dbContext.Admins.Add(testAdmin);
+        var adminRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Admin)!.Id;
         dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
         {
             UserId = testAdminUserId,
@@ -92,8 +95,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             NormalizedUserName = TestDoctorUserName.ToUpper(),
             PasswordHash = hasher.HashPassword(null!, TestDoctorPassword)
         };
-        dbContext.Users.Add(testDoctorUser);
-        var doctorRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleType.Doctor)!.Id;
+        var testDoctor = new Doctor { AppUser = testDoctorUser };
+        dbContext.Doctors.Add(testDoctor);
+        var doctorRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Doctor)!.Id;
         dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
         {
             UserId = testDoctorUserId,
@@ -108,8 +112,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             NormalizedUserName = TestPatientUserName.ToUpper(),
             PasswordHash = hasher.HashPassword(null!, TestPatientPassword)
         };
-        dbContext.Users.Add(testPatientUser);
-        var patientRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleType.Patient)!.Id;
+        var testPatient = new Patient { AppUser = testPatientUser };
+        dbContext.Patients.Add(testPatient);
+        var patientRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
         dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
         {
             UserId = patientUserId,
@@ -123,13 +128,13 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         switch (roleName)
         {
-            case RoleType.Admin:
+            case RoleTypes.Admin:
                 await AuthenticateAsAdminAsync(client);
                 break;
-            case RoleType.Doctor:
+            case RoleTypes.Doctor:
                 await AuthenticateAsDoctorAsync(client);
                 break;
-            case RoleType.Patient:
+            case RoleTypes.Patient:
                 await AuthenticateAsPatientAsync(client);
                 break;
             default:
@@ -137,22 +142,22 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         }
     }
 
-    protected static async Task AuthenticateAsAdminAsync(HttpClient client)
+    protected static async Task<string> AuthenticateAsAdminAsync(HttpClient client)
     {
-        await AuthenticateAsAsync(client, TestAdminUserName, TestAdminPassword);
+        return await AuthenticateAsAsync(client, TestAdminUserName, TestAdminPassword);
     }
 
-    protected static async Task AuthenticateAsDoctorAsync(HttpClient client)
+    protected static async Task<string> AuthenticateAsDoctorAsync(HttpClient client)
     {
-        await AuthenticateAsAsync(client, TestDoctorUserName, TestDoctorPassword);
+        return await AuthenticateAsAsync(client, TestDoctorUserName, TestDoctorPassword);
     }
 
-    protected static async Task AuthenticateAsPatientAsync(HttpClient client)
+    protected static async Task<string> AuthenticateAsPatientAsync(HttpClient client)
     {
-        await AuthenticateAsAsync(client, TestPatientUserName, TestPatientPassword);
+        return await AuthenticateAsAsync(client, TestPatientUserName, TestPatientPassword);
     }
 
-    private static async Task AuthenticateAsAsync(HttpClient client, string userName, string password)
+    private static async Task<string> AuthenticateAsAsync(HttpClient client, string userName, string password)
     {
         var result = await client.PostAsJsonAsync(AuthenticateUrl, new AuthenticateRequest
         {
@@ -168,5 +173,10 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         var jwtToken = (await result.Content.ReadAsAsync<AuthenticateResponse>()).JwtToken;
 
         client.DefaultRequestHeaders.Add("Authorization", $"bearer {jwtToken}");
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtObject = handler.ReadJwtToken(jwtToken);
+        var userId = jwtObject.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)!.Value;
+        return userId;
     }
 }

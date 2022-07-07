@@ -1,4 +1,5 @@
-﻿using DoctorsOfficeApi.Entities.UserTypes;
+﻿using DoctorsOfficeApi.Entities;
+using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -8,10 +9,22 @@ namespace DoctorsOfficeApi.Data;
 
 public class AppDbContext : IdentityDbContext<AppUser>
 {
-    public DbSet<IdentityUserRole<string>> IdentityUserRole { get; set; }
+    public virtual DbSet<IdentityUserRole<string>> IdentityUserRole { get; set; }
+    public virtual DbSet<Appointment> Appointments { get; set; }
+    public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; }
+    public virtual DbSet<AppointmentType> AppointmentTypes { get; set; }
+    public virtual DbSet<Doctor> Doctors { get; set; }
+    public virtual DbSet<Patient> Patients { get; set; }
+    public virtual DbSet<Admin> Admins { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseLazyLoadingProxies();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -25,20 +38,22 @@ public class AppDbContext : IdentityDbContext<AppUser>
         const string adminRoleId = "fa2640a0-0496-4010-bc27-424e0e5c6f78";
         SeedRoles(builder, adminRoleId);
         CreateAdminAccount(builder, adminRoleId);
+        SeedAppointmentTypes(builder);
+        SeedAppointmentStatuses(builder);
     }
 
-    private void SeedRoles(ModelBuilder builder, string adminRoleId)
+    private static void SeedRoles(ModelBuilder builder, string adminRoleId)
     {
         var roles = new List<IdentityRole>
         {
-            new() { Name = RoleType.Admin, NormalizedName = RoleType.Admin.ToUpper(), Id = adminRoleId },
-            new() { Name = RoleType.Patient, NormalizedName = RoleType.Patient.ToUpper() },
-            new() { Name = RoleType.Doctor, NormalizedName = RoleType.Doctor.ToUpper() }
+            new() { Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId },
+            new() { Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper() },
+            new() { Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper() }
         };
         builder.Entity<IdentityRole>().HasData(roles);
     }
 
-    private void CreateAdminAccount(ModelBuilder builder, string adminRoleId)
+    private static void CreateAdminAccount(ModelBuilder builder, string adminRoleId)
     {
         const string adminUserId = "7a4165b4-0aca-43fb-a390-294781ee377f";
         var hasher = new PasswordHasher<AppUser>();
@@ -64,5 +79,25 @@ public class AppDbContext : IdentityDbContext<AppUser>
                 Id = adminUserId
             }
         );
+    }
+
+    private static void SeedAppointmentTypes(ModelBuilder builder)
+    {
+        var appointmentTypeFields = typeof(AppointmentTypes).GetFields();
+        var id = 1;
+        var appointmentTypes = appointmentTypeFields
+            .Select(appointmentTypeField => new AppointmentType { Id = id++, Name = appointmentTypeField.Name })
+            .ToList();
+        builder.Entity<AppointmentType>().HasData(appointmentTypes);
+    }
+
+    private static void SeedAppointmentStatuses(ModelBuilder builder)
+    {
+        var appointmentStatusFields = typeof(AppointmentStatuses).GetFields();
+        var id = 1;
+        var appointmentStatuses = appointmentStatusFields
+            .Select(appointmentStatusField => new AppointmentStatus { Id = id++, Name = appointmentStatusField.Name })
+            .ToList();
+        builder.Entity<AppointmentStatus>().HasData(appointmentStatuses);
     }
 }

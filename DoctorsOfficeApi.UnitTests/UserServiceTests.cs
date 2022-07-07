@@ -232,7 +232,7 @@ public class UserServiceTests
             PasswordHash = oldPasswordHash
         };
         var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
-        
+
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
         A.CallTo(() => _fakeUserManager.FindByNameAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => _fakeUserManager.UpdateAsync(A<AppUser>.Ignored)).Returns(IdentityResult.Success);
@@ -334,7 +334,7 @@ public class UserServiceTests
         };
         var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
-        
+
         var updateUserRequest = new UpdateUserRequest
         {
             UserName = "newUerName",
@@ -417,7 +417,7 @@ public class UserServiceTests
         // assert
         await action.Should().ThrowExactlyAsync<BadRequestException>();
     }
-    
+
     [Fact]
     public async void DeleteUserByIdAsync_IdExists_CallsUserManagerDeleteAsyncMethod()
     {
@@ -468,7 +468,7 @@ public class UserServiceTests
         // assert
         A.CallTo(() => _fakeUserManager.DeleteAsync(A<AppUser>.Ignored)).MustNotHaveHappened();
     }
-    
+
     [Fact]
     public async void GetUserRolesAsClaims_UserDoesntHaveRoles_DoesntReturnAnyRoleClaim()
     {
@@ -497,7 +497,7 @@ public class UserServiceTests
         result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role1");
         result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role2");
     }
-    
+
     [Fact]
     public async Task GetUserRefreshTokens_UserIdExists_ReturnsRefreshTokens()
     {
@@ -506,7 +506,7 @@ public class UserServiceTests
         var refreshTokens = new List<RefreshToken> { A.Dummy<RefreshToken>() };
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => appUser.RefreshTokens).Returns(refreshTokens);
-        
+
         var id = Guid.NewGuid().ToString();
 
         // act
@@ -515,15 +515,15 @@ public class UserServiceTests
         // assert
         result.Should().BeEquivalentTo(refreshTokens);
     }
-    
+
     [Fact]
     public async Task GetUserRefreshTokens_UserIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
         AppUser appUser = null!;
-        
+
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
-        
+
         var id = Guid.NewGuid().ToString();
 
         // act
@@ -532,7 +532,7 @@ public class UserServiceTests
         // assert
         await action.Should().ThrowExactlyAsync<NotFoundException>();
     }
-    
+
     [Fact]
     public async void UserNameExists_UserNameDoesntExist_ReturnsFalse()
     {
@@ -564,14 +564,14 @@ public class UserServiceTests
         // assert
         result.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task ValidateUserPasswordAsync_ValidPassword_ReturnsTrue()
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
         const string password = "password";
-        
+
         A.CallTo(() => _fakeUserManager.CheckPasswordAsync(A<AppUser>.Ignored, A<string>.Ignored)).Returns(true);
         A.CallTo(() => _fakeUserManager.FindByNameAsync(A<string>.Ignored)).Returns(appUser);
 
@@ -581,14 +581,14 @@ public class UserServiceTests
         // assert
         result.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task ValidateUserPasswordAsync_InvalidPassword_ReturnsFalse()
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
         const string password = "password";
-        
+
         A.CallTo(() => _fakeUserManager.CheckPasswordAsync(A<AppUser>.Ignored, A<string>.Ignored)).Returns(false);
         A.CallTo(() => _fakeUserManager.FindByNameAsync(A<string>.Ignored)).Returns(appUser);
 
@@ -598,7 +598,7 @@ public class UserServiceTests
         // assert
         result.Should().BeFalse();
     }
-    
+
     [Fact]
     public async Task ValidateUserPasswordAsync_UserNameDoesntExist_ThrowsNotFoundException()
     {
@@ -615,7 +615,7 @@ public class UserServiceTests
         // assert
         await acton.Should().ThrowExactlyAsync<NotFoundException>();
     }
-    
+
     [Fact]
     public void SetUserPassword_ValidUser_SetsUserPassword()
     {
@@ -629,5 +629,34 @@ public class UserServiceTests
 
         // assert
         appUser.PasswordHash.Should().NotBe(dummyPasswordHash);
+    }
+
+    [Fact]
+    public async Task UserExistsById_UserExists_ReturnsTrue()
+    {
+        // arrange
+        var appUser = new AppUser();
+        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
+
+        // act
+        var result = await _userService.UserExistsByIdAsync(appUser.Id);
+
+        // assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UserExistsById_UserDoesntExist_ReturnsFalse()
+    {
+        // arrange
+        var usersQueryableDummy = A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryableDummy);
+
+        // act
+        var result = await _userService.UserExistsByIdAsync(Guid.NewGuid().ToString());
+
+        // assert
+        result.Should().BeFalse();
     }
 }

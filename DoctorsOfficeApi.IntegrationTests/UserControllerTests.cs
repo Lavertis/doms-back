@@ -40,14 +40,14 @@ public class UserControllerTests : IntegrationTest
 
         // assert
         var responseContent = await response.Content.ReadAsAsync<List<UserResponse>>();
-        
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         expectedResponse.ForEach(user => { responseContent.Should().ContainEquivalentOf(user); });
     }
 
     [Theory]
-    [InlineData(RoleType.Doctor)]
-    [InlineData(RoleType.Patient)]
+    [InlineData(RoleTypes.Doctor)]
+    [InlineData(RoleTypes.Patient)]
     public async void GetAllUsers_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -83,7 +83,7 @@ public class UserControllerTests : IntegrationTest
 
         // assert
         var responseContent = await response.Content.ReadAsAsync<UserResponse>();
-        
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         responseContent.Should().BeEquivalentTo(expectedResponse);
     }
@@ -105,8 +105,8 @@ public class UserControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleType.Doctor)]
-    [InlineData(RoleType.Patient)]
+    [InlineData(RoleTypes.Doctor)]
+    [InlineData(RoleTypes.Patient)]
     public async Task GetUserById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -146,37 +146,37 @@ public class UserControllerTests : IntegrationTest
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{user.Id}/refresh-tokens");
-        
+
         // assert
         var responseContent = await response.Content.ReadAsAsync<List<RefreshToken>>();
-        
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         responseContent.Should().BeEquivalentTo(refreshTokens);
     }
-    
+
     [Fact]
     public async Task GetRefreshTokensByUserId_RequestedUserDoesNotExist_ReturnsNotFound()
     {
         // arrange
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
-        
+
         const string nonExistingUserId = "nonExistingUserId";
-        
+
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{nonExistingUserId}/refresh-tokens");
-        
+
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-    }   
-    
+    }
+
     [Fact]
     public async Task GetRefreshTokensByUserId_UserDoesntHaveRefreshTokens_ReturnsEmptyList()
     {
         // arrange
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
-        
+
         var user = new AppUser
         {
             UserName = "user1",
@@ -184,20 +184,20 @@ public class UserControllerTests : IntegrationTest
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
-        
+
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{user.Id}/refresh-tokens");
-        
+
         // assert
         var responseContent = await response.Content.ReadAsAsync<List<RefreshToken>>();
-        
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         responseContent.Should().BeEmpty();
     }
-    
+
     [Theory]
-    [InlineData(RoleType.Doctor)]
-    [InlineData(RoleType.Patient)]
+    [InlineData(RoleTypes.Doctor)]
+    [InlineData(RoleTypes.Patient)]
     public async Task GetRefreshTokensByUserId_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -205,10 +205,10 @@ public class UserControllerTests : IntegrationTest
         await AuthenticateAsRole(client, roleName);
 
         const string dummyUserId = "dummyUserId";
-        
+
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{dummyUserId}/refresh-tokens");
-        
+
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }

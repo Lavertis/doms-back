@@ -21,7 +21,7 @@ public class UserService : IUserService
         _roleManager = roleManager;
     }
 
-    
+
     public async Task<IList<AppUser>> GetAllUsersAsync(CancellationToken cancellationToken = default)
     {
         var users = await _userManager.Users.ToListAsync(cancellationToken: cancellationToken);
@@ -54,12 +54,12 @@ public class UserService : IUserService
         {
             throw new BadRequestException(e.Message);
         }
-        
+
         var mapper = new Mapper(new MapperConfiguration(cfg =>
             cfg.CreateMap<CreateUserRequest, AppUser>()
         ));
         var user = mapper.Map<AppUser>(request);
-        
+
         var createUserIdentityResult = await _userManager.CreateAsync(user, request.Password);
         if (!createUserIdentityResult.Succeeded)
             throw new AppException("UserManager could not create user");
@@ -81,7 +81,7 @@ public class UserService : IUserService
         {
             throw new BadRequestException(e.Message);
         }
-        
+
         var user = await GetUserByIdAsync(userId);
         if (user == null)
             throw new NotFoundException("User with requested id does not exist");
@@ -91,14 +91,16 @@ public class UserService : IUserService
             user.UserName = request.UserName;
             user.NormalizedUserName = request.UserName.ToUpper();
         }
+
         if (request.Email != null)
         {
             user.Email = request.Email;
-            user.NormalizedEmail = request.Email.ToUpper();    
+            user.NormalizedEmail = request.Email.ToUpper();
         }
-        if(request.PhoneNumber != null)
+
+        if (request.PhoneNumber != null)
             user.PhoneNumber = request.PhoneNumber;
-        if(request.NewPassword != null)
+        if (request.NewPassword != null)
             SetUserPassword(user, request.NewPassword);
 
         var updateUserIdentityResult = await _userManager.UpdateAsync(user);
@@ -153,5 +155,10 @@ public class UserService : IUserService
     {
         var hasher = new PasswordHasher<AppUser>();
         user.PasswordHash = hasher.HashPassword(user, newPassword);
+    }
+
+    public async Task<bool> UserExistsByIdAsync(string userId)
+    {
+        return await _userManager.Users.AnyAsync(user => user.Id == userId);
     }
 }

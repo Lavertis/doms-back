@@ -9,7 +9,7 @@ namespace DoctorsOfficeApi.Controllers;
 
 [ApiController]
 [Route("api/user")]
-[Authorize(Roles = RoleType.Admin)]
+[Authorize(Roles = RoleTypes.Admin)]
 [ApiExplorerSettings(GroupName = "User")]
 public class UserController : Controller
 {
@@ -21,7 +21,7 @@ public class UserController : Controller
     }
 
     /// <summary>
-    /// Returns all base users
+    /// Returns all base users. Only for admins.
     /// </summary>
     [HttpGet]
     public async Task<ActionResult<IList<UserResponse>>> GetAllUsersAsync()
@@ -30,9 +30,9 @@ public class UserController : Controller
         var responses = users.Select(u => new UserResponse(u)).ToList();
         return Ok(responses);
     }
-    
+
     /// <summary>
-    /// Returns base user by id
+    /// Returns base user by id. Only for admins.
     /// </summary>
     [HttpGet("{id}")]
     public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(string id)
@@ -43,7 +43,7 @@ public class UserController : Controller
     }
 
     /// <summary>
-    /// Returns refresh token for user by id
+    /// Returns refresh token for user by id. Only for admins.
     /// </summary>
     [HttpGet("{id}/refresh-tokens")]
     public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(string id)

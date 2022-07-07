@@ -1,6 +1,6 @@
 ﻿namespace DoctorsOfficeApi.Models;
 
-public readonly record struct RoleType
+public readonly record struct RoleTypes
 {
     public const string Admin = "Admin";
     public const string Patient = "Patient";
