@@ -9,13 +9,13 @@ namespace DoctorsOfficeApi.Data;
 
 public class AppDbContext : IdentityDbContext<AppUser>
 {
-    public virtual DbSet<IdentityUserRole<string>> IdentityUserRole { get; set; }
-    public virtual DbSet<Appointment> Appointments { get; set; }
-    public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; }
-    public virtual DbSet<AppointmentType> AppointmentTypes { get; set; }
-    public virtual DbSet<Doctor> Doctors { get; set; }
-    public virtual DbSet<Patient> Patients { get; set; }
-    public virtual DbSet<Admin> Admins { get; set; }
+    public virtual DbSet<IdentityUserRole<string>> IdentityUserRole { get; set; } = default!;
+    public virtual DbSet<Appointment> Appointments { get; set; } = default!;
+    public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; } = default!;
+    public virtual DbSet<AppointmentType> AppointmentTypes { get; set; } = default!;
+    public virtual DbSet<Doctor> Doctors { get; set; } = default!;
+    public virtual DbSet<Patient> Patients { get; set; } = default!;
+    public virtual DbSet<Admin> Admins { get; set; } = default!;
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -93,7 +93,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
 
     private static void SeedAppointmentStatuses(ModelBuilder builder)
     {
-        var appointmentStatusFields = typeof(AppointmentStatuses).GetFields();
+        var appointmentStatusFields = typeof(AppointmentStatuses).GetFields().Where(field => field.Name != "AllowedTransitions");
         var id = 1;
         var appointmentStatuses = appointmentStatusFields
             .Select(appointmentStatusField => new AppointmentStatus { Id = id++, Name = appointmentStatusField.Name })

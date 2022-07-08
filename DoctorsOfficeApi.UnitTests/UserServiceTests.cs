@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Requests;
@@ -23,48 +22,6 @@ public class UserServiceTests
         _fakeRoleManager = A.Fake<RoleManager<IdentityRole>>();
         _fakeUserManager = A.Fake<UserManager<AppUser>>();
         _userService = new UserService(_fakeUserManager, _fakeRoleManager);
-    }
-
-    [Fact]
-    public async void GetAllUsers_NoUsers_ReturnsEmptyCollection()
-    {
-        // arrange
-        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
-
-        // act
-        var result = await _userService.GetAllUsersAsync();
-
-        // assert
-        result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public async void GetAllUsers_UsersExist_ReturnsAllUsers()
-    {
-        // arrange
-        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(3).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
-
-        // act
-        var result = await _userService.GetAllUsersAsync();
-
-        // assert
-        result.Should().HaveCount(3);
-    }
-
-    [Fact]
-    public async void GetAllUsers_OneUserExists_ReturnsCollectionWithOneUser()
-    {
-        // arrange
-        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(1).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
-
-        // act
-        var result = await _userService.GetAllUsersAsync();
-
-        // assert
-        result.Should().ContainSingle();
     }
 
     [Fact]
@@ -496,41 +453,6 @@ public class UserServiceTests
         // assert
         result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role1");
         result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role2");
-    }
-
-    [Fact]
-    public async Task GetUserRefreshTokens_UserIdExists_ReturnsRefreshTokens()
-    {
-        // arrange
-        var appUser = A.Dummy<AppUser>();
-        var refreshTokens = new List<RefreshToken> { A.Dummy<RefreshToken>() };
-        A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
-        A.CallTo(() => appUser.RefreshTokens).Returns(refreshTokens);
-
-        var id = Guid.NewGuid().ToString();
-
-        // act
-        var result = await _userService.GetUserRefreshTokensAsync(id);
-
-        // assert
-        result.Should().BeEquivalentTo(refreshTokens);
-    }
-
-    [Fact]
-    public async Task GetUserRefreshTokens_UserIdDoesntExist_ThrowsNotFoundException()
-    {
-        // arrange
-        AppUser appUser = null!;
-
-        A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
-
-        var id = Guid.NewGuid().ToString();
-
-        // act
-        var action = async () => await _userService.GetUserRefreshTokensAsync(id);
-
-        // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
     }
 
     [Fact]

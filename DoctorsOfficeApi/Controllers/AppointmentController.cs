@@ -1,9 +1,15 @@
 ﻿using System.Security.Claims;
+using DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
+using DoctorsOfficeApi.CQRS.Commands.UpdateAppointment;
+using DoctorsOfficeApi.CQRS.Queries.GetAppointmentById;
+using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByDoctorId;
+using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByPatientId;
+using DoctorsOfficeApi.CQRS.Queries.GetFilteredAppointments;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.AppointmentService;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +20,11 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiExplorerSettings(GroupName = "Appointment")]
 public class AppointmentController : Controller
 {
-    private readonly IAppointmentService _appointmentService;
+    private readonly IMediator _mediator;
 
-    public AppointmentController(IAppointmentService appointmentService)
+    public AppointmentController(IMediator mediator)
     {
-        _appointmentService = appointmentService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -30,16 +36,14 @@ public class AppointmentController : Controller
     {
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
         var authenticatedUserRole = User.FindFirstValue(ClaimTypes.Role)!;
-        var appointments = authenticatedUserRole switch
+
+        var appointmentResponses = authenticatedUserRole switch
         {
-            RoleTypes.Doctor => await _appointmentService.GetAppointmentsByDoctorIdAsync(authenticatedUserId),
-            RoleTypes.Patient => await _appointmentService.GetAppointmentsByPatientIdAsync(authenticatedUserId),
+            RoleTypes.Doctor => await _mediator.Send(new GetAppointmentsByDoctorIdQuery(authenticatedUserId)),
+            RoleTypes.Patient => await _mediator.Send(new GetAppointmentsByPatientIdQuery(authenticatedUserId)),
             _ => throw new ArgumentException("Invalid role")
         };
 
-        var appointmentResponses = appointments
-            .Select(appointment => new AppointmentResponse(appointment))
-            .ToList();
         return Ok(appointmentResponses);
     }
 
@@ -51,11 +55,12 @@ public class AppointmentController : Controller
     public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(long id)
     {
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
-        var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
-        if (appointment.Patient.Id != authenticatedUserId && appointment.Doctor.Id != authenticatedUserId)
+        var query = new GetAppointmentByIdQuery(id);
+        var appointmentResponse = await _mediator.Send(query);
+
+        if (appointmentResponse.PatientId != authenticatedUserId && appointmentResponse.DoctorId != authenticatedUserId)
             return StatusCode(403);
 
-        var appointmentResponse = new AppointmentResponse(appointment);
         return Ok(appointmentResponse);
     }
 
@@ -73,18 +78,8 @@ public class AppointmentController : Controller
     {
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
 
-        var appointments = await _appointmentService.GetFilteredAppointmentsAsync(
-            dateStart,
-            dateEnd,
-            type,
-            status,
-            patientId,
-            authenticatedUserId
-        );
-
-        var appointmentResponses = appointments
-            .Select(appointment => new AppointmentResponse(appointment))
-            .ToList();
+        var query = new GetFilteredAppointmentsQuery(dateStart, dateEnd, type, status, patientId, authenticatedUserId);
+        var appointmentResponses = await _mediator.Send(query);
 
         return Ok(appointmentResponses);
     }
@@ -102,7 +97,7 @@ public class AppointmentController : Controller
     {
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
 
-        var appointments = await _appointmentService.GetFilteredAppointmentsAsync(
+        var query = new GetFilteredAppointmentsQuery(
             dateStart,
             dateEnd,
             type,
@@ -110,10 +105,7 @@ public class AppointmentController : Controller
             authenticatedUserId,
             null
         );
-
-        var appointmentResponses = appointments
-            .Select(appointment => new AppointmentResponse(appointment))
-            .ToList();
+        var appointmentResponses = await _mediator.Send(query);
 
         return Ok(appointmentResponses);
     }
@@ -130,11 +122,12 @@ public class AppointmentController : Controller
 
             throw new BadRequestException("Cannot create appointment for another doctor");
 
-        appointmentRequest.Status = AppointmentStatuses.Accepted;
+        var command = new CreateAppointmentCommand(appointmentRequest)
+        {
+            Status = AppointmentStatuses.Accepted
+        };
+        var appointmentResponse = await _mediator.Send(command);
 
-        var appointment = await _appointmentService.CreateAppointmentAsync(appointmentRequest);
-
-        var appointmentResponse = new AppointmentResponse(appointment);
         return new ObjectResult(appointmentResponse) { StatusCode = StatusCodes.Status201Created };
     }
 
@@ -149,11 +142,12 @@ public class AppointmentController : Controller
         if (appointmentRequest.PatientId != authenticatedUserId)
             throw new BadRequestException("Cannot create appointment request for another user");
 
-        appointmentRequest.Status = AppointmentStatuses.Pending;
+        var command = new CreateAppointmentCommand(appointmentRequest)
+        {
+            Status = AppointmentStatuses.Pending
+        };
+        var appointmentResponse = await _mediator.Send(command);
 
-        var appointment = await _appointmentService.CreateAppointmentAsync(appointmentRequest);
-
-        var appointmentResponse = new AppointmentResponse(appointment);
         return new ObjectResult(appointmentResponse) { StatusCode = StatusCodes.Status201Created };
     }
 
@@ -167,19 +161,22 @@ public class AppointmentController : Controller
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
         var authenticatedUserRole = User.FindFirstValue(ClaimTypes.Role)!;
 
-        var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
-        if (appointment.Patient.Id != authenticatedUserId && appointment.Doctor.Id != authenticatedUserId)
+        var getAppointmentByIdQuery = new GetAppointmentByIdQuery(id);
+        var oldAppointmentResponse = await _mediator.Send(getAppointmentByIdQuery);
+
+        if (oldAppointmentResponse.PatientId != authenticatedUserId && oldAppointmentResponse.DoctorId != authenticatedUserId)
             return StatusCode(403);
 
-        if (appointmentRequest.Status != null &&
+        if (!string.IsNullOrEmpty(appointmentRequest.Status) &&
             authenticatedUserRole == RoleTypes.Doctor &&
-            !AppointmentStatuses.AllowedTransitions[appointment.Status.Name].Contains(appointmentRequest.Status!))
+            !AppointmentStatuses.AllowedTransitions[oldAppointmentResponse.Status].Contains(appointmentRequest.Status!))
         {
-            throw new BadRequestException($"Cant change status from {appointment.Status.Name} to {appointmentRequest.Status}");
+            throw new BadRequestException($"Cant change status from {oldAppointmentResponse.Status} to {appointmentRequest.Status}");
         }
 
-        var updatedAppointment = await _appointmentService.UpdateAppointmentByIdAsync(id, appointmentRequest);
-        var appointmentResponse = new AppointmentResponse(updatedAppointment);
-        return Ok(appointmentResponse);
+        var command = new UpdateAppointmentCommand(id, appointmentRequest);
+        var updatedAppointment = await _mediator.Send(command);
+
+        return Ok(updatedAppointment);
     }
 }

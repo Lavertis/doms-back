@@ -10,6 +10,7 @@ using DoctorsOfficeApi.Services.JwtService;
 using DoctorsOfficeApi.Services.UserService;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -105,6 +106,8 @@ builder.Services.AddFluentValidation();
 builder.Services.AddTransient<IValidator<AuthenticateRequest>, AuthenticateRequestValidator>();
 builder.Services.AddTransient<IValidator<CreateAppointmentRequest>, CreateAppointmentRequestValidator>();
 builder.Services.AddTransient<IValidator<UpdateAppointmentRequest>, UpdateAppointmentRequestValidator>();
+
+builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 

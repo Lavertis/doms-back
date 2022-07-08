@@ -1,7 +1,10 @@
-﻿using DoctorsOfficeApi.Entities;
+﻿using DoctorsOfficeApi.CQRS.Queries.GetAllUsers;
+using DoctorsOfficeApi.CQRS.Queries.GetRefreshTokensByUserId;
+using DoctorsOfficeApi.CQRS.Queries.GetUserById;
+using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.UserService;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,22 +16,22 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiExplorerSettings(GroupName = "User")]
 public class UserController : Controller
 {
-    private IUserService _userService;
+    private readonly IMediator _mediator;
 
-    public UserController(IUserService userService)
+    public UserController(IMediator mediator)
     {
-        _userService = userService;
+        _mediator = mediator;
     }
 
     /// <summary>
     /// Returns all base users. Only for admins.
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ActionResult<IList<UserResponse>>> GetAllUsersAsync()
     {
-        var users = await _userService.GetAllUsersAsync();
-        var responses = users.Select(u => new UserResponse(u)).ToList();
-        return Ok(responses);
+        var query = new GetAllUsersQuery();
+        var userResponses = await _mediator.Send(query);
+        return Ok(userResponses);
     }
 
     /// <summary>
@@ -37,9 +40,9 @@ public class UserController : Controller
     [HttpGet("{id}")]
     public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(string id)
     {
-        var user = await _userService.GetUserByIdAsync(id);
-        var response = new UserResponse(user);
-        return Ok(response);
+        var query = new GetUserByIdQuery(id);
+        var userResponse = await _mediator.Send(query);
+        return Ok(userResponse);
     }
 
     /// <summary>
@@ -48,7 +51,8 @@ public class UserController : Controller
     [HttpGet("{id}/refresh-tokens")]
     public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(string id)
     {
-        var refreshTokens = await _userService.GetUserRefreshTokensAsync(id);
+        var query = new GetRefreshTokensByUserIdQuery(id);
+        var refreshTokens = await _mediator.Send(query);
         return Ok(refreshTokens);
     }
 }

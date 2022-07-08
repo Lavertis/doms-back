@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
-using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Requests;
@@ -19,13 +18,6 @@ public class UserService : IUserService
     {
         _userManager = userManager;
         _roleManager = roleManager;
-    }
-
-
-    public async Task<IList<AppUser>> GetAllUsersAsync(CancellationToken cancellationToken = default)
-    {
-        var users = await _userManager.Users.ToListAsync(cancellationToken: cancellationToken);
-        return users;
     }
 
     public async Task<AppUser> GetUserByIdAsync(string userId)
@@ -127,13 +119,6 @@ public class UserService : IUserService
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         roles.ForEach(role => claims.Add(new Claim(ClaimTypes.Role, role)));
         return claims;
-    }
-
-    public async Task<IList<RefreshToken>> GetUserRefreshTokensAsync(string userId)
-    {
-        var user = await GetUserByIdAsync(userId);
-        var refreshTokens = user.RefreshTokens.ToList();
-        return refreshTokens;
     }
 
     public async Task<bool> UserNameExistsAsync(string userName, CancellationToken cancellationToken = default)

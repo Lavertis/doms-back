@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using DoctorsOfficeApi.Services.AppointmentService;
+﻿using DoctorsOfficeApi.Services.AppointmentService;
 using DoctorsOfficeApi.Services.UserService;
 using FluentValidation;
 
@@ -12,7 +11,6 @@ public class CreateAppointmentRequest
     public string PatientId { get; set; } = default!;
     public string DoctorId { get; set; } = default!;
     public string Type { get; set; } = default!;
-    [JsonIgnore] public string? Status { get; set; } = default!;
 }
 
 public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppointmentRequest>
