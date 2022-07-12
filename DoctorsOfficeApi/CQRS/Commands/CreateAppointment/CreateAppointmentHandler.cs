@@ -4,6 +4,7 @@ using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
 using DoctorsOfficeApi.Services.AppointmentService;
+using DoctorsOfficeApi.Services.PatientService;
 using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Queries.CreateAppointment;
@@ -12,11 +13,13 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
 {
     private readonly AppDbContext _dbContext;
     private readonly IAppointmentService _appointmentService;
+    private readonly IPatientService _patientService;
 
-    public CreateAppointmentHandler(AppDbContext dbContext, IAppointmentService appointmentService)
+    public CreateAppointmentHandler(AppDbContext dbContext, IAppointmentService appointmentService, IPatientService patientService)
     {
         _dbContext = dbContext;
         _appointmentService = appointmentService;
+        _patientService = patientService;
     }
 
     public async Task<AppointmentResponse> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
@@ -28,12 +31,10 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
             {
                 Date = request.Date,
                 Description = request.Description,
-                Patient = (await _dbContext.Patients.FindAsync(
-                    new object?[] { request.PatientId },
-                    cancellationToken: cancellationToken))!, // TODO replace with patient service method
+                Patient = (await _patientService.GetPatientByIdAsync(request.PatientId)),
                 Doctor = (await _dbContext.Doctors.FindAsync(
                     new object?[] { request.DoctorId },
-                    cancellationToken: cancellationToken))!, // TODO replace with patient service method
+                    cancellationToken: cancellationToken))!, // TODO replace with doctor service method
                 Status = await _appointmentService.GetAppointmentStatusByNameAsync(request.Status!),
                 Type = await _appointmentService.GetAppointmentTypeByNameAsync(request.Type),
             };

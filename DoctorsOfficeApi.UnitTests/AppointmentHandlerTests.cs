@@ -11,6 +11,7 @@ using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
 using DoctorsOfficeApi.Services.AppointmentService;
+using DoctorsOfficeApi.Services.PatientService;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
@@ -23,6 +24,7 @@ public class AppointmentHandlerTests
 {
     private readonly AppDbContext _appDbContext;
     private readonly IAppointmentService _fakeAppointmentService;
+    private readonly IPatientService _fakePatientService;
 
     public AppointmentHandlerTests()
     {
@@ -33,6 +35,7 @@ public class AppointmentHandlerTests
         _appDbContext = new AppDbContext(dbContextOptions);
 
         _fakeAppointmentService = A.Fake<IAppointmentService>();
+        _fakePatientService = A.Fake<IPatientService>();
     }
 
     [Fact]
@@ -171,7 +174,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var type = new AppointmentType { Id = 1, Name = "Consultation" };
         const int appointmentCount = 3;
@@ -319,7 +322,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var type = new AppointmentType { Id = 1, Name = "Consultation" };
         const int appointmentCount = 5;
@@ -367,7 +370,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var types = new List<AppointmentType>
         {
@@ -419,7 +422,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var statuses = new List<AppointmentStatus>
         {
             new() { Id = 1, Name = "Status1" },
@@ -473,9 +476,9 @@ public class AppointmentHandlerTests
         var doctor = new Doctor { Id = "1" };
         var patients = new List<Patient>
         {
-            new() { Id = "1" },
-            new() { Id = "2" },
-            new() { Id = "3" }
+            new() { Id = "1", FirstName = "", LastName = "", Address = "" },
+            new() { Id = "2", FirstName = "", LastName = "", Address = "" },
+            new() { Id = "3", FirstName = "", LastName = "", Address = "" }
         };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var type = new AppointmentType { Id = 1, Name = "Consultation" };
@@ -522,7 +525,7 @@ public class AppointmentHandlerTests
     public async Task GetFilteredAppointmentsHandler_ValidDoctorId_ReturnsAppointmentsBelongingToDoctor()
     {
         // arrange
-        var patient = new Patient { Id = "1" };
+        var patient = new Patient { Id = "1", FirstName = "", LastName = "", Address = "" };
         var doctors = new List<Doctor>
         {
             new() { Id = "1" },
@@ -575,7 +578,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var type = new AppointmentType { Id = 1, Name = "Consultation" };
 
@@ -598,7 +601,7 @@ public class AppointmentHandlerTests
             Type = type.Name,
             Description = ""
         };
-        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService, _fakePatientService);
 
         // act
         var result = await handler.Handle(createAppointmentCommand, CancellationToken.None);
@@ -627,7 +630,7 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctor = new Doctor { Id = "1" };
-        var patient = new Patient { Id = "2" };
+        var patient = new Patient { Id = "2", FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = 1, Name = "Pending" };
         var type = new AppointmentType { Id = 1, Name = "Consultation" };
 
@@ -658,9 +661,11 @@ public class AppointmentHandlerTests
         else
             A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
 
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+
         typeof(CreateAppointmentCommand).GetProperty(fieldName)!.SetValue(createAppointmentCommand, fieldValue);
 
-        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService, _fakePatientService);
 
         // act
         var action = async () => await handler.Handle(createAppointmentCommand, CancellationToken.None);
@@ -878,7 +883,7 @@ public class AppointmentHandlerTests
         long appointmentTypeId = 1)
     {
         var doctor = new Doctor { Id = doctorId };
-        var patient = new Patient { Id = patientId };
+        var patient = new Patient { Id = patientId, FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = appointmentStatusId, Name = "Pending" };
         var type = new AppointmentType { Id = appointmentTypeId, Name = "Consultation" };
 

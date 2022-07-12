@@ -13,7 +13,8 @@ public interface IUserService
     Task<bool> DeleteUserByIdAsync(string userId);
     Task<IList<Claim>> GetUserRolesAsClaimsAsync(AppUser user);
     Task<bool> UserNameExistsAsync(string userName, CancellationToken cancellationToken = default);
+    Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
     Task<bool> ValidateUserPasswordAsync(string userName, string password);
     void SetUserPassword(AppUser user, string newPassword);
-    public Task<bool> UserExistsByIdAsync(string userId);
+    Task<bool> UserExistsByIdAsync(string userId);
 }

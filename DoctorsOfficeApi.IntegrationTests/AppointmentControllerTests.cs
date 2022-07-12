@@ -61,7 +61,10 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentType = DbContext.AppointmentTypes.First();
         var otherPatient = new Patient
         {
-            AppUser = new AppUser()
+            AppUser = new AppUser(),
+            FirstName = "",
+            LastName = "",
+            Address = ""
         };
 
         const int appointmentsCount = 3;
@@ -220,7 +223,10 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUser = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
         var otherPatient = new Patient
         {
-            AppUser = new AppUser()
+            AppUser = new AppUser(),
+            FirstName = "",
+            LastName = "",
+            Address = ""
         };
         var doctor = DbContext.Doctors.First();
         var appointment = new Appointment
@@ -373,7 +379,13 @@ public class AppointmentControllerTests : IntegrationTest
         var doctors = new List<Doctor> { doctor1, doctor2 };
 
         var patient1 = DbContext.Patients.First();
-        var patient2 = new Patient { AppUser = new AppUser { Id = "7945992e-3b96-4f0b-9143-f8db38cd8b5e" } };
+        var patient2 = new Patient
+        {
+            AppUser = new AppUser { Id = "7945992e-3b96-4f0b-9143-f8db38cd8b5e" },
+            FirstName = "",
+            LastName = "",
+            Address = ""
+        };
         DbContext.Patients.Add(patient2);
         var patients = new List<Patient> { patient1, patient2 };
 
@@ -543,7 +555,7 @@ public class AppointmentControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleName);
+        await AuthenticateAsRoleAsync(client, roleName);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/search");
@@ -565,7 +577,13 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
 
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
-        var patient2 = new Patient { AppUser = new AppUser() };
+        var patient2 = new Patient
+        {
+            AppUser = new AppUser(),
+            FirstName = "",
+            LastName = "",
+            Address = ""
+        };
         DbContext.Patients.Add(patient2);
         var patients = new List<Patient> { patient1, patient2 };
 
@@ -632,7 +650,13 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
 
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
-        var patient2 = new Patient { AppUser = new AppUser() };
+        var patient2 = new Patient
+        {
+            AppUser = new AppUser(),
+            FirstName = "",
+            LastName = "",
+            Address = ""
+        };
         DbContext.Patients.Add(patient2);
         var patients = new List<Patient> { patient1, patient2 };
 
@@ -731,7 +755,7 @@ public class AppointmentControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleType);
+        await AuthenticateAsRoleAsync(client, roleType);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth/search");
@@ -827,7 +851,7 @@ public class AppointmentControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleType);
+        await AuthenticateAsRoleAsync(client, roleType);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 
@@ -951,7 +975,7 @@ public class AppointmentControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleType);
+        await AuthenticateAsRoleAsync(client, roleType);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 

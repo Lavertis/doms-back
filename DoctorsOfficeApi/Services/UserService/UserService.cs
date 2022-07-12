@@ -51,6 +51,8 @@ public class UserService : IUserService
             cfg.CreateMap<CreateUserRequest, AppUser>()
         ));
         var user = mapper.Map<AppUser>(request);
+        user.NormalizedUserName = user.UserName.ToUpper();
+        user.NormalizedEmail = user.Email.ToUpper();
 
         var createUserIdentityResult = await _userManager.CreateAsync(user, request.Password);
         if (!createUserIdentityResult.Succeeded)
@@ -127,6 +129,13 @@ public class UserService : IUserService
                 user.NormalizedUserName == userName.ToUpper(), cancellationToken: cancellationToken
         );
         return exists;
+    }
+
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await _userManager.Users.AnyAsync(user =>
+                user.NormalizedEmail == email.ToUpper(), cancellationToken: cancellationToken
+        );
     }
 
     public async Task<bool> ValidateUserPasswordAsync(string userName, string password)

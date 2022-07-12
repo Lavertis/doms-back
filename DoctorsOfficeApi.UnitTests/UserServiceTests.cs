@@ -447,6 +447,7 @@ public class UserServiceTests
         var appUser = A.Dummy<AppUser>();
         var roles = new List<string> { "role1", "role2" };
         A.CallTo(() => _fakeUserManager.GetRolesAsync(A<AppUser>.Ignored)).Returns(roles);
+
         // act
         var result = await _userService.GetUserRolesAsClaimsAsync(appUser);
 
@@ -477,7 +478,7 @@ public class UserServiceTests
         {
             new AppUser { UserName = "userName", NormalizedUserName = "USERNAME" }
         }.AsQueryable().BuildMock();
-        ;
+
         A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
 
         // act
@@ -485,6 +486,45 @@ public class UserServiceTests
 
         // assert
         result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task EmailExists_UserNameExist_ReturnsTrue()
+    {
+        // arrange
+        const string testEmail = "mail@mail.com";
+        var fakeAppUserQueryable = new List<AppUser>
+        {
+            new AppUser
+            {
+                UserName = "userName",
+                NormalizedUserName = "USERNAME",
+                Email = testEmail,
+                NormalizedEmail = testEmail.ToUpper()
+            }
+        }.AsQueryable().BuildMock();
+
+        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
+
+        // act
+        var result = await _userService.EmailExistsAsync(testEmail);
+
+        // assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task EmailExists_EmailDoesntExist_ReturnsFalse()
+    {
+        // arrange
+        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
+
+        // act
+        var result = await _userService.EmailExistsAsync("testMail@mail.com");
+
+        // assert
+        result.Should().BeFalse();
     }
 
     [Fact]

@@ -112,7 +112,13 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             NormalizedUserName = TestPatientUserName.ToUpper(),
             PasswordHash = hasher.HashPassword(null!, TestPatientPassword)
         };
-        var testPatient = new Patient { AppUser = testPatientUser };
+        var testPatient = new Patient
+        {
+            FirstName = "testPatientFirstName",
+            LastName = "testPatientLastName",
+            Address = "testPatientAddress",
+            AppUser = testPatientUser
+        };
         dbContext.Patients.Add(testPatient);
         var patientRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
         dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
@@ -124,22 +130,15 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         dbContext.SaveChanges();
     }
 
-    protected static async Task AuthenticateAsRole(HttpClient client, string roleName)
+    protected static async Task<string> AuthenticateAsRoleAsync(HttpClient client, string roleName)
     {
-        switch (roleName)
+        return roleName switch
         {
-            case RoleTypes.Admin:
-                await AuthenticateAsAdminAsync(client);
-                break;
-            case RoleTypes.Doctor:
-                await AuthenticateAsDoctorAsync(client);
-                break;
-            case RoleTypes.Patient:
-                await AuthenticateAsPatientAsync(client);
-                break;
-            default:
-                throw new ArgumentException($"Unknown role name: {roleName}");
-        }
+            RoleTypes.Admin => await AuthenticateAsAdminAsync(client),
+            RoleTypes.Doctor => await AuthenticateAsDoctorAsync(client),
+            RoleTypes.Patient => await AuthenticateAsPatientAsync(client),
+            _ => throw new ArgumentException($"Unknown role name: {roleName}")
+        };
     }
 
     protected static async Task<string> AuthenticateAsAdminAsync(HttpClient client)
@@ -157,7 +156,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         return await AuthenticateAsAsync(client, TestPatientUserName, TestPatientPassword);
     }
 
-    private static async Task<string> AuthenticateAsAsync(HttpClient client, string userName, string password)
+    protected static async Task<string> AuthenticateAsAsync(HttpClient client, string userName, string password)
     {
         var result = await client.PostAsJsonAsync(AuthenticateUrl, new AuthenticateRequest
         {

@@ -31,8 +31,9 @@ public class AppointmentServiceTests
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        await _appDbContext.AddAsync(appointment);
+        await _appDbContext.Appointments.AddAsync(appointment);
         await _appDbContext.SaveChangesAsync();
+
         // act
         var result = await _appointmentService.GetAppointmentByIdAsync(appointment.Id);
 
@@ -189,7 +190,7 @@ public class AppointmentServiceTests
         long appointmentTypeId = 1)
     {
         var doctor = new Doctor { Id = doctorId };
-        var patient = new Patient { Id = patientId };
+        var patient = new Patient { Id = patientId, FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = appointmentStatusId, Name = "Pending" };
         var type = new AppointmentType { Id = appointmentTypeId, Name = "Consultation" };
 

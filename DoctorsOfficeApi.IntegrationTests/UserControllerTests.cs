@@ -52,7 +52,7 @@ public class UserControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleName);
+        await AuthenticateAsRoleAsync(client, roleName);
 
         // act
         var response = await client.GetAsync(UrlPrefix);
@@ -111,7 +111,7 @@ public class UserControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleName);
+        await AuthenticateAsRoleAsync(client, roleName);
 
         const string dummyUserId = "dummyUserId";
 
@@ -202,7 +202,7 @@ public class UserControllerTests : IntegrationTest
     {
         // arrange
         var client = GetHttpClient();
-        await AuthenticateAsRole(client, roleName);
+        await AuthenticateAsRoleAsync(client, roleName);
 
         const string dummyUserId = "dummyUserId";
 

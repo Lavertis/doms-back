@@ -3,7 +3,7 @@ using DoctorsOfficeApi.Exceptions;
 
 namespace DoctorsOfficeApi.Middleware;
 
-public class ExceptionHandlerMiddleware :  IMiddleware
+public class ExceptionHandlerMiddleware : IMiddleware
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
@@ -18,16 +18,17 @@ public class ExceptionHandlerMiddleware :  IMiddleware
 
             response.StatusCode = error switch
             {
-                BadRequestException => (int) HttpStatusCode.BadRequest,
-                NotFoundException => (int) HttpStatusCode.NotFound,
-                ForbiddenException => (int) HttpStatusCode.Forbidden,
-                _ => (int) HttpStatusCode.InternalServerError
+                BadRequestException => (int)HttpStatusCode.BadRequest,
+                NotFoundException => (int)HttpStatusCode.NotFound,
+                ForbiddenException => (int)HttpStatusCode.Forbidden,
+                ConflictException => (int)HttpStatusCode.Conflict,
+                _ => (int)HttpStatusCode.InternalServerError
             };
 
-            if (response.StatusCode == (int) HttpStatusCode.InternalServerError)
-                await response.WriteAsJsonAsync(new {succeeded = false, error = "Internal server error"});
+            if (response.StatusCode == (int)HttpStatusCode.InternalServerError)
+                await response.WriteAsJsonAsync(new { succeeded = false, error = "Internal server error" });
             else
-                await response.WriteAsJsonAsync(new {succeeded = false, error = error.Message});
+                await response.WriteAsJsonAsync(new { succeeded = false, error = error.Message });
         }
     }
 }

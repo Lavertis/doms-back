@@ -32,7 +32,6 @@ public class AppDbContext : IdentityDbContext<AppUser>
         base.OnModelCreating(builder);
         builder.Entity<AppUser>().Ignore(user => user.LockoutEnabled);
         builder.Entity<AppUser>().Ignore(user => user.LockoutEnd);
-        builder.Entity<AppUser>().Ignore(user => user.PhoneNumber);
         builder.Entity<IdentityUserToken<string>>().Metadata.SetIsTableExcludedFromMigrations(true);
 
         const string adminRoleId = "fa2640a0-0496-4010-bc27-424e0e5c6f78";
