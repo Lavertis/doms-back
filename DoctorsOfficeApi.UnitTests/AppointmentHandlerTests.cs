@@ -1,6 +1,5 @@
 ﻿using DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
 using DoctorsOfficeApi.CQRS.Commands.UpdateAppointment;
-using DoctorsOfficeApi.CQRS.Queries.CreateAppointment;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentById;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByDoctorId;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByPatientId;
@@ -11,6 +10,7 @@ using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
 using DoctorsOfficeApi.Services.AppointmentService;
+using DoctorsOfficeApi.Services.DoctorService;
 using DoctorsOfficeApi.Services.PatientService;
 using FakeItEasy;
 using FluentAssertions;
@@ -25,6 +25,7 @@ public class AppointmentHandlerTests
     private readonly AppDbContext _appDbContext;
     private readonly IAppointmentService _fakeAppointmentService;
     private readonly IPatientService _fakePatientService;
+    private readonly IDoctorService _fakeDoctorService;
 
     public AppointmentHandlerTests()
     {
@@ -36,6 +37,7 @@ public class AppointmentHandlerTests
 
         _fakeAppointmentService = A.Fake<IAppointmentService>();
         _fakePatientService = A.Fake<IPatientService>();
+        _fakeDoctorService = A.Fake<IDoctorService>();
     }
 
     [Fact]
@@ -588,9 +590,10 @@ public class AppointmentHandlerTests
         _appDbContext.AppointmentTypes.Add(type);
         await _appDbContext.SaveChangesAsync();
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Returns(patient);
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctor);
 
         var createAppointmentCommand = new CreateAppointmentCommand
         {
@@ -601,7 +604,7 @@ public class AppointmentHandlerTests
             Type = type.Name,
             Description = ""
         };
-        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService, _fakePatientService);
+        var handler = new CreateAppointmentHandler(_appDbContext, _fakeAppointmentService, _fakePatientService, _fakeDoctorService);
 
         // act
         var result = await handler.Handle(createAppointmentCommand, CancellationToken.None);
@@ -650,22 +653,29 @@ public class AppointmentHandlerTests
             Description = ""
         };
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
         if (fieldName == "Status")
-            A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
+            A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
 
         if (fieldName == "Type")
-            A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
+            A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
 
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+        if (fieldName == "PatientId")
+            A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+        else
+            A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Returns(patient);
+
+        if (fieldName == "DoctorId")
+            A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+        else
+            A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctor);
 
         typeof(CreateAppointmentCommand).GetProperty(fieldName)!.SetValue(createAppointmentCommand, fieldValue);
 
-        var handler = new CreateAppointmentHandler(_appDbContext, fakeAppointmentService, _fakePatientService);
+        var handler = new CreateAppointmentHandler(_appDbContext, _fakeAppointmentService, _fakePatientService, _fakeDoctorService);
 
         // act
         var action = async () => await handler.Handle(createAppointmentCommand, CancellationToken.None);
@@ -696,13 +706,12 @@ public class AppointmentHandlerTests
             Status = newAppointmentStatus.Name
         };
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
-        A.CallTo(() => fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored)).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored)).Returns(appointment);
 
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
 
         // act
         var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -730,15 +739,14 @@ public class AppointmentHandlerTests
             Status = "new status"
         };
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
             .Returns(new AppointmentType());
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
             .Returns(new AppointmentStatus());
-        A.CallTo(() => fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
             .Throws(new NotFoundException(""));
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -771,14 +779,12 @@ public class AppointmentHandlerTests
         else
             typeof(UpdateAppointmentCommand).GetProperty(fieldName)!.SetValue(updateAppointmentCommand, fieldValue);
 
-
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
-        A.CallTo(() => fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored)).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored)).Returns(appointment);
 
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
 
         // act
         var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -823,15 +829,14 @@ public class AppointmentHandlerTests
             Description = ""
         };
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
             .Throws(new NotFoundException(""));
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
             .Returns(new AppointmentStatus());
-        A.CallTo(() => fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
             .Returns(appointment);
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -858,15 +863,14 @@ public class AppointmentHandlerTests
             Description = ""
         };
 
-        var fakeAppointmentService = A.Fake<IAppointmentService>();
-        A.CallTo(() => fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
             .Returns(new AppointmentType());
-        A.CallTo(() => fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
             .Throws(new NotFoundException(""));
-        A.CallTo(() => fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
+        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<long>.Ignored))
             .Returns(appointment);
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);

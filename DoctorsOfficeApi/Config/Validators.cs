@@ -14,5 +14,8 @@ public static class Validators
         services.AddTransient<IValidator<UpdateAppointmentRequest>, UpdateAppointmentRequestValidator>();
         services.AddTransient<IValidator<CreatePatientRequest>, CreatePatientRequestValidator>();
         services.AddTransient<IValidator<UpdateAuthenticatedPatientRequest>, UpdateAuthenticatedPatientRequestValidator>();
+        services.AddTransient<IValidator<CreateDoctorRequest>, CreateDoctorRequestValidator>();
+        services.AddTransient<IValidator<UpdateAuthenticatedDoctorRequest>, UpdateAuthenticatedDoctorRequestValidator>();
+        services.AddTransient<IValidator<UpdateDoctorRequest>, UpdateDoctorRequestValidator>();
     }
 }

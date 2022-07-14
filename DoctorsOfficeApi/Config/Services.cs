@@ -1,5 +1,6 @@
 ﻿using DoctorsOfficeApi.Services.AppointmentService;
 using DoctorsOfficeApi.Services.AuthService;
+using DoctorsOfficeApi.Services.DoctorService;
 using DoctorsOfficeApi.Services.JwtService;
 using DoctorsOfficeApi.Services.PatientService;
 using DoctorsOfficeApi.Services.UserService;
@@ -15,5 +16,6 @@ public static class Services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddScoped<IPatientService, PatientService>();
+        services.AddScoped<IDoctorService, DoctorService>();
     }
 }

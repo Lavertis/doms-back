@@ -4,23 +4,18 @@ using FluentValidation;
 
 namespace DoctorsOfficeApi.Models.Requests;
 
-public class CreatePatientRequest
+public class CreateDoctorRequest
 {
     public string UserName { get; set; } = default!;
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
     public string Email { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Address { get; set; } = default!;
-    public DateTime DateOfBirth { get; set; }
     public string Password { get; set; } = default!;
-    public string ConfirmPassword { get; set; } = default!;
+    public string PhoneNumber { get; set; } = default!;
 }
 
-public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequest>
+public class CreateDoctorRequestValidator : AbstractValidator<CreateDoctorRequest>
 {
     [Obsolete("Obsolete")] // TODO replace OnFailure custom validator
-    public CreatePatientRequestValidator(IUserService userService)
+    public CreateDoctorRequestValidator(IUserService userService)
     {
         CascadeMode = CascadeMode.Stop;
 
@@ -36,18 +31,6 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
             .OnFailure(request => throw new ConflictException("Username already exists"))
             .WithMessage("Username already exists");
 
-        RuleFor(e => e.FirstName)
-            .NotEmpty()
-            .WithMessage("First name is required")
-            .MaximumLength(100)
-            .WithMessage("First name must be at most 100 characters long");
-
-        RuleFor(e => e.LastName)
-            .NotEmpty()
-            .WithMessage("First name is required")
-            .MaximumLength(100)
-            .WithMessage("First name must be at most 100 characters long");
-
         RuleFor(e => e.Email)
             .NotEmpty()
             .WithMessage("Email is required")
@@ -62,26 +45,12 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
             .NotEmpty()
             .WithMessage("Phone number is required");
 
-        RuleFor(e => e.Address)
-            .NotEmpty()
-            .WithMessage("Address is required")
-            .MaximumLength(100)
-            .WithMessage("Address must be at most 100 characters long");
-
-        RuleFor(e => e.DateOfBirth)
-            .NotEmpty()
-            .WithMessage("Date of birth is required")
-            .Must(date => date.Date <= DateTime.UtcNow.Date)
-            .WithMessage("Date of birth must be in the past");
-
         RuleFor(e => e.Password)
             .NotEmpty()
             .WithMessage("Password is required")
             .MinimumLength(8)
             .WithMessage("Password must be at least 8 characters long")
             .MaximumLength(50)
-            .WithMessage("Password must be at most 50 characters long")
-            .Equal(e => e.ConfirmPassword)
-            .WithMessage("Passwords do not match");
+            .WithMessage("Password must be at most 50 characters long");
     }
 }
