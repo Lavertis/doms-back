@@ -5,6 +5,7 @@ namespace DoctorsOfficeApi.Models.Responses;
 public class PatientResponse
 {
     public string Id { get; set; } = default!;
+    public string UserName { get; set; } = default!;
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string Email { get; set; } = default!;
@@ -19,6 +20,7 @@ public class PatientResponse
     public PatientResponse(Patient patient)
     {
         Id = patient.Id;
+        UserName = patient.UserName;
         Email = patient.AppUser.Email;
         PhoneNumber = patient.AppUser.PhoneNumber;
         FirstName = patient.FirstName;
