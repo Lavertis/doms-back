@@ -1,6 +1,6 @@
 ﻿using DoctorsOfficeApi.Middleware;
 
-namespace DoctorsOfficeApi.Config;
+namespace DoctorsOfficeApi.Modules;
 
 public static class Middleware
 {

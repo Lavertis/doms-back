@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using DoctorsOfficeApi.Data;
+using DoctorsOfficeApi.Config;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Services.JwtService;
 using FakeItEasy;
@@ -19,7 +19,7 @@ public class JwtServiceTests
 
     public JwtServiceTests()
     {
-        _dummyAppSettings = new AppSettings{ JwtSecretKey = "12345678901234567890123456789012" };
+        _dummyAppSettings = new AppSettings { JwtSecretKey = "12345678901234567890123456789012" };
         var fakeAppSettingsOptions = A.Fake<IOptions<AppSettings>>();
         A.CallTo(() => fakeAppSettingsOptions.Value).Returns(_dummyAppSettings);
         _fakeUserManager = A.Fake<UserManager<AppUser>>();

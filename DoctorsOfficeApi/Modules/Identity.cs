@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DoctorsOfficeApi.Config;
+namespace DoctorsOfficeApi.Modules;
 
 public static class Identity
 {

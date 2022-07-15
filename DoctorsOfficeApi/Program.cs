@@ -1,6 +1,7 @@
 using DoctorsOfficeApi.Config;
 using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Middleware;
+using DoctorsOfficeApi.Modules;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

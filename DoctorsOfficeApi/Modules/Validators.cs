@@ -2,7 +2,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
-namespace DoctorsOfficeApi.Config;
+namespace DoctorsOfficeApi.Modules;
 
 public static class Validators
 {

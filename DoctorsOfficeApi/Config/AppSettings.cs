@@ -1,4 +1,4 @@
-﻿namespace DoctorsOfficeApi.Data;
+﻿namespace DoctorsOfficeApi.Config;
 
 public class AppSettings
 {

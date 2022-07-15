@@ -6,7 +6,7 @@ using DoctorsOfficeApi.Services.JwtService;
 using DoctorsOfficeApi.Services.PatientService;
 using DoctorsOfficeApi.Services.UserService;
 
-namespace DoctorsOfficeApi.Config;
+namespace DoctorsOfficeApi.Modules;
 
 public static class Services
 {

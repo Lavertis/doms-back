@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using DoctorsOfficeApi.Data;
+using DoctorsOfficeApi.Config;
 using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using Microsoft.AspNetCore.Identity;

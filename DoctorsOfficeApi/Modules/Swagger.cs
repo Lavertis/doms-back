@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 
-namespace DoctorsOfficeApi.Config;
+namespace DoctorsOfficeApi.Modules;
 
 public static class Swagger
 {

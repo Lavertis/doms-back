@@ -1,4 +1,4 @@
-﻿using DoctorsOfficeApi.Data;
+﻿using DoctorsOfficeApi.Config;
 using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
