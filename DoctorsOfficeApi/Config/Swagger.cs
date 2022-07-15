@@ -27,7 +27,7 @@ public static class Swagger
 
             options.TagActionsBy(api =>
             {
-                if (api.GroupName != null)
+                if (api.GroupName is not null)
                     return new[] { api.GroupName };
                 if (api.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
                     return new[] { controllerActionDescriptor.ControllerName };

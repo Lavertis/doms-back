@@ -17,17 +17,17 @@ public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppoint
     public async Task<IList<AppointmentResponse>> Handle(GetFilteredAppointmentsQuery request, CancellationToken cancellationToken)
     {
         var appointmentsQueryable = _dbContext.Appointments.AsQueryable();
-        if (request.dateStart != null)
+        if (request.dateStart is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Date >= request.dateStart);
-        if (request.dateEnd != null)
+        if (request.dateEnd is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Date <= request.dateEnd);
-        if (request.type != null)
+        if (request.type is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Type.Name == request.type);
-        if (request.status != null)
+        if (request.status is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Status.Name == request.status);
-        if (request.patientId != null)
+        if (request.patientId is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Patient.Id == request.patientId);
-        if (request.doctorId != null)
+        if (request.doctorId is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Doctor.Id == request.doctorId);
 
         var appointmentResponses = await appointmentsQueryable

@@ -24,7 +24,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
         var httpContext = httpContextAccessor.HttpContext!;
         var authenticatedUserId = httpContext.User.FindFirstValue(ClaimTypes.Sid)!;
 
-        When(req => req.UserName != null, () =>
+        When(req => req.UserName is not null, () =>
         {
             RuleFor(e => e.UserName)
                 .MinimumLength(4)
@@ -34,13 +34,13 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByNameAsync(email).Result;
-                    return conflictUser == null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Username already exists"))
                 .WithMessage("Username is already taken");
         });
 
-        When(req => req.Email != null, () =>
+        When(req => req.Email is not null, () =>
         {
             RuleFor(e => e.Email)
                 .EmailAddress()
@@ -48,7 +48,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByEmailAsync(email).Result;
-                    return conflictUser == null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Email already exists"))
                 .WithMessage("Email is already taken");
@@ -57,9 +57,9 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
         RuleFor(e => e.PhoneNumber)
             .NotEmpty()
             .WithMessage("Phone number cannot be empty")
-            .When(e => e.PhoneNumber != null);
+            .When(e => e.PhoneNumber is not null);
 
-        When(req => req.NewPassword != null, () =>
+        When(req => req.NewPassword is not null, () =>
         {
             RuleFor(e => e.NewPassword)
                 .MinimumLength(8)

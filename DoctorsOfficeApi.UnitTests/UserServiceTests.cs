@@ -249,7 +249,7 @@ public class UserServiceTests
 
         var updateUserRequest = new UpdateUserRequest();
         typeof(UpdateUserRequest).GetProperty(fieldName)!.SetValue(updateUserRequest, fieldValue);
-        if (updateUserRequest.NewPassword != null)
+        if (updateUserRequest.NewPassword is not null)
         {
             updateUserRequest.ConfirmPassword = updateUserRequest.NewPassword;
         }
@@ -258,14 +258,14 @@ public class UserServiceTests
         var result = await _userService.UpdateUserByIdAsync("1", updateUserRequest);
 
         // assert
-        if (updateUserRequest.UserName != null) result.UserName.Should().Be(updateUserRequest.UserName);
-        if (updateUserRequest.UserName != null) result.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
-        if (updateUserRequest.Email != null) result.Email.Should().Be(updateUserRequest.Email);
-        if (updateUserRequest.Email != null) result.NormalizedEmail.Should().Be(updateUserRequest.Email.ToUpper());
-        if (updateUserRequest.PhoneNumber != null) result.PhoneNumber.Should().Be(updateUserRequest.PhoneNumber);
-        if (updateUserRequest.Email != null) result.EmailConfirmed.Should().Be(true);
-        if (updateUserRequest.PhoneNumber != null) result.PhoneNumberConfirmed.Should().Be(true);
-        if (updateUserRequest.NewPassword != null) result.PasswordHash.Should().NotBe(oldPasswordHash);
+        if (updateUserRequest.UserName is not null) result.UserName.Should().Be(updateUserRequest.UserName);
+        if (updateUserRequest.UserName is not null) result.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
+        if (updateUserRequest.Email is not null) result.Email.Should().Be(updateUserRequest.Email);
+        if (updateUserRequest.Email is not null) result.NormalizedEmail.Should().Be(updateUserRequest.Email.ToUpper());
+        if (updateUserRequest.PhoneNumber is not null) result.PhoneNumber.Should().Be(updateUserRequest.PhoneNumber);
+        if (updateUserRequest.Email is not null) result.EmailConfirmed.Should().Be(true);
+        if (updateUserRequest.PhoneNumber is not null) result.PhoneNumberConfirmed.Should().Be(true);
+        if (updateUserRequest.NewPassword is not null) result.PasswordHash.Should().NotBe(oldPasswordHash);
         A.CallTo(() => _fakeUserManager.UpdateAsync(A<AppUser>.Ignored)).MustHaveHappenedOnceExactly();
     }
 

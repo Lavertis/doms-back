@@ -17,7 +17,7 @@ public class PatientService : IPatientService
     public async Task<Patient> GetPatientByIdAsync(string id)
     {
         var patient = await _dbContext.Patients.FindAsync(id);
-        if (patient == null)
+        if (patient is null)
             throw new NotFoundException("Patient not found");
 
         return patient;

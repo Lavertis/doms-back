@@ -17,7 +17,7 @@ public class AppointmentService : IAppointmentService
     public async Task<Appointment> GetAppointmentByIdAsync(long id)
     {
         var appointment = await _dbContext.Appointments.FindAsync(id);
-        if (appointment == null)
+        if (appointment is null)
         {
             throw new NotFoundException("Appointment not found");
         }
@@ -38,7 +38,7 @@ public class AppointmentService : IAppointmentService
     public async Task<AppointmentStatus> GetAppointmentStatusByNameAsync(string status)
     {
         var appointmentStatus = await _dbContext.AppointmentStatuses.SingleOrDefaultAsync(s => s.Name == status);
-        if (appointmentStatus == null)
+        if (appointmentStatus is null)
         {
             throw new NotFoundException("Appointment status not found");
         }
@@ -49,7 +49,7 @@ public class AppointmentService : IAppointmentService
     public async Task<AppointmentType> GetAppointmentTypeByNameAsync(string type)
     {
         var appointmentType = await _dbContext.AppointmentTypes.SingleOrDefaultAsync(t => t.Name == type);
-        if (appointmentType == null)
+        if (appointmentType is null)
         {
             throw new NotFoundException("Appointment type not found");
         }

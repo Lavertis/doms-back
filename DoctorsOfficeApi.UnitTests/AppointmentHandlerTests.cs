@@ -790,22 +790,22 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        if (updateAppointmentCommand.Date != null)
+        if (updateAppointmentCommand.Date is not null)
             _appDbContext.Appointments.Should().ContainSingle(a =>
                 a.Id == updateAppointmentCommand.AppointmentId &&
                 a.Date == updateAppointmentCommand.Date
             );
-        if (updateAppointmentCommand.Type != null)
+        if (updateAppointmentCommand.Type is not null)
             _appDbContext.Appointments.Should().ContainSingle(a =>
                 a.Id == updateAppointmentCommand.AppointmentId &&
                 a.Type.Name == updateAppointmentCommand.Type
             );
-        if (updateAppointmentCommand.Status != null)
+        if (updateAppointmentCommand.Status is not null)
             _appDbContext.Appointments.Should().ContainSingle(a =>
                 a.Id == updateAppointmentCommand.AppointmentId &&
                 a.Status.Name == updateAppointmentCommand.Status
             );
-        if (updateAppointmentCommand.Description != null)
+        if (updateAppointmentCommand.Description is not null)
             _appDbContext.Appointments.Should().ContainSingle(a =>
                 a.Id == updateAppointmentCommand.AppointmentId &&
                 a.Description == updateAppointmentCommand.Description

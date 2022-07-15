@@ -30,7 +30,7 @@ public class UpdatePatientByIdCommand : IRequest<PatientResponse>
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
         Address = request.Address;
-        if (request.DateOfBirth != null)
+        if (request.DateOfBirth is not null)
             DateOfBirth = request.DateOfBirth.Value.Date;
         NewPassword = request.NewPassword;
         CurrentPassword = request.CurrentPassword;

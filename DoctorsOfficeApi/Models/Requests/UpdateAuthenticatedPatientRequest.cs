@@ -32,7 +32,7 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
         var authenticatedUserId = httpContext.User.FindFirstValue(ClaimTypes.Sid)!;
         var authenticatedUser = userManager.FindByIdAsync(authenticatedUserId).Result;
 
-        When(req => req.UserName != null, () =>
+        When(req => req.UserName is not null, () =>
         {
             RuleFor(e => e.UserName)
                 .MinimumLength(4)
@@ -42,7 +42,7 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByNameAsync(email).Result;
-                    return conflictUser == null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Username already exists"))
                 .WithMessage("Username is already taken");
@@ -51,20 +51,20 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
         RuleFor(e => e.FirstName)
             .MinimumLength(4)
             .WithMessage("First name must be at least 4 characters long")
-            .When(e => e.FirstName != null)
+            .When(e => e.FirstName is not null)
             .MaximumLength(100)
             .WithMessage("First name must be at most 100 characters long")
-            .When(e => e.FirstName != null);
+            .When(e => e.FirstName is not null);
 
         RuleFor(e => e.LastName)
             .MinimumLength(4)
             .WithMessage("Last name must be at least 4 characters long")
-            .When(e => e.LastName != null)
+            .When(e => e.LastName is not null)
             .MaximumLength(100)
             .WithMessage("First name must be at most 100 characters long")
-            .When(e => e.LastName != null);
+            .When(e => e.LastName is not null);
 
-        When(req => req.Email != null, () =>
+        When(req => req.Email is not null, () =>
         {
             RuleFor(e => e.Email)
                 .EmailAddress()
@@ -72,7 +72,7 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByEmailAsync(email).Result;
-                    return conflictUser == null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Email already exists"))
                 .WithMessage("Email is already taken");
@@ -81,22 +81,22 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
         RuleFor(e => e.PhoneNumber)
             .NotEmpty()
             .WithMessage("Phone number cannot be empty")
-            .When(e => e.PhoneNumber != null);
+            .When(e => e.PhoneNumber is not null);
 
         RuleFor(e => e.Address)
             .MinimumLength(4)
             .WithMessage("Address must be at least 4 characters long")
-            .When(e => e.Address != null)
+            .When(e => e.Address is not null)
             .MaximumLength(100)
             .WithMessage("Address must be at most 100 characters long")
-            .When(e => e.Address != null);
+            .When(e => e.Address is not null);
 
         RuleFor(e => e.DateOfBirth)
             .Must(date => date <= DateTime.UtcNow)
             .WithMessage("Date of birth must be in the past")
             .When(e => e.DateOfBirth.HasValue);
 
-        When(req => req.NewPassword != null, () =>
+        When(req => req.NewPassword is not null, () =>
         {
             RuleFor(e => e.NewPassword)
                 .MinimumLength(8)

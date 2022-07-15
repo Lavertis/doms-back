@@ -22,7 +22,7 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
         RuleFor(e => e.Date)
             .GreaterThanOrEqualTo(DateTime.UtcNow)
             .WithMessage("Date must be in the future")
-            .Unless(d => d.Date != null);
+            .Unless(d => d.Date is not null);
 
         RuleFor(e => e.Description);
 

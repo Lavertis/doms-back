@@ -26,13 +26,13 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
     {
         var patient = await _patientService.GetPatientByIdAsync(request.Id);
 
-        if (request.UserName != null)
+        if (request.UserName is not null)
         {
             patient.AppUser.UserName = request.UserName;
             patient.AppUser.NormalizedUserName = request.UserName.ToUpper();
         }
 
-        if (request.Email != null)
+        if (request.Email is not null)
         {
             patient.AppUser.Email = request.Email;
             patient.AppUser.NormalizedEmail = request.Email.ToUpper();

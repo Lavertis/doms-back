@@ -24,7 +24,7 @@ public class AuthService : IAuthService
         var user = await _userManager.Users.SingleOrDefaultAsync(u =>
                 u.RefreshTokens.Any(t => t.Token == token), cancellationToken: cancellationToken
         );
-        if (user == null)
+        if (user is null)
             throw new NotFoundException("Refresh token is invalid");
         return user;
     }

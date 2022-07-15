@@ -23,7 +23,7 @@ public class UserService : IUserService
     public async Task<AppUser> GetUserByIdAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
+        if (user is null)
             throw new NotFoundException("User with requested id does not exist");
         return user;
     }
@@ -31,7 +31,7 @@ public class UserService : IUserService
     public async Task<AppUser> GetUserByUserNameAsync(string userName)
     {
         var user = await _userManager.FindByNameAsync(userName);
-        if (user == null)
+        if (user is null)
             throw new NotFoundException("User with requested username does not exist");
         return user;
     }
@@ -77,24 +77,24 @@ public class UserService : IUserService
         }
 
         var user = await GetUserByIdAsync(userId);
-        if (user == null)
+        if (user is null)
             throw new NotFoundException("User with requested id does not exist");
 
-        if (request.UserName != null)
+        if (request.UserName is not null)
         {
             user.UserName = request.UserName;
             user.NormalizedUserName = request.UserName.ToUpper();
         }
 
-        if (request.Email != null)
+        if (request.Email is not null)
         {
             user.Email = request.Email;
             user.NormalizedEmail = request.Email.ToUpper();
         }
 
-        if (request.PhoneNumber != null)
+        if (request.PhoneNumber is not null)
             user.PhoneNumber = request.PhoneNumber;
-        if (request.NewPassword != null)
+        if (request.NewPassword is not null)
             SetUserPassword(user, request.NewPassword);
 
         var updateUserIdentityResult = await _userManager.UpdateAsync(user);

@@ -66,7 +66,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Authenti
         if (string.IsNullOrEmpty(refreshToken.ReplacedByToken)) return;
 
         var childToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
-        if (childToken == null) return;
+        if (childToken is null) return;
 
         if (childToken.IsActive)
             RevokeRefreshToken(childToken, ipAddress, reason);

@@ -24,9 +24,9 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         appointment.Description = request.Description ?? appointment.Description;
         try
         {
-            if (request.Type != null)
+            if (request.Type is not null)
                 appointment.Type = await _appointmentService.GetAppointmentTypeByNameAsync(request.Type);
-            if (request.Status != null)
+            if (request.Status is not null)
                 appointment.Status = await _appointmentService.GetAppointmentStatusByNameAsync(request.Status);
         }
         catch (NotFoundException e)
