@@ -50,7 +50,7 @@ public class PatientController : Controller
     }
 
     /// <summary>
-    /// Updates updates account of the authenticated patient. Only for patients
+    /// Updates account of the authenticated patient. Only for patients
     /// </summary>
     [HttpPatch("auth")]
     public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(UpdateAuthenticatedPatientRequest request)
