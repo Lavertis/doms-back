@@ -3,7 +3,6 @@ using DoctorsOfficeApi.CQRS.Commands.RefreshToken;
 using DoctorsOfficeApi.CQRS.Commands.RevokeRefreshToken;
 using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.AuthService;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +15,10 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiExplorerSettings(GroupName = "Auth")]
 public class AuthController : Controller
 {
-    private readonly IAuthService _authService;
     private readonly IMediator _mediator;
 
-    public AuthController(IAuthService authService, IMediator mediator)
+    public AuthController(IMediator mediator)
     {
-        _authService = authService;
         _mediator = mediator;
     }
 
