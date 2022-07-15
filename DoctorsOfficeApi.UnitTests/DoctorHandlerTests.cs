@@ -21,18 +21,18 @@ public class DoctorHandlerTests
 {
     private readonly AppDbContext _dbContext;
     private readonly IDoctorService _fakeDoctorService;
-    private readonly IUserService _fakeUserServiece;
+    private readonly IUserService _fakeUserService;
 
     public DoctorHandlerTests()
     {
-        var inMemoryDbName = "InMemoryDb_" + DateTime.Now.ToFileTimeUtc();
+        var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid();
         var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(inMemoryDbName)
             .Options;
         _dbContext = new AppDbContext(dbContextOptions);
 
         _fakeDoctorService = A.Fake<IDoctorService>();
-        _fakeUserServiece = A.Fake<IUserService>();
+        _fakeUserService = A.Fake<IUserService>();
     }
 
     [Fact]
@@ -149,8 +149,8 @@ public class DoctorHandlerTests
             PasswordHash = command.Password
         };
 
-        var handler = new CreateDoctorHandler(_dbContext, _fakeUserServiece);
-        A.CallTo(() => _fakeUserServiece.CreateUserAsync(A<CreateUserRequest>.Ignored)).Returns(appUser);
+        var handler = new CreateDoctorHandler(_dbContext, _fakeUserService);
+        A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored)).Returns(appUser);
 
         // act
         var result = await handler.Handle(command, default);
@@ -195,7 +195,7 @@ public class DoctorHandlerTests
 
         A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctorToUpdate);
 
-        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserServiece);
+        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
 
         // act
         var result = await handler.Handle(command, default);
@@ -206,7 +206,7 @@ public class DoctorHandlerTests
         updatedDoctor!.AppUser.UserName.Should().Be(command.UserName);
         updatedDoctor.AppUser.Email.Should().Be(command.Email);
         updatedDoctor.AppUser.PhoneNumber.Should().Be(command.PhoneNumber);
-        A.CallTo(() => _fakeUserServiece.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -224,7 +224,7 @@ public class DoctorHandlerTests
         A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored))
             .Throws(new NotFoundException(""));
 
-        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserServiece);
+        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
 
         // act
         var action = async () => await handler.Handle(command, default);
@@ -264,7 +264,7 @@ public class DoctorHandlerTests
 
         A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctorToUpdate);
 
-        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserServiece);
+        var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
 
         // act
         var result = await handler.Handle(command, default);
@@ -285,7 +285,7 @@ public class DoctorHandlerTests
                 updatedDoctor!.AppUser.PhoneNumber.Should().Be(fieldValue);
                 break;
             case "Password":
-                A.CallTo(() => _fakeUserServiece.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
+                A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
                 break;
         }
     }

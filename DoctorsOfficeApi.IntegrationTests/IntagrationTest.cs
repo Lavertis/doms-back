@@ -42,7 +42,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
                 if (dbContextOptions is not null)
                     services.Remove(dbContextOptions);
 
-                var inMemoryDbName = "InMemoryDb_" + DateTime.Now.ToFileTimeUtc(); // workaround for concurrent integration tests using same db
+                var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid(); // workaround for concurrent integration tests using same db
                 services.AddDbContext<AppDbContext>(options => { options.UseInMemoryDatabase(inMemoryDbName); });
 
                 DbContext = services.BuildServiceProvider().GetService<AppDbContext>()!;

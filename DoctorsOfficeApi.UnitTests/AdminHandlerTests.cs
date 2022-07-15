@@ -19,7 +19,7 @@ public class AdminHandlerTests
 
     public AdminHandlerTests()
     {
-        var inMemoryDbName = "InMemoryDb_" + DateTime.Now.ToFileTimeUtc();
+        var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid();
         var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(inMemoryDbName)
             .Options;

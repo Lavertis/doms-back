@@ -15,7 +15,7 @@ public class PatientServiceTests
 
     public PatientServiceTests()
     {
-        var inMemoryDbName = "InMemoryDb_" + DateTime.Now.ToFileTimeUtc();
+        var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid();
         var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(inMemoryDbName)
             .Options;
