@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOfficeApi.Data;
 
-public class AppDbContext : IdentityDbContext<AppUser>
+public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 {
-    public virtual DbSet<IdentityUserRole<string>> IdentityUserRole { get; set; } = default!;
+    public virtual DbSet<IdentityUserRole<Guid>> IdentityUserRole { get; set; } = default!;
     public virtual DbSet<Appointment> Appointments { get; set; } = default!;
     public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; } = default!;
     public virtual DbSet<AppointmentType> AppointmentTypes { get; set; } = default!;
@@ -32,29 +32,47 @@ public class AppDbContext : IdentityDbContext<AppUser>
         base.OnModelCreating(builder);
         builder.Entity<AppUser>().Ignore(user => user.LockoutEnabled);
         builder.Entity<AppUser>().Ignore(user => user.LockoutEnd);
-        builder.Entity<IdentityUserToken<string>>().Metadata.SetIsTableExcludedFromMigrations(true);
+        builder.Entity<IdentityUserToken<Guid>>().Metadata.SetIsTableExcludedFromMigrations(true);
 
-        const string adminRoleId = "fa2640a0-0496-4010-bc27-424e0e5c6f78";
+        var adminRoleId = Guid.NewGuid();
         SeedRoles(builder, adminRoleId);
         CreateAdminAccount(builder, adminRoleId);
         SeedAppointmentTypes(builder);
         SeedAppointmentStatuses(builder);
     }
 
-    private static void SeedRoles(ModelBuilder builder, string adminRoleId)
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var roles = new List<IdentityRole>
-        {
-            new() { Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId },
-            new() { Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper() },
-            new() { Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper() }
-        };
-        builder.Entity<IdentityRole>().HasData(roles);
+        UpdateTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
     }
 
-    private static void CreateAdminAccount(ModelBuilder builder, string adminRoleId)
+    public override int SaveChanges()
     {
-        const string adminUserId = "7a4165b4-0aca-43fb-a390-294781ee377f";
+        UpdateTimestamps();
+        return base.SaveChanges();
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        UpdateTimestamps();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    private static void SeedRoles(ModelBuilder builder, Guid adminRoleId)
+    {
+        var roles = new List<AppRole>
+        {
+            new() { Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId },
+            new() { Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper(), Id = Guid.NewGuid() },
+            new() { Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper(), Id = Guid.NewGuid() }
+        };
+        builder.Entity<AppRole>().HasData(roles);
+    }
+
+    private static void CreateAdminAccount(ModelBuilder builder, Guid adminRoleId)
+    {
+        var adminUserId = Guid.NewGuid();
         var hasher = new PasswordHasher<AppUser>();
         builder.Entity<AppUser>().HasData(
             new AppUser
@@ -65,8 +83,8 @@ public class AppDbContext : IdentityDbContext<AppUser>
                 PasswordHash = hasher.HashPassword(null!, "admin")
             }
         );
-        builder.Entity<IdentityUserRole<string>>().HasData(
-            new IdentityUserRole<string>
+        builder.Entity<IdentityUserRole<Guid>>().HasData(
+            new IdentityUserRole<Guid>
             {
                 RoleId = adminRoleId,
                 UserId = adminUserId
@@ -80,12 +98,25 @@ public class AppDbContext : IdentityDbContext<AppUser>
         );
     }
 
+    private void UpdateTimestamps()
+    {
+        var entityEntries = ChangeTracker.Entries()
+            .Where(x => x.Entity is BaseEntity && x.State is EntityState.Added or EntityState.Modified);
+
+        foreach (var entityEntry in entityEntries)
+        {
+            var now = DateTime.UtcNow;
+            ((BaseEntity) entityEntry.Entity).UpdatedAt = now;
+            if (entityEntry.State == EntityState.Added)
+                ((BaseEntity) entityEntry.Entity).CreatedAt = now;
+        }
+    }
+
     private static void SeedAppointmentTypes(ModelBuilder builder)
     {
         var appointmentTypeFields = typeof(AppointmentTypes).GetFields();
-        var id = 1;
         var appointmentTypes = appointmentTypeFields
-            .Select(appointmentTypeField => new AppointmentType { Id = id++, Name = appointmentTypeField.Name })
+            .Select(appointmentTypeField => new AppointmentType { Id = Guid.NewGuid(), Name = appointmentTypeField.Name })
             .ToList();
         builder.Entity<AppointmentType>().HasData(appointmentTypes);
     }
@@ -93,9 +124,8 @@ public class AppDbContext : IdentityDbContext<AppUser>
     private static void SeedAppointmentStatuses(ModelBuilder builder)
     {
         var appointmentStatusFields = typeof(AppointmentStatuses).GetFields().Where(field => field.Name != "AllowedTransitions");
-        var id = 1;
         var appointmentStatuses = appointmentStatusFields
-            .Select(appointmentStatusField => new AppointmentStatus { Id = id++, Name = appointmentStatusField.Name })
+            .Select(appointmentStatusField => new AppointmentStatus { Id = Guid.NewGuid(), Name = appointmentStatusField.Name })
             .ToList();
         builder.Entity<AppointmentStatus>().HasData(appointmentStatuses);
     }

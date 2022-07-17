@@ -37,7 +37,7 @@ public class AuthServiceTests
             {
                 RefreshTokens = new List<RefreshToken>
                 {
-                    new() { Token = refreshToken, Expires = DateTime.Now.AddDays(1) }
+                    new() { Token = refreshToken, ExpiresAt = DateTime.Now.AddDays(1) }
                 }
             }
         }.AsQueryable().BuildMock();
@@ -79,18 +79,18 @@ public class AuthServiceTests
                 new RefreshToken
                 {
                     Token = refreshToken,
-                    Expires = DateTime.Now.AddDays(1)
+                    ExpiresAt = DateTime.Now.AddDays(1)
                 },
                 new RefreshToken
                 {
                     Token = refreshToken,
-                    Expires = DateTime.Now.AddDays(1),
-                    Revoked = DateTime.Now.Subtract(1.Days())
+                    ExpiresAt = DateTime.Now.AddDays(1),
+                    RevokedAt = DateTime.Now.Subtract(1.Days())
                 },
                 new RefreshToken
                 {
                     Token = refreshToken,
-                    Expires = DateTime.Now.Subtract(1.Days())
+                    ExpiresAt = DateTime.Now.Subtract(1.Days())
                 }
             }
         };
@@ -110,7 +110,7 @@ public class AuthServiceTests
         var token = new RefreshToken
         {
             Token = refreshToken,
-            Expires = DateTime.Now.AddDays(1)
+            ExpiresAt = DateTime.Now.AddDays(1)
         };
         const string reasonRevoked = "reason";
         const string ipAddress = "ipAddress";
@@ -120,7 +120,7 @@ public class AuthServiceTests
         _authService.RevokeRefreshToken(token, ipAddress, reasonRevoked, replacedByToken);
 
         // assert
-        token.Revoked.Should().NotBeNull();
+        token.RevokedAt.Should().NotBeNull();
         token.ReasonRevoked.Should().Be(reasonRevoked);
         token.RevokedByIp.Should().Be(ipAddress);
         token.ReplacedByToken.Should().Be(replacedByToken);

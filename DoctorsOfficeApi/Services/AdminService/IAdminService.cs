@@ -4,5 +4,5 @@ namespace DoctorsOfficeApi.Services.AdminService;
 
 public interface IAdminService
 {
-    Task<Admin> GetAdminByIdAsync(string id);
+    Task<Admin> GetAdminByIdAsync(Guid id);
 }

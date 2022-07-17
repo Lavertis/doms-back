@@ -31,7 +31,7 @@ public class PatientController : Controller
     [HttpGet("auth")]
     public async Task<ActionResult<PatientResponse>> GetAuthenticatedPatientAsync()
     {
-        var authenticatedPatientId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var query = new GetPatientByIdQuery(authenticatedPatientId);
         var patient = await _mediator.Send(query);
         return Ok(patient);
@@ -55,7 +55,7 @@ public class PatientController : Controller
     [HttpPatch("auth")]
     public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(UpdateAuthenticatedPatientRequest request)
     {
-        var authenticatedPatientId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var command = new UpdatePatientByIdCommand(authenticatedPatientId, request);
         var patientResponse = await _mediator.Send(command);
         return Ok(patientResponse);
@@ -67,7 +67,7 @@ public class PatientController : Controller
     [HttpDelete("auth")]
     public async Task<ActionResult> DeleteAuthenticatedPatientAsync()
     {
-        var authenticatedPatientId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var command = new DeletePatientByIdCommand(authenticatedPatientId);
         await _mediator.Send(command);
         return Ok();

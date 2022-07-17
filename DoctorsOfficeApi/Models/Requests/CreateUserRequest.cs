@@ -1,4 +1,5 @@
-﻿using DoctorsOfficeApi.Services.UserService;
+﻿using DoctorsOfficeApi.Entities;
+using DoctorsOfficeApi.Services.UserService;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,7 +17,7 @@ public class CreateUserRequest
 
 public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
 {
-    public CreateUserRequestValidator(IUserService userService, RoleManager<IdentityRole> roleManager)
+    public CreateUserRequestValidator(IUserService userService, RoleManager<AppRole> roleManager)
     {
         CascadeMode = CascadeMode.Stop;
         RuleFor(e => e.UserName)
@@ -35,7 +36,7 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
             .WithMessage("Email is required")
             .EmailAddress()
             .WithMessage("Email must be a valid email address");
-        
+
         RuleFor(e => e.Password)
             .NotEmpty()
             .WithMessage("Password is required")
@@ -49,7 +50,7 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
         RuleFor(e => e.PhoneNumber)
             .NotEmpty()
             .WithMessage("Phone number is required");
-        
+
         RuleFor(e => e.RoleName)
             .NotEmpty()
             .WithMessage("Role name is required")

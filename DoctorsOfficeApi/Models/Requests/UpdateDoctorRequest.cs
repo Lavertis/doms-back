@@ -34,7 +34,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByNameAsync(email).Result;
-                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id.ToString() == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Username already exists"))
                 .WithMessage("Username is already taken");
@@ -48,7 +48,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
                 .Must(email =>
                 {
                     var conflictUser = userManager.FindByEmailAsync(email).Result;
-                    return conflictUser is null || conflictUser.Id == authenticatedUserId;
+                    return conflictUser is null || conflictUser.Id.ToString() == authenticatedUserId;
                 })
                 .OnFailure(request => throw new ConflictException("Email already exists"))
                 .WithMessage("Email is already taken");

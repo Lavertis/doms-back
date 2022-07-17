@@ -951,12 +951,13 @@ public class PatientControllerTests : IntegrationTest
                 Email = createPatientCommand.Email,
                 NormalizedEmail = createPatientCommand.Email.ToUpper(),
                 PhoneNumber = createPatientCommand.PhoneNumber,
-                PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password)
+                PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password),
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         };
         DbContext.Patients.Add(newPatient);
         var patientRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
-        DbContext.IdentityUserRole.Add(new IdentityUserRole<string>
+        DbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = newPatient.AppUser.Id,
             RoleId = patientRoleId,

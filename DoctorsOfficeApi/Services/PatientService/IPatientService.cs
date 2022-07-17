@@ -4,5 +4,5 @@ namespace DoctorsOfficeApi.Services.PatientService;
 
 public interface IPatientService
 {
-    public Task<Patient> GetPatientByIdAsync(string id);
+    public Task<Patient> GetPatientByIdAsync(Guid id);
 }

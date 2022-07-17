@@ -4,9 +4,9 @@ namespace DoctorsOfficeApi.CQRS.Commands.DeleteDoctorById;
 
 public class DeleteDoctorByIdCommand : IRequest<Unit>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
-    public DeleteDoctorByIdCommand(string id)
+    public DeleteDoctorByIdCommand(Guid id)
     {
         Id = id;
     }

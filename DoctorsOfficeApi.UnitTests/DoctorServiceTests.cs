@@ -29,7 +29,7 @@ public class DoctorServiceTests
         // arrange
         var doctor = new Doctor
         {
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         _dbContext.Doctors.Add(doctor);
@@ -48,7 +48,7 @@ public class DoctorServiceTests
         // arrange
 
         // act
-        var action = async () => await _doctorService.GetDoctorByIdAsync("");
+        var action = async () => await _doctorService.GetDoctorByIdAsync(Guid.NewGuid());
 
         // assert
         await action.Should().ThrowExactlyAsync<NotFoundException>();

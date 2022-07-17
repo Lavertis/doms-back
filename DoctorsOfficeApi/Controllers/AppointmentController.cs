@@ -34,7 +34,7 @@ public class AppointmentController : Controller
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<IList<AppointmentResponse>>> GetAllAppointmentsForAuthenticatedUserAsync()
     {
-        var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var authenticatedUserRole = User.FindFirstValue(ClaimTypes.Role)!;
 
         var appointmentResponses = authenticatedUserRole switch
@@ -50,11 +50,11 @@ public class AppointmentController : Controller
     /// <summary>
     /// Returns appointment by id. User can only get owned appointment. For doctors and patients
     /// </summary>
-    [HttpGet("{id:long}")]
+    [HttpGet("{id:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
-    public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(long id)
+    public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(Guid id)
     {
-        var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var query = new GetAppointmentByIdQuery(id);
         var appointmentResponse = await _mediator.Send(query);
 
@@ -154,11 +154,11 @@ public class AppointmentController : Controller
     /// <summary>
     /// Updates appointment. For patients and doctors
     /// </summary>
-    [HttpPatch("{id:long}")]
+    [HttpPatch("{id:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
-    public async Task<ActionResult<AppointmentResponse>> UpdateAppointmentByIdAsync(long id, UpdateAppointmentRequest appointmentRequest)
+    public async Task<ActionResult<AppointmentResponse>> UpdateAppointmentByIdAsync(Guid id, UpdateAppointmentRequest appointmentRequest)
     {
-        var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var authenticatedUserRole = User.FindFirstValue(ClaimTypes.Role)!;
 
         var getAppointmentByIdQuery = new GetAppointmentByIdQuery(id);

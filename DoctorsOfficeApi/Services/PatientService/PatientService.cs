@@ -14,7 +14,7 @@ public class PatientService : IPatientService
         _dbContext = dbContext;
     }
 
-    public async Task<Patient> GetPatientByIdAsync(string id)
+    public async Task<Patient> GetPatientByIdAsync(Guid id)
     {
         var patient = await _dbContext.Patients.FindAsync(id);
         if (patient is null)

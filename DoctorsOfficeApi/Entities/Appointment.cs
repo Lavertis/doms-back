@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using DoctorsOfficeApi.Entities.UserTypes;
 
 namespace DoctorsOfficeApi.Entities;
 
 [Table("Appointments")]
-public class Appointment
+public class Appointment : BaseEntity
 {
-    [Key] public long Id { get; set; }
     public DateTime Date { get; set; }
     public string Description { get; set; } = default!;
     public virtual Patient Patient { get; set; } = default!;

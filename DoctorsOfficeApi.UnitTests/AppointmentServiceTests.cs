@@ -45,7 +45,7 @@ public class AppointmentServiceTests
     public void GetAppointmentById_AppointmentDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        const long nonExistingAppointmentId = 100;
+        var nonExistingAppointmentId = Guid.NewGuid();
 
         // act
         var action = async () => await _appointmentService.GetAppointmentByIdAsync(nonExistingAppointmentId);
@@ -61,7 +61,7 @@ public class AppointmentServiceTests
         const string appointmentTypeName = "TestAppointmentType";
         await _appDbContext.AppointmentTypes.AddAsync(new AppointmentType
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = appointmentTypeName
         });
         await _appDbContext.SaveChangesAsync();
@@ -93,7 +93,7 @@ public class AppointmentServiceTests
         const string appointmentStatusName = "TestAppointmentStatus";
         _appDbContext.AppointmentStatuses.Add(new AppointmentStatus
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = appointmentStatusName
         });
         await _appDbContext.SaveChangesAsync();
@@ -124,7 +124,7 @@ public class AppointmentServiceTests
         // arrange
         var appointmentStatus = new AppointmentStatus
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "TestAppointmentStatus"
         };
         _appDbContext.AppointmentStatuses.Add(appointmentStatus);
@@ -156,7 +156,7 @@ public class AppointmentServiceTests
         // arrange
         var appointmentType = new AppointmentType
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "TestAppointmentType"
         };
         _appDbContext.AppointmentTypes.Add(appointmentType);
@@ -184,11 +184,20 @@ public class AppointmentServiceTests
 
     private static IList<Appointment> GetAppointments(
         int count,
-        string patientId = "1",
-        string doctorId = "2",
-        long appointmentStatusId = 1,
-        long appointmentTypeId = 1)
+        Guid patientId = default,
+        Guid doctorId = default,
+        Guid appointmentStatusId = default,
+        Guid appointmentTypeId = default)
     {
+        if (patientId == default)
+            patientId = Guid.NewGuid();
+        if (doctorId == default)
+            doctorId = Guid.NewGuid();
+        if (appointmentStatusId == default)
+            appointmentStatusId = Guid.NewGuid();
+        if (appointmentStatusId == default)
+            appointmentTypeId = Guid.NewGuid();
+
         var doctor = new Doctor { Id = doctorId };
         var patient = new Patient { Id = patientId, FirstName = "", LastName = "", Address = "" };
         var status = new AppointmentStatus { Id = appointmentStatusId, Name = "Pending" };
@@ -199,7 +208,7 @@ public class AppointmentServiceTests
         {
             appointments.Add(new Appointment()
             {
-                Id = i + 1,
+                Id = Guid.NewGuid(),
                 Date = DateTime.UtcNow,
                 Doctor = doctor,
                 Patient = patient,

@@ -32,7 +32,8 @@ public class AuthControllerTests : IntegrationTest
         {
             UserName = testUserName,
             NormalizedUserName = testUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, testPassword)
+            PasswordHash = hasher.HashPassword(null!, testPassword),
+            SecurityStamp = Guid.NewGuid().ToString()
         });
         await DbContext.SaveChangesAsync();
 
@@ -108,8 +109,17 @@ public class AuthControllerTests : IntegrationTest
         var client = GetHttpClient();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
-        testUser.RefreshTokens.Add(new RefreshToken { Token = testToken, Revoked = null, Expires = DateTime.UtcNow.AddDays(1) });
+        var testUser = new AppUser
+        {
+            UserName = "testUser",
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
+        testUser.RefreshTokens.Add(new RefreshToken
+        {
+            Token = testToken,
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.AddDays(1)
+        });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
@@ -151,8 +161,8 @@ public class AuthControllerTests : IntegrationTest
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
-            Revoked = null,
-            Expires = DateTime.UtcNow.Subtract(1.Days())
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.Subtract(1.Days())
         });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
@@ -173,12 +183,16 @@ public class AuthControllerTests : IntegrationTest
         var client = GetHttpClient();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser
+        {
+            UserName = "testUser",
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
-            Revoked = DateTime.UtcNow.Subtract(1.Hours()),
-            Expires = DateTime.UtcNow.AddDays(1)
+            RevokedAt = DateTime.UtcNow.Subtract(1.Hours()),
+            ExpiresAt = DateTime.UtcNow.AddDays(1)
         });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
@@ -200,21 +214,25 @@ public class AuthControllerTests : IntegrationTest
 
         const string testToken = "testToken";
         const string descendantToken = "descendantToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser
+        {
+            UserName = "testUser",
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
         testUser.RefreshTokens.AddRange(new[]
         {
             new RefreshToken
             {
                 Token = testToken,
-                Revoked = DateTime.UtcNow.Subtract(1.Hours()),
-                Expires = DateTime.UtcNow.AddDays(1),
+                RevokedAt = DateTime.UtcNow.Subtract(1.Hours()),
+                ExpiresAt = DateTime.UtcNow.AddDays(1),
                 ReplacedByToken = descendantToken
             },
             new RefreshToken
             {
                 Token = descendantToken,
-                Revoked = null,
-                Expires = DateTime.UtcNow.AddDays(1)
+                RevokedAt = null,
+                ExpiresAt = DateTime.UtcNow.AddDays(1)
             }
         });
         DbContext.Users.Add(testUser);
@@ -231,7 +249,7 @@ public class AuthControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         (await DbContext.Users.FindAsync(testUser.Id))!
             .RefreshTokens.SingleOrDefault(token => token.Token == descendantToken)!
-            .Revoked.Should().NotBeNull();
+            .RevokedAt.Should().NotBeNull();
     }
 
     [Fact]
@@ -241,12 +259,16 @@ public class AuthControllerTests : IntegrationTest
         var client = GetHttpClient();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser
+        {
+            UserName = "testUser",
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
-            Revoked = null,
-            Expires = DateTime.UtcNow.AddDays(1)
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.AddDays(1)
         });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
@@ -261,7 +283,7 @@ public class AuthControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         (await DbContext.Users.FindAsync(testUser.Id))!
             .RefreshTokens.SingleOrDefault(token => token.Token == testToken)!
-            .Revoked.Should().NotBeNull();
+            .RevokedAt.Should().NotBeNull();
     }
 
     [Fact]
@@ -278,7 +300,7 @@ public class AuthControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
-    
+
     [Fact]
     public async Task RevokeToken_TokenIsExpired_ReturnsBadRequestException()
     {
@@ -290,8 +312,8 @@ public class AuthControllerTests : IntegrationTest
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
-            Revoked = null,
-            Expires = DateTime.UtcNow.Subtract(1.Days())
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.Subtract(1.Days())
         });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
@@ -304,7 +326,7 @@ public class AuthControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task RevokeToken_TokenIsRevoked_ReturnsBadRequestException()
     {
@@ -316,8 +338,8 @@ public class AuthControllerTests : IntegrationTest
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
-            Revoked = DateTime.UtcNow.Subtract(1.Days()),
-            Expires = DateTime.UtcNow.AddDays(1)
+            RevokedAt = DateTime.UtcNow.Subtract(1.Days()),
+            ExpiresAt = DateTime.UtcNow.AddDays(1)
         });
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();

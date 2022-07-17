@@ -571,7 +571,7 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -678,7 +678,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToUpdate = new Doctor
         {
             AppUser = new AppUser
@@ -729,7 +729,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string patientId = "1";
+        var patientId = Guid.NewGuid();
         var patient = new Patient()
         {
             FirstName = "firstName",
@@ -773,7 +773,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
         await DbContext.SaveChangesAsync();
 
@@ -808,7 +808,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToUpdate = new Doctor
         {
             AppUser = new AppUser
@@ -874,7 +874,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToUpdate = new Doctor
         {
             AppUser = new AppUser
@@ -912,7 +912,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToUpdate = new Doctor
         {
             AppUser = new AppUser
@@ -930,7 +930,7 @@ public class DoctorControllerTests : IntegrationTest
         {
             AppUser = new AppUser
             {
-                Id = "2",
+                Id = Guid.NewGuid(),
                 UserName = "confUserName",
                 NormalizedUserName = "confUserName".ToUpper()
             }
@@ -963,7 +963,7 @@ public class DoctorControllerTests : IntegrationTest
 
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToUpdate = new Doctor
         {
             AppUser = new AppUser
@@ -981,7 +981,7 @@ public class DoctorControllerTests : IntegrationTest
         {
             AppUser = new AppUser
             {
-                Id = "2",
+                Id = Guid.NewGuid(),
                 Email = "conflictingMail@mail.com",
                 NormalizedEmail = "conflictingMail@mail.com".ToUpper()
             }
@@ -1011,7 +1011,7 @@ public class DoctorControllerTests : IntegrationTest
         // arrange
         var client = GetHttpClient();
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var updateDoctorRequest = new UpdateDoctorRequest
         {
             UserName = "newUserName"
@@ -1036,7 +1036,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsRoleAsync(client, roleName);
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var updateDoctorRequest = new UpdateDoctorRequest
         {
             UserName = "newUserName"
@@ -1059,7 +1059,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
         var doctorToDelete = new Doctor { AppUser = new AppUser { Id = doctorId } };
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
@@ -1081,7 +1081,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string notDoctorId = "1";
+        var notDoctorId = Guid.NewGuid();
         var notDoctor = new Patient
         {
             FirstName = "",
@@ -1106,7 +1106,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string doctorId = "1";
+        var doctorId = "1";
 
         // act
         var response = await client.DeleteAsync($"{UrlPrefix}/{doctorId}");
@@ -1121,7 +1121,7 @@ public class DoctorControllerTests : IntegrationTest
         // arrange
         var client = GetHttpClient();
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
         // act
         var response = await client.DeleteAsync($"{UrlPrefix}/{doctorId}");
@@ -1139,7 +1139,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsRoleAsync(client, roleName);
 
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
         // act
         var response = await client.DeleteAsync($"{UrlPrefix}/{doctorId}");
@@ -1161,12 +1161,13 @@ public class DoctorControllerTests : IntegrationTest
                 Email = createPatientCommand.Email,
                 NormalizedEmail = createPatientCommand.Email.ToUpper(),
                 PhoneNumber = createPatientCommand.PhoneNumber,
-                PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password)
+                PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password),
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         };
         DbContext.Doctors.Add(newDoctor);
         var doctorRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Doctor)!.Id;
-        DbContext.IdentityUserRole.Add(new IdentityUserRole<string>
+        DbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = newDoctor.AppUser.Id,
             RoleId = doctorRoleId,

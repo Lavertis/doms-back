@@ -5,9 +5,9 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetAppointmentById;
 
 public class GetAppointmentByIdQuery : IRequest<AppointmentResponse>
 {
-    public long Id { get; set; }
+    public Guid Id { get; set; }
 
-    public GetAppointmentByIdQuery(long id)
+    public GetAppointmentByIdQuery(Guid id)
     {
         Id = id;
     }

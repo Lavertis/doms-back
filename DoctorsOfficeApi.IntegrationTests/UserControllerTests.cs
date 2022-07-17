@@ -71,7 +71,7 @@ public class UserControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = "user1Id"
+            Id = Guid.NewGuid()
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
@@ -95,7 +95,7 @@ public class UserControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string nonExistingUserId = "nonExistingUserId";
+        var nonExistingUserId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{nonExistingUserId}");
@@ -113,7 +113,7 @@ public class UserControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsRoleAsync(client, roleName);
 
-        const string dummyUserId = "dummyUserId";
+        var dummyUserId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{dummyUserId}");
@@ -132,13 +132,13 @@ public class UserControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = "user1Id"
+            Id = Guid.NewGuid()
         };
         var refreshTokens = new List<RefreshToken>
         {
-            new() { Id = 100, Token = "token1" },
-            new() { Id = 101, Token = "token2" },
-            new() { Id = 102, Token = "token3" },
+            new() { Id = Guid.NewGuid(), Token = "token1" },
+            new() { Id = Guid.NewGuid(), Token = "token2" },
+            new() { Id = Guid.NewGuid(), Token = "token3" },
         };
         user.RefreshTokens.AddRange(refreshTokens);
         DbContext.Users.Add(user);
@@ -180,7 +180,7 @@ public class UserControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = "user1Id"
+            Id = Guid.NewGuid()
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
@@ -204,7 +204,7 @@ public class UserControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsRoleAsync(client, roleName);
 
-        const string dummyUserId = "dummyUserId";
+        var dummyUserId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{dummyUserId}/refresh-tokens");

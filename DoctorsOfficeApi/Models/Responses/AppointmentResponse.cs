@@ -4,11 +4,11 @@ namespace DoctorsOfficeApi.Models.Responses;
 
 public class AppointmentResponse
 {
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     public DateTime Date { get; set; }
     public string Description { get; set; } = default!;
-    public string PatientId { get; set; } = default!;
-    public string DoctorId { get; set; } = default!;
+    public Guid PatientId { get; set; } = default!;
+    public Guid DoctorId { get; set; } = default!;
     public string Status { get; set; } = default!;
     public string Type { get; set; } = default!;
 

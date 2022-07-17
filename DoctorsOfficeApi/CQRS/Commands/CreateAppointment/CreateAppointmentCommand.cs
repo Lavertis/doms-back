@@ -8,8 +8,8 @@ public class CreateAppointmentCommand : IRequest<AppointmentResponse>
 {
     public DateTime Date { get; set; }
     public string Description { get; set; } = default!;
-    public string PatientId { get; set; } = default!;
-    public string DoctorId { get; set; } = default!;
+    public Guid PatientId { get; set; } = default!;
+    public Guid DoctorId { get; set; } = default!;
     public string Type { get; set; } = default!;
     public string Status { get; set; } = default!;
 
@@ -21,8 +21,8 @@ public class CreateAppointmentCommand : IRequest<AppointmentResponse>
     {
         Date = createAppointmentRequest.Date;
         Description = createAppointmentRequest.Description;
-        PatientId = createAppointmentRequest.PatientId;
-        DoctorId = createAppointmentRequest.DoctorId;
+        PatientId = Guid.Parse(createAppointmentRequest.PatientId);
+        DoctorId = Guid.Parse(createAppointmentRequest.DoctorId);
         Type = createAppointmentRequest.Type;
     }
 }

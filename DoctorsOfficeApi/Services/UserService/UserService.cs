@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using AutoMapper;
+using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Requests;
@@ -11,18 +12,18 @@ namespace DoctorsOfficeApi.Services.UserService;
 
 public class UserService : IUserService
 {
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly RoleManager<AppRole> _roleManager;
     private readonly UserManager<AppUser> _userManager;
 
-    public UserService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+    public UserService(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
     {
         _userManager = userManager;
         _roleManager = roleManager;
     }
 
-    public async Task<AppUser> GetUserByIdAsync(string userId)
+    public async Task<AppUser> GetUserByIdAsync(Guid userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user is null)
             throw new NotFoundException("User with requested id does not exist");
         return user;
@@ -51,8 +52,6 @@ public class UserService : IUserService
             cfg.CreateMap<CreateUserRequest, AppUser>()
         ));
         var user = mapper.Map<AppUser>(request);
-        user.NormalizedUserName = user.UserName.ToUpper();
-        user.NormalizedEmail = user.Email.ToUpper();
 
         var createUserIdentityResult = await _userManager.CreateAsync(user, request.Password);
         if (!createUserIdentityResult.Succeeded)
@@ -65,7 +64,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<AppUser> UpdateUserByIdAsync(string userId, UpdateUserRequest request)
+    public async Task<AppUser> UpdateUserByIdAsync(Guid userId, UpdateUserRequest request)
     {
         try
         {
@@ -104,7 +103,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<bool> DeleteUserByIdAsync(string userId)
+    public async Task<bool> DeleteUserByIdAsync(Guid userId)
     {
         var user = await GetUserByIdAsync(userId);
         var deleteIdentityResult = await _userManager.DeleteAsync(user);
@@ -115,7 +114,7 @@ public class UserService : IUserService
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Sid, user.Id),
+            new(ClaimTypes.Sid, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName),
         };
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
@@ -151,7 +150,7 @@ public class UserService : IUserService
         user.PasswordHash = hasher.HashPassword(user, newPassword);
     }
 
-    public async Task<bool> UserExistsByIdAsync(string userId)
+    public async Task<bool> UserExistsByIdAsync(Guid userId)
     {
         return await _userManager.Users.AnyAsync(user => user.Id == userId);
     }

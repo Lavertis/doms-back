@@ -45,8 +45,8 @@ public class JwtService : IJwtService
         var refreshToken = new RefreshToken
         {
             Token = await GetUniqueToken(cancellationToken),
-            Expires = DateTime.UtcNow.AddDays(7),
-            Created = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow,
             CreatedByIp = ipAddress
         };
 

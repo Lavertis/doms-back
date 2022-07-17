@@ -89,7 +89,7 @@ public class AdminControllerTests : IntegrationTest
 
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         DbContext.Admins.Add(admin);
@@ -112,7 +112,7 @@ public class AdminControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const string nonExistingAdminId = "100";
+        var nonExistingAdminId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{nonExistingAdminId}");
@@ -127,7 +127,7 @@ public class AdminControllerTests : IntegrationTest
         // arrange
         var client = GetHttpClient();
 
-        const string nonExistingAdminId = "100";
+        var nonExistingAdminId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{nonExistingAdminId}");
@@ -145,7 +145,7 @@ public class AdminControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsRoleAsync(client, roleName);
 
-        const string nonExistingAdminId = "100";
+        var nonExistingAdminId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{nonExistingAdminId}");
@@ -163,9 +163,9 @@ public class AdminControllerTests : IntegrationTest
 
         var admins = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = "100" } },
-            new() { AppUser = new AppUser { Id = "200" } },
-            new() { AppUser = new AppUser { Id = "300" } }
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
         };
 
         DbContext.Admins.AddRange(admins);

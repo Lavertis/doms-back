@@ -32,7 +32,7 @@ public class DoctorController : Controller
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> GetAuthenticatedDoctorAsync()
     {
-        var authenticatedDoctorId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedDoctorId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var getDoctorByIdQuery = new GetDoctorByIdQuery(authenticatedDoctorId);
         var authenticatedDoctorResponse = await _mediator.Send(getDoctorByIdQuery);
         return Ok(authenticatedDoctorResponse);
@@ -70,7 +70,7 @@ public class DoctorController : Controller
     public async Task<ActionResult<DoctorResponse>> UpdateAuthenticatedDoctorAsync(
         UpdateAuthenticatedDoctorRequest request)
     {
-        var authenticatedDoctorId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedDoctorId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var updateDoctorByIdCommand = new UpdateDoctorByIdCommand(authenticatedDoctorId, request);
         var updatedDoctorResponse = await _mediator.Send(updateDoctorByIdCommand);
         return Ok(updatedDoctorResponse);
@@ -79,9 +79,9 @@ public class DoctorController : Controller
     /// <summary>
     /// Updates doctor by id. Only for admins
     /// </summary>
-    [HttpPatch("{id}")]
+    [HttpPatch("{id:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
-    public async Task<ActionResult<DoctorResponse>> UpdateDoctorByIdAsync(string id, UpdateDoctorRequest request)
+    public async Task<ActionResult<DoctorResponse>> UpdateDoctorByIdAsync(Guid id, UpdateDoctorRequest request)
     {
         var updateDoctorByIdCommand = new UpdateDoctorByIdCommand(id, request);
         var updatedDoctorResponse = await _mediator.Send(updateDoctorByIdCommand);
@@ -91,9 +91,9 @@ public class DoctorController : Controller
     /// <summary>
     /// Deletes doctor by id. Only for admins
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
-    public async Task<ActionResult> DeleteDoctorByIdAsync(string id)
+    public async Task<ActionResult> DeleteDoctorByIdAsync(Guid id)
     {
         var deleteDoctorByIdCommand = new DeleteDoctorByIdCommand(id);
         await _mediator.Send(deleteDoctorByIdCommand);

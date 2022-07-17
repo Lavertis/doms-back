@@ -4,7 +4,7 @@ namespace DoctorsOfficeApi.Models.Responses;
 
 public class AdminResponse
 {
-    public string Id { get; set; } = default!;
+    public Guid Id { get; set; } = default!;
     public string UserName { get; set; } = default!;
     public string Email { get; set; } = default!;
 

@@ -6,7 +6,7 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdateDoctorById;
 
 public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
 {
-    public string Id { get; set; } = default!;
+    public Guid Id { get; set; } = default!;
     public string? UserName { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
@@ -16,7 +16,7 @@ public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
     {
     }
 
-    public UpdateDoctorByIdCommand(string id, UpdateAuthenticatedDoctorRequest request)
+    public UpdateDoctorByIdCommand(Guid id, UpdateAuthenticatedDoctorRequest request)
     {
         Id = id;
         UserName = request.UserName;
@@ -25,7 +25,7 @@ public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
         Password = request.NewPassword;
     }
 
-    public UpdateDoctorByIdCommand(string id, UpdateDoctorRequest request)
+    public UpdateDoctorByIdCommand(Guid id, UpdateDoctorRequest request)
     {
         Id = id;
         UserName = request.UserName;

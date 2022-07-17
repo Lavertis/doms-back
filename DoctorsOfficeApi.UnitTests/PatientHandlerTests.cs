@@ -42,9 +42,9 @@ public class PatientHandlerTests
         // arrange
         var patient = new Patient
         {
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored)).Returns(patient);
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored)).Returns(patient);
 
         var expectedResult = new PatientResponse(patient);
 
@@ -62,10 +62,10 @@ public class PatientHandlerTests
     public async Task GetPatientByIdHandler_PatientDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
-        const string patientId = "100";
+        var patientId = Guid.NewGuid();
 
         var query = new GetPatientByIdQuery(patientId);
         var handler = new GetPatientByIdHandler(_fakePatientService);
@@ -138,7 +138,7 @@ public class PatientHandlerTests
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
             {
-                Id = "100",
+                Id = Guid.NewGuid(),
                 UserName = "oldUserName",
                 NormalizedUserName = "oldUserName".ToUpper(),
                 Email = "oldMail@mail.com",
@@ -151,7 +151,7 @@ public class PatientHandlerTests
         _dbContext.Patients.Add(patientToUpdate);
         await _dbContext.SaveChangesAsync();
 
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
 
         var updatePatientCommand = new UpdatePatientByIdCommand
@@ -208,7 +208,7 @@ public class PatientHandlerTests
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
             {
-                Id = "100",
+                Id = Guid.NewGuid(),
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789",
@@ -219,7 +219,7 @@ public class PatientHandlerTests
         _dbContext.Patients.Add(patientToUpdate);
         await _dbContext.SaveChangesAsync();
 
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
 
         var updatePatientCommand = new UpdatePatientByIdCommand
@@ -274,12 +274,12 @@ public class PatientHandlerTests
     public async Task UpdatePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
         var updatePatientCommand = new UpdatePatientByIdCommand
         {
-            Id = "100",
+            Id = Guid.NewGuid(),
         };
 
         var handler = new UpdatePatientByIdHandler(_dbContext, _fakePatientService, _fakeUserService);
@@ -300,14 +300,14 @@ public class PatientHandlerTests
             FirstName = "firstName",
             LastName = "lastName",
             Address = "address",
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         _dbContext.Patients.Add(patientToDelete);
         await _dbContext.SaveChangesAsync();
 
 
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Returns(patientToDelete);
 
         var command = new DeletePatientByIdCommand(patientToDelete.Id);
@@ -323,10 +323,10 @@ public class PatientHandlerTests
     [Fact]
     public async Task DeletePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
-        const string patientId = "100";
+        var patientId = Guid.NewGuid();
 
         var command = new DeletePatientByIdCommand(patientId);
         var handler = new DeletePatientByIdHandler(_dbContext, _fakePatientService);

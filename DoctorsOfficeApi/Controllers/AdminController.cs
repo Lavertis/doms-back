@@ -28,7 +28,7 @@ public class AdminController : Controller
     [HttpGet("auth")]
     public async Task<ActionResult<AdminResponse>> GetAuthenticatedAdminAsync()
     {
-        var authenticatedAdminId = User.FindFirstValue(ClaimTypes.Sid)!;
+        var authenticatedAdminId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
         var query = new GetAdminByIdQuery(authenticatedAdminId);
         var adminResponse = await _mediator.Send(query);
         return Ok(adminResponse);
@@ -37,8 +37,8 @@ public class AdminController : Controller
     /// <summary>
     /// Returns admin with specified id. Only for admins.
     /// </summary>
-    [HttpGet("{id}")]
-    public async Task<ActionResult<AdminResponse>> GetAdminByIdAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<AdminResponse>> GetAdminByIdAsync(Guid id)
     {
         var query = new GetAdminByIdQuery(id);
         var adminResponse = await _mediator.Send(query);

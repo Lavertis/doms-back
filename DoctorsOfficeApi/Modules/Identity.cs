@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using DoctorsOfficeApi.Data;
+using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +44,7 @@ public static class Identity
                     RequireNonAlphanumeric = false,
                 };
             })
-            .AddRoles<IdentityRole>()
+            .AddRoles<AppRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
     }

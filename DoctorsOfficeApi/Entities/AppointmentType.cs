@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DoctorsOfficeApi.Entities;
 
 [Table("AppointmentTypes")]
-public class AppointmentType
+public class AppointmentType : BaseEntity
 {
-    [Key] public long Id { get; set; }
     public string Name { get; set; } = default!;
 }

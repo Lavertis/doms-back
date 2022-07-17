@@ -5,9 +5,9 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetDoctorById;
 
 public class GetDoctorByIdQuery : IRequest<DoctorResponse>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
-    public GetDoctorByIdQuery(string id)
+    public GetDoctorByIdQuery(Guid id)
     {
         Id = id;
     }

@@ -4,7 +4,7 @@ namespace DoctorsOfficeApi.Models.Responses;
 
 public class UserResponse
 {
-    public string Id { get; set; } = default!;
+    public Guid Id { get; set; } = default!;
     public string UserName { get; set; } = default!;
     public string NormalizedUserName { get; set; } = default!;
     public bool TwoFactorEnabled { get; set; }

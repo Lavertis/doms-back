@@ -29,14 +29,14 @@ public class AdminServiceTests
         // arrange
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         _dbContext.Admins.Add(admin);
         await _dbContext.SaveChangesAsync();
 
         // act
-        var result = await _adminService.GetAdminByIdAsync("100");
+        var result = await _adminService.GetAdminByIdAsync(admin.AppUser.Id);
 
         // assert
         result.Should().BeEquivalentTo(admin);
@@ -46,7 +46,7 @@ public class AdminServiceTests
     public async Task GetAdminById_AdminDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        const string adminId = "100";
+        var adminId = Guid.NewGuid();
 
         // act
         var action = async () => await _adminService.GetAdminByIdAsync(adminId);

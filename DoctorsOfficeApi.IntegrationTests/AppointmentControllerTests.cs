@@ -189,7 +189,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = GetHttpClient();
 
-        const long appointmentId = 999;
+        var appointmentId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{appointmentId}");
@@ -289,7 +289,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const long appointmentId = 999;
+        var appointmentId = Guid.NewGuid();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/{appointmentId}");
@@ -381,7 +381,7 @@ public class AppointmentControllerTests : IntegrationTest
         var patient1 = DbContext.Patients.First();
         var patient2 = new Patient
         {
-            AppUser = new AppUser { Id = "7945992e-3b96-4f0b-9143-f8db38cd8b5e" },
+            AppUser = new AppUser { Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e") },
             FirstName = "",
             LastName = "",
             Address = ""
@@ -442,7 +442,7 @@ public class AppointmentControllerTests : IntegrationTest
                 responseContent.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
                 break;
             case "patientId":
-                responseContent.Should().OnlyContain(a => a.PatientId == filterValue);
+                responseContent.Should().OnlyContain(a => a.PatientId.ToString() == filterValue);
                 break;
             case "type":
                 responseContent.Should().OnlyContain(a => a.Type == filterValue);
@@ -776,8 +776,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = authenticatedUserId,
-            PatientId = patient.Id,
+            DoctorId = authenticatedUserId.ToString(),
+            PatientId = patient.Id.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -798,9 +798,9 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData("Description", "")]
     [InlineData("DoctorId", "")]
-    [InlineData("DoctorId", "nonExistingDoctorId")]
+    [InlineData("DoctorId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("PatientId", "")]
-    [InlineData("PatientId", "nonExistingPatientId")]
+    [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("Type", "")]
     [InlineData("Type", "nonExistingTypeName")]
     public async Task CreateAppointment_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
@@ -815,8 +815,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = authenticatedUserId,
-            PatientId = patient.Id,
+            DoctorId = authenticatedUserId.ToString(),
+            PatientId = patient.Id.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -876,8 +876,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = otherDoctor.Id,
-            PatientId = patient.Id,
+            DoctorId = otherDoctor.Id.ToString(),
+            PatientId = patient.Id.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -900,8 +900,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id,
-            PatientId = authenticatedUserId,
+            DoctorId = doctor.Id.ToString(),
+            PatientId = authenticatedUserId.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -922,9 +922,9 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData("Description", "")]
     [InlineData("DoctorId", "")]
-    [InlineData("DoctorId", "nonExistingDoctorId")]
+    [InlineData("DoctorId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("PatientId", "")]
-    [InlineData("PatientId", "nonExistingPatientId")]
+    [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("Type", "")]
     [InlineData("Type", "nonExistingTypeName")]
     public async Task CreateAppointmentRequest_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
@@ -939,8 +939,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id,
-            PatientId = authenticatedUserId,
+            DoctorId = doctor.Id.ToString(),
+            PatientId = authenticatedUserId.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -1000,8 +1000,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id,
-            PatientId = otherPatient.Id,
+            DoctorId = doctor.Id.ToString(),
+            PatientId = otherPatient.Id.ToString(),
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -1023,7 +1023,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         var appointment = new Appointment
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
             Doctor = DbContext.Doctors.First(),
@@ -1100,7 +1100,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsPatientAsync(client);
 
-        const int appointmentId = 12345678;
+        var appointmentId = Guid.NewGuid();
         var updateAppointmentRequest = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(2),
@@ -1130,7 +1130,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         var appointment = new Appointment
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
             Doctor = DbContext.Doctors.First(),
@@ -1194,7 +1194,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         var appointment = new Appointment
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
             Doctor = authenticatedDoctor,
@@ -1237,7 +1237,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         var appointment = new Appointment
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Date = DateTime.Parse("2022-07-07T10:49:11Z"),
             Description = "Description",
             Doctor = DbContext.Doctors.First(),
@@ -1299,7 +1299,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         var appointment = new Appointment
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Date = DateTime.Parse("2022-07-07T10:49:11Z"),
             Description = "Description",
             Doctor = DbContext.Doctors.First(),
@@ -1335,7 +1335,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = GetHttpClient();
 
-        const long appointmentId = 1;
+        var appointmentId = Guid.NewGuid();
         var updateAppointmentRequest = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(2),
@@ -1361,7 +1361,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = GetHttpClient();
         await AuthenticateAsAdminAsync(client);
 
-        const long appointmentId = 1;
+        var appointmentId = Guid.NewGuid();
         var updateAppointmentRequest = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(2),

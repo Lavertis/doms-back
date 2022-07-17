@@ -33,13 +33,13 @@ public class AuthService : IAuthService
     {
         // remove old inactive refresh tokens from user based on TTL in app settings
         user.RefreshTokens.RemoveAll(x =>
-            !x.IsActive && x.Created.AddDays(_appSettings.RefreshTokenTtl) <= DateTime.UtcNow
+            !x.IsActive && x.CreatedAt.AddDays(_appSettings.RefreshTokenTtl) <= DateTime.UtcNow
         );
     }
 
     public void RevokeRefreshToken(RefreshToken token, string? ipAddress, string? reason = null, string? replacedByToken = null)
     {
-        token.Revoked = DateTime.UtcNow;
+        token.RevokedAt = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;
         token.ReasonRevoked = reason;
         token.ReplacedByToken = replacedByToken;

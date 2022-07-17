@@ -37,8 +37,8 @@ public class UserController : Controller
     /// <summary>
     /// Returns base user by id. Only for admins.
     /// </summary>
-    [HttpGet("{id}")]
-    public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(Guid id)
     {
         var query = new GetUserByIdQuery(id);
         var userResponse = await _mediator.Send(query);
@@ -48,8 +48,8 @@ public class UserController : Controller
     /// <summary>
     /// Returns refresh token for user by id. Only for admins.
     /// </summary>
-    [HttpGet("{id}/refresh-tokens")]
-    public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(string id)
+    [HttpGet("{id:guid}/refresh-tokens")]
+    public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(Guid id)
     {
         var query = new GetRefreshTokensByUserIdQuery(id);
         var refreshTokens = await _mediator.Send(query);

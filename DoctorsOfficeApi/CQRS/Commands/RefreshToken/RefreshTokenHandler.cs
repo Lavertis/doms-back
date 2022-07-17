@@ -76,7 +76,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Authenti
 
     private static void RevokeRefreshToken(Entities.RefreshToken token, string? ipAddress, string? reason = null, string? replacedByToken = null)
     {
-        token.Revoked = DateTime.UtcNow;
+        token.RevokedAt = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;
         token.ReasonRevoked = reason;
         token.ReplacedByToken = replacedByToken;

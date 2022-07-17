@@ -14,7 +14,7 @@ public class AppointmentService : IAppointmentService
         _dbContext = dbContext;
     }
 
-    public async Task<Appointment> GetAppointmentByIdAsync(long id)
+    public async Task<Appointment> GetAppointmentByIdAsync(Guid id)
     {
         var appointment = await _dbContext.Appointments.FindAsync(id);
         if (appointment is null)

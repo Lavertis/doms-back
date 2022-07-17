@@ -33,7 +33,7 @@ public class PatientServiceTests
             FirstName = "firstName",
             LastName = "lastName",
             Address = "address",
-            AppUser = new AppUser { Id = "100" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         _dbContext.Patients.Add(patient);
@@ -51,7 +51,7 @@ public class PatientServiceTests
     {
         // arrange
 
-        const string nenExistingPatientId = "100";
+        var nenExistingPatientId = Guid.NewGuid();
 
         // act
         var action = async () => await _patientService.GetPatientByIdAsync(nenExistingPatientId);

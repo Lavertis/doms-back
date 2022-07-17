@@ -31,13 +31,13 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
         RuleFor(e => e.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
-            .MustAsync((patientId, cancellationToken) => userService.UserExistsByIdAsync(patientId))
+            .MustAsync((patientId, cancellationToken) => userService.UserExistsByIdAsync(Guid.Parse(patientId)))
             .WithMessage("Patient does not exist");
 
         RuleFor(e => e.DoctorId)
             .NotEmpty()
             .WithMessage("DoctorId is required")
-            .MustAsync(((doctorId, cancellationToken) => userService.UserExistsByIdAsync(doctorId)))
+            .MustAsync(((doctorId, cancellationToken) => userService.UserExistsByIdAsync(Guid.Parse(doctorId))))
             .WithMessage("Doctor does not exist");
 
         RuleFor(e => e.Type)

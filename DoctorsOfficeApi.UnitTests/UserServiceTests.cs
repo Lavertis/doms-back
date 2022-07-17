@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Requests;
@@ -13,13 +14,13 @@ namespace DoctorsOfficeApi.UnitTests;
 
 public class UserServiceTests
 {
-    private readonly RoleManager<IdentityRole> _fakeRoleManager;
+    private readonly RoleManager<AppRole> _fakeRoleManager;
     private readonly UserManager<AppUser> _fakeUserManager;
     private readonly UserService _userService;
 
     public UserServiceTests()
     {
-        _fakeRoleManager = A.Fake<RoleManager<IdentityRole>>();
+        _fakeRoleManager = A.Fake<RoleManager<AppRole>>();
         _fakeUserManager = A.Fake<UserManager<AppUser>>();
         _userService = new UserService(_fakeUserManager, _fakeRoleManager);
     }
@@ -32,7 +33,7 @@ public class UserServiceTests
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
 
         // act
-        var action = async () => await _userService.GetUserByIdAsync("1");
+        var action = async () => await _userService.GetUserByIdAsync(Guid.NewGuid());
 
         // assert
         await action.Should().ThrowExactlyAsync<NotFoundException>();
@@ -46,7 +47,7 @@ public class UserServiceTests
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
 
         // act
-        var result = await _userService.GetUserByIdAsync("1");
+        var result = await _userService.GetUserByIdAsync(Guid.NewGuid());
 
         // assert
         result.Should().Be(appUser);
@@ -178,7 +179,7 @@ public class UserServiceTests
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
         var appUser = new AppUser
         {
-            Id = "1",
+            Id = Guid.NewGuid(),
             UserName = "testUserName",
             NormalizedUserName = "TESTUSERNAME",
             Email = "mail@mail.com",
@@ -204,7 +205,7 @@ public class UserServiceTests
         };
 
         // act
-        var result = await _userService.UpdateUserByIdAsync("1", updateUserRequest);
+        var result = await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
         result.UserName.Should().Be(updateUserRequest.UserName);
@@ -231,7 +232,7 @@ public class UserServiceTests
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
         var appUser = new AppUser
         {
-            Id = "1",
+            Id = Guid.NewGuid(),
             UserName = "testUserName",
             NormalizedUserName = "TESTUSERNAME",
             Email = "mail@mail.com",
@@ -255,7 +256,7 @@ public class UserServiceTests
         }
 
         // act
-        var result = await _userService.UpdateUserByIdAsync("1", updateUserRequest);
+        var result = await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
         if (updateUserRequest.UserName is not null) result.UserName.Should().Be(updateUserRequest.UserName);
@@ -279,7 +280,7 @@ public class UserServiceTests
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
         var appUser = new AppUser
         {
-            Id = "1",
+            Id = Guid.NewGuid(),
             UserName = "testUserName",
             NormalizedUserName = "TESTUSERNAME",
             Email = "mail@mail.com",
@@ -304,7 +305,7 @@ public class UserServiceTests
         typeof(UpdateUserRequest).GetProperty(fieldName)!.SetValue(updateUserRequest, fieldValue);
 
         // act
-        var action = async () => await _userService.UpdateUserByIdAsync("1", updateUserRequest);
+        var action = async () => await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
         await action.Should().ThrowExactlyAsync<BadRequestException>();
@@ -318,7 +319,7 @@ public class UserServiceTests
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => _fakeUserManager.Users).Returns(A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock());
 
-        const string id = "1";
+        var id = Guid.NewGuid();
         var updateUserRequest = A.Dummy<UpdateUserRequest>();
 
         // act
@@ -334,8 +335,8 @@ public class UserServiceTests
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        var appUser = new AppUser { Id = "1", UserName = "testUserName", PasswordHash = oldPasswordHash };
-        var conflictingUser = new AppUser { Id = "2", UserName = "conflictingUserName" };
+        var appUser = new AppUser { Id = Guid.NewGuid(), UserName = "testUserName", PasswordHash = oldPasswordHash };
+        var conflictingUser = new AppUser { Id = Guid.NewGuid(), UserName = "conflictingUserName" };
         var usersQueryable = new List<AppUser> { appUser, conflictingUser }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
@@ -344,7 +345,7 @@ public class UserServiceTests
         var updateUserRequest = new UpdateUserRequest { UserName = "conflictingUserName" };
 
         // act
-        var action = async () => await _userService.UpdateUserByIdAsync("1", updateUserRequest);
+        var action = async () => await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
         await action.Should().ThrowExactlyAsync<BadRequestException>();
@@ -356,7 +357,7 @@ public class UserServiceTests
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        var appUser = new AppUser { Id = "1", UserName = "testUserName", NormalizedUserName = "TESTUSERSNAME", PasswordHash = oldPasswordHash };
+        var appUser = new AppUser { Id = Guid.NewGuid(), UserName = "testUserName", NormalizedUserName = "TESTUSERSNAME", PasswordHash = oldPasswordHash };
         var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
@@ -369,7 +370,7 @@ public class UserServiceTests
         };
 
         // act
-        var action = async () => await _userService.UpdateUserByIdAsync("1", updateUserRequest);
+        var action = async () => await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
         await action.Should().ThrowExactlyAsync<BadRequestException>();
@@ -380,7 +381,7 @@ public class UserServiceTests
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
-        var id = Guid.NewGuid().ToString();
+        var id = Guid.NewGuid();
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
 
         // act
@@ -395,7 +396,7 @@ public class UserServiceTests
     {
         // arrange
         AppUser appUser = null!;
-        var id = Guid.NewGuid().ToString();
+        var id = Guid.NewGuid();
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
 
         // act
@@ -410,7 +411,7 @@ public class UserServiceTests
     {
         // arrange
         AppUser appUser = null!;
-        var id = Guid.NewGuid().ToString();
+        var id = Guid.NewGuid();
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
 
         // act
@@ -616,7 +617,7 @@ public class UserServiceTests
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryableDummy);
 
         // act
-        var result = await _userService.UserExistsByIdAsync(Guid.NewGuid().ToString());
+        var result = await _userService.UserExistsByIdAsync(Guid.NewGuid());
 
         // assert
         result.Should().BeFalse();

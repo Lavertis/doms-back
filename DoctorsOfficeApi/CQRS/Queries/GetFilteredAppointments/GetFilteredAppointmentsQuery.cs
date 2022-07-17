@@ -9,8 +9,12 @@ public class GetFilteredAppointmentsQuery : IRequest<IList<AppointmentResponse>>
     public DateTime? dateEnd { get; set; }
     public string? type { get; set; }
     public string? status { get; set; }
-    public string? patientId { get; set; }
-    public string? doctorId { get; set; }
+    public Guid? patientId { get; set; }
+    public Guid? doctorId { get; set; }
+
+    public GetFilteredAppointmentsQuery()
+    {
+    }
 
     public GetFilteredAppointmentsQuery(
         DateTime? dateStart,
@@ -24,7 +28,7 @@ public class GetFilteredAppointmentsQuery : IRequest<IList<AppointmentResponse>>
         this.dateEnd = dateEnd;
         this.type = type;
         this.status = status;
-        this.patientId = patientId;
-        this.doctorId = doctorId;
+        this.doctorId = Guid.TryParse(doctorId, out var doctorGuid) ? doctorGuid : null;
+        this.patientId = Guid.TryParse(patientId, out var patientGuid) ? patientGuid : null;
     }
 }

@@ -13,7 +13,7 @@ public class AdminService : IAdminService
         _dbContext = dbContext;
     }
 
-    public async Task<Admin> GetAdminByIdAsync(string id)
+    public async Task<Admin> GetAdminByIdAsync(Guid id)
     {
         var admin = await _dbContext.Admins.FindAsync(id);
         if (admin is null)

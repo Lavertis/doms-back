@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Entities.UserTypes;
+using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
@@ -70,47 +71,50 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         var hasher = new PasswordHasher<AppUser>();
 
-        const string testAdminUserId = "2ee5b9d4-987e-4c86-9552-10523318bd7a";
+        var testAdminUserId = Guid.NewGuid();
         var testAdminUser = new AppUser
         {
             Id = testAdminUserId,
             UserName = TestAdminUserName,
             NormalizedUserName = TestAdminUserName.ToUpper(),
             PasswordHash = hasher.HashPassword(null!, TestAdminPassword),
+            SecurityStamp = Guid.NewGuid().ToString()
         };
         var testAdmin = new Admin { AppUser = testAdminUser };
         dbContext.Admins.Add(testAdmin);
         var adminRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Admin)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
+        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = testAdminUserId,
             RoleId = adminRoleId,
         });
 
-        const string testDoctorUserId = "3c06c6c2-7f44-4c19-9578-6a1971c6de1f";
+        var testDoctorUserId = Guid.NewGuid();
         var testDoctorUser = new AppUser
         {
             Id = testDoctorUserId,
             UserName = TestDoctorUserName,
             NormalizedUserName = TestDoctorUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, TestDoctorPassword)
+            PasswordHash = hasher.HashPassword(null!, TestDoctorPassword),
+            SecurityStamp = Guid.NewGuid().ToString()
         };
         var testDoctor = new Doctor { AppUser = testDoctorUser };
         dbContext.Doctors.Add(testDoctor);
         var doctorRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Doctor)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
+        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = testDoctorUserId,
             RoleId = doctorRoleId,
         });
 
-        const string patientUserId = "27b2b1f8-4906-4faa-85d2-88620e412259";
+        var patientUserId = Guid.NewGuid();
         var testPatientUser = new AppUser
         {
             Id = patientUserId,
             UserName = TestPatientUserName,
             NormalizedUserName = TestPatientUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, TestPatientPassword)
+            PasswordHash = hasher.HashPassword(null!, TestPatientPassword),
+            SecurityStamp = Guid.NewGuid().ToString()
         };
         var testPatient = new Patient
         {
@@ -121,7 +125,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         };
         dbContext.Patients.Add(testPatient);
         var patientRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<string>
+        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = patientUserId,
             RoleId = patientRoleId,
@@ -130,7 +134,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         dbContext.SaveChanges();
     }
 
-    protected static async Task<string> AuthenticateAsRoleAsync(HttpClient client, string roleName)
+    protected static async Task<Guid> AuthenticateAsRoleAsync(HttpClient client, string roleName)
     {
         return roleName switch
         {
@@ -141,22 +145,22 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         };
     }
 
-    protected static async Task<string> AuthenticateAsAdminAsync(HttpClient client)
+    protected static async Task<Guid> AuthenticateAsAdminAsync(HttpClient client)
     {
         return await AuthenticateAsAsync(client, TestAdminUserName, TestAdminPassword);
     }
 
-    protected static async Task<string> AuthenticateAsDoctorAsync(HttpClient client)
+    protected static async Task<Guid> AuthenticateAsDoctorAsync(HttpClient client)
     {
         return await AuthenticateAsAsync(client, TestDoctorUserName, TestDoctorPassword);
     }
 
-    protected static async Task<string> AuthenticateAsPatientAsync(HttpClient client)
+    protected static async Task<Guid> AuthenticateAsPatientAsync(HttpClient client)
     {
         return await AuthenticateAsAsync(client, TestPatientUserName, TestPatientPassword);
     }
 
-    protected static async Task<string> AuthenticateAsAsync(HttpClient client, string userName, string password)
+    protected static async Task<Guid> AuthenticateAsAsync(HttpClient client, string userName, string password)
     {
         var result = await client.PostAsJsonAsync(AuthenticateUrl, new AuthenticateRequest
         {
@@ -166,7 +170,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         if (!result.IsSuccessStatusCode)
         {
-            throw new Exception("Failed to authenticate as user");
+            throw new AppException("Failed to authenticate as user");
         }
 
         var jwtToken = (await result.Content.ReadAsAsync<AuthenticateResponse>()).JwtToken;
@@ -176,6 +180,6 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         var handler = new JwtSecurityTokenHandler();
         var jwtObject = handler.ReadJwtToken(jwtToken);
         var userId = jwtObject.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid)!.Value;
-        return userId;
+        return Guid.Parse(userId);
     }
 }

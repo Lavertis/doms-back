@@ -66,7 +66,7 @@ public class AuthHandlerTests
         // arrange
         const string dummyJwtToken = "dummyJwtToken";
         var oldRefreshToken = new RefreshToken
-            { Token = "oldRefreshToken", Revoked = null, Expires = DateTime.UtcNow.Add(5.Minutes()) };
+            { Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
         var newRefreshToken = new RefreshToken { Token = "newRefreshToken" };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
 
@@ -101,7 +101,7 @@ public class AuthHandlerTests
     {
         // arrange
         var oldRefreshToken = new RefreshToken
-            { Token = "oldRefreshToken", Revoked = null, Expires = DateTime.UtcNow.Add(5.Minutes()) };
+            { Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
         var fakeAppUserQueryable = new List<AppUser>
         {
             new() { RefreshTokens = new List<RefreshToken> { oldRefreshToken } }
@@ -130,8 +130,8 @@ public class AuthHandlerTests
         var oldRefreshToken = new RefreshToken
         {
             Token = "oldRefreshToken",
-            Revoked = DateTime.UtcNow.Subtract(5.Minutes()),
-            Expires = DateTime.UtcNow.Add(5.Minutes())
+            RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
+            ExpiresAt = DateTime.UtcNow.Add(5.Minutes())
         };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
 
@@ -160,26 +160,26 @@ public class AuthHandlerTests
         // arrange
         var oldRefreshToken = new RefreshToken
         {
-            Id = 10,
+            Id = Guid.NewGuid(),
             Token = "oldRefreshToken",
-            Revoked = DateTime.UtcNow.Subtract(5.Minutes()),
-            Expires = DateTime.UtcNow.Add(5.Minutes()),
+            RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
+            ExpiresAt = DateTime.UtcNow.Add(5.Minutes()),
             ReplacedByToken = "descendantRefreshToken1"
         };
         var descendantRefreshToken1 = new RefreshToken
         {
-            Id = 11,
+            Id = Guid.NewGuid(),
             Token = "descendantRefreshToken1",
-            Revoked = DateTime.UtcNow.Subtract(5.Minutes()),
-            Expires = DateTime.UtcNow.Add(5.Minutes()),
+            RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
+            ExpiresAt = DateTime.UtcNow.Add(5.Minutes()),
             ReplacedByToken = "descendantRefreshToken2"
         };
         var descendantRefreshToken2 = new RefreshToken
         {
-            Id = 11,
+            Id = Guid.NewGuid(),
             Token = "descendantRefreshToken2",
-            Revoked = null,
-            Expires = DateTime.UtcNow.Add(5.Minutes())
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.Add(5.Minutes())
         };
 
         var appUser = new AppUser
@@ -215,7 +215,7 @@ public class AuthHandlerTests
         }
 
         // assert
-        descendantRefreshToken2.Revoked.Should().NotBeNull();
+        descendantRefreshToken2.RevokedAt.Should().NotBeNull();
     }
 
     [Fact]
@@ -225,8 +225,8 @@ public class AuthHandlerTests
         var oldRefreshToken = new RefreshToken
         {
             Token = "oldRefreshToken",
-            Revoked = null,
-            Expires = DateTime.UtcNow.Subtract(5.Minutes())
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.Subtract(5.Minutes())
         };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
 
@@ -254,7 +254,7 @@ public class AuthHandlerTests
     {
         // arrange
         var refreshTokenToBeRevoked = new RefreshToken
-            { Token = "refreshTokenToBeRevoked", Revoked = null, Expires = DateTime.UtcNow.Add(5.Minutes()) };
+            { Token = "refreshTokenToBeRevoked", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
@@ -350,8 +350,8 @@ public class AuthHandlerTests
         var refreshTokenToBeRevoked = new RefreshToken
         {
             Token = "refreshTokenToBeRevoked",
-            Revoked = DateTime.UtcNow.Subtract(5.Minutes()),
-            Expires = DateTime.UtcNow.Add(5.Minutes())
+            RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
+            ExpiresAt = DateTime.UtcNow.Add(5.Minutes())
         };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
 
@@ -381,8 +381,8 @@ public class AuthHandlerTests
         var refreshTokenToBeRevoked = new RefreshToken
         {
             Token = "refreshTokenToBeRevoked",
-            Revoked = null,
-            Expires = DateTime.UtcNow.Subtract(5.Minutes())
+            RevokedAt = null,
+            ExpiresAt = DateTime.UtcNow.Subtract(5.Minutes())
         };
         var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
 

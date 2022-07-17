@@ -4,7 +4,7 @@ namespace DoctorsOfficeApi.Services.AppointmentService;
 
 public interface IAppointmentService
 {
-    public Task<Appointment> GetAppointmentByIdAsync(long id);
+    public Task<Appointment> GetAppointmentByIdAsync(Guid id);
     public Task<bool> AppointmentTypeExistsAsync(string type);
 
     public Task<bool> AppointmentStatusExistsAsync(string status);

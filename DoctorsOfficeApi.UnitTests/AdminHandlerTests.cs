@@ -31,10 +31,10 @@ public class AdminHandlerTests
     public async Task GetAdminByIdHandler_AdminExists_ReturnsAdminWithSpecifiedId()
     {
         // arrange
-        const string adminId = "100";
+        var adminId = Guid.NewGuid();
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = adminId }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
         A.CallTo(() => _fakeAdminService.GetAdminByIdAsync(adminId)).Returns(admin);
 
@@ -54,7 +54,7 @@ public class AdminHandlerTests
     public async Task GetAdminByIdHandler_AdminDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        const string adminId = "100";
+        var adminId = Guid.NewGuid();
         A.CallTo(() => _fakeAdminService.GetAdminByIdAsync(adminId))
             .Throws(new NotFoundException(""));
 
@@ -74,9 +74,9 @@ public class AdminHandlerTests
         // arrange
         var admins = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = "100" } },
-            new() { AppUser = new AppUser { Id = "101" } },
-            new() { AppUser = new AppUser { Id = "102" } }
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
         };
 
         _appDbContext.Admins.AddRange(admins);

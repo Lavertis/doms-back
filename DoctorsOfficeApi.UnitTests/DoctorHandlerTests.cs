@@ -84,7 +84,7 @@ public class DoctorHandlerTests
     public void GetDoctorByIdHandler_DoctorWithSpecifiedIdExists_ReturnsDoctor()
     {
         // arrange
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
         var doctor = new Doctor
         {
@@ -107,7 +107,7 @@ public class DoctorHandlerTests
     public async Task GetDoctorByIdHandler_DoctorWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
         var doctor = new Doctor
         {
@@ -174,7 +174,7 @@ public class DoctorHandlerTests
         {
             AppUser = new AppUser
             {
-                Id = "1",
+                Id = Guid.NewGuid(),
                 UserName = "userName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789"
@@ -186,14 +186,14 @@ public class DoctorHandlerTests
 
         var command = new UpdateDoctorByIdCommand
         {
-            Id = "1",
+            Id = doctorToUpdate.AppUser.Id,
             UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
             Password = "newPassword1234#"
         };
 
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctorToUpdate);
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Returns(doctorToUpdate);
 
         var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
 
@@ -214,14 +214,14 @@ public class DoctorHandlerTests
     {
         var command = new UpdateDoctorByIdCommand
         {
-            Id = "1",
+            Id = Guid.NewGuid(),
             UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "123456789",
             Password = "newPassword1234#"
         };
 
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
         var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
@@ -246,7 +246,7 @@ public class DoctorHandlerTests
         {
             AppUser = new AppUser
             {
-                Id = "1",
+                Id = Guid.NewGuid(),
                 UserName = "userName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789"
@@ -258,11 +258,11 @@ public class DoctorHandlerTests
 
         var command = new UpdateDoctorByIdCommand
         {
-            Id = "1"
+            Id = doctorToUpdate.AppUser.Id,
         };
         typeof(UpdateDoctorByIdCommand).GetProperty(fieldName)!.SetValue(command, fieldValue);
 
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctorToUpdate);
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Returns(doctorToUpdate);
 
         var handler = new UpdateDoctorByIdHandler(_dbContext, _fakeDoctorService, _fakeUserService);
 
@@ -296,11 +296,11 @@ public class DoctorHandlerTests
         // arrange
         var doctorToDelete = new Doctor
         {
-            AppUser = new AppUser { Id = "1" }
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
         _dbContext.Doctors.Add(doctorToDelete);
 
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored)).Returns(doctorToDelete);
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Returns(doctorToDelete);
 
         var command = new DeleteDoctorByIdCommand(doctorToDelete.AppUser.Id);
         var handler = new DeleteDoctorByIdHandler(_dbContext, _fakeDoctorService);
@@ -317,9 +317,9 @@ public class DoctorHandlerTests
     public async Task DeleteDoctorById_DoctorWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        const string doctorId = "1";
+        var doctorId = Guid.NewGuid();
 
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
         var command = new DeleteDoctorByIdCommand(doctorId);

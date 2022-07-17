@@ -13,7 +13,7 @@ public class DoctorService : IDoctorService
         _dbContext = dbContext;
     }
 
-    public async Task<Doctor> GetDoctorByIdAsync(string id)
+    public async Task<Doctor> GetDoctorByIdAsync(Guid id)
     {
         var doctor = await _dbContext.Doctors.FindAsync(id);
         if (doctor is null)
