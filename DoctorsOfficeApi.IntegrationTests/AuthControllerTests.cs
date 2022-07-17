@@ -23,7 +23,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task Authenticate_CredentialsAreCorrect_ReturnsJwtAndRefreshToken()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string testUserName = "testUser";
@@ -57,7 +57,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task Authenticate_UserNameDoesntExist_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var request = new AuthenticateRequest
         {
@@ -76,7 +76,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task Authenticate_PasswordIsIncorrect_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string testUserName = "testUser";
@@ -106,7 +106,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RefreshToken_ValidToken_ReturnsJwtAndRefreshToken()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser
@@ -139,7 +139,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RefreshToken_NonExistingToken_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var request = new RefreshTokenRequest { RefreshToken = "nonExistingToken" };
 
@@ -154,7 +154,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RefreshToken_TokenIsExpired_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser { UserName = "testUser" };
@@ -180,7 +180,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RefreshToken_TokenIsRevoked_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser
@@ -210,7 +210,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RefreshToken_TokenIsRevoked_RemovesDescendantTokens()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         const string descendantToken = "descendantToken";
@@ -256,7 +256,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RevokeToken_TokenExists_RevokesToken()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser
@@ -290,7 +290,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RevokeToken_TokenDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var request = new RevokeRefreshTokenRequest { RefreshToken = "nonExistingToken" };
 
@@ -305,7 +305,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RevokeToken_TokenIsExpired_ReturnsBadRequestException()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser { UserName = "testUser" };
@@ -331,7 +331,7 @@ public class AuthControllerTests : IntegrationTest
     public async Task RevokeToken_TokenIsRevoked_ReturnsBadRequestException()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
         var testUser = new AppUser { UserName = "testUser" };

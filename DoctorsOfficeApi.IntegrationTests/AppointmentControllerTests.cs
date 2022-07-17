@@ -24,7 +24,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAllAppointmentsForAuthenticatedUser_NoUserIsAuthenticated_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth");
@@ -37,7 +37,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAllAppointmentsForAuthenticatedUser_UserDoesntHaveAppointments_ReturnsEmptyList()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         // act
@@ -53,7 +53,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAllAppointmentsForAuthenticatedUser_UserHasAppointments_ReturnsOnlyUserAppointments()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var userId = await AuthenticateAsPatientAsync(client);
         var user = (await DbContext.Patients.FindAsync(userId))!;
         var doctor = DbContext.Doctors.First();
@@ -114,7 +114,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAllAppointmentsForAuthenticatedUser_AuthenticatedUserIsDoctor_ReturnsOnlyDoctorAppointments()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var authenticatedUser = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
         var patient = DbContext.Patients.First();
@@ -173,7 +173,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAllAppointmentsForAuthenticatedUser_AuthenticatedUserIsAdmin_ReturnsForbidden()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         // act
@@ -187,7 +187,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_NoUserIsAuthenticated_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var appointmentId = Guid.NewGuid();
 
@@ -202,7 +202,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_AppointmentDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         const long appointmentId = 999;
@@ -218,7 +218,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_AppointmentDoesntBelongToAuthenticatedPatient_ReturnsForbidden()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedUser = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
         var otherPatient = new Patient
@@ -254,7 +254,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_AppointmentDoesntBelongToAuthenticatedDoctor_ReturnsForbidden()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var otherDoctor = new Doctor
         {
@@ -286,7 +286,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_AuthenticatedUserIsAdmin_ReturnsForbidden()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var appointmentId = Guid.NewGuid();
@@ -302,7 +302,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_RequestedAppointmentBelongsToAuthenticatedPatient_ReturnsAppointment()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedUser = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
         var doctor = DbContext.Doctors.First();
@@ -333,7 +333,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentById_RequestedAppointmentBelongsToAuthenticatedDoctor_ReturnsAppointment()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var authenticatedUser = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
         var patient = DbContext.Patients.First();
@@ -370,7 +370,7 @@ public class AppointmentControllerTests : IntegrationTest
         string filterName, string filterValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
 
         var doctor1 = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
@@ -457,7 +457,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsFiltered_NoFiltersProvided_ReturnsAllAppointmentsForAuthenticatedDoctor()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
@@ -506,7 +506,7 @@ public class AppointmentControllerTests : IntegrationTest
         string filterName, string filterValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
@@ -539,7 +539,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsFiltered_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/search");
@@ -554,7 +554,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsFiltered_AuthorizedUserIsOtherThanDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
@@ -573,7 +573,7 @@ public class AppointmentControllerTests : IntegrationTest
         string filterName, string filterValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
 
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
@@ -646,7 +646,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsForAuthenticatedUserFiltered_NoFiltersProvided_ReturnsAllAppointmentsForUser()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
 
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
@@ -706,7 +706,7 @@ public class AppointmentControllerTests : IntegrationTest
         string filterName, string filterValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
         var patient = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
 
@@ -739,7 +739,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsForAuthenticatedUserFiltered_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth/search");
@@ -754,7 +754,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task GetAppointmentsForAuthenticatedUserFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(string roleType)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleType);
 
         // act
@@ -768,7 +768,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointment_ValidRequest_CreatesNewAppointment()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var patient = DbContext.Patients.First();
 
@@ -807,7 +807,7 @@ public class AppointmentControllerTests : IntegrationTest
         string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var patient = DbContext.Patients.First();
 
@@ -833,7 +833,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointment_NoAuthorizedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 
@@ -850,7 +850,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointment_AuthorizedUserOtherThanDoctor_ReturnsForbidden(string roleType)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleType);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
@@ -866,7 +866,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointment_IdForOtherThanAuthorizedDoctorIsProvidedInTheRequest_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var otherDoctor = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(otherDoctor);
@@ -892,7 +892,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointmentRequest_ValidRequest_CreatesNewAppointmentWithStatusPending()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var doctor = DbContext.Doctors.First();
 
@@ -931,7 +931,7 @@ public class AppointmentControllerTests : IntegrationTest
         string filedName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var doctor = DbContext.Doctors.First();
 
@@ -957,7 +957,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointmentRequest_NoAuthorizedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 
@@ -974,7 +974,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointmentRequest_AuthorizedUserOtherThanPatient_ReturnsForbidden(string roleType)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleType);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
@@ -990,7 +990,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task CreateAppointmentRequest_IdForOtherThanAuthorizedPatientIsProvidedInTheRequest_CreatesAppointmentRequestForAuthenticatedUser()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
         var otherPatient = new Patient { AppUser = new AppUser() };
         DbContext.Patients.Add(otherPatient);
@@ -1016,7 +1016,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_ValidRequest_UpdatesAppointment()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
         var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
@@ -1066,7 +1066,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_IdDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         const int appointmentId = 12345678;
@@ -1097,7 +1097,7 @@ public class AppointmentControllerTests : IntegrationTest
         string status)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var appointmentId = Guid.NewGuid();
@@ -1123,7 +1123,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_AuthenticatedUserIsPatientAndStatusIsCancelled_UpdatesAppointment()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
         var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
@@ -1187,7 +1187,7 @@ public class AppointmentControllerTests : IntegrationTest
         string initialStatus, string newStatus)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var authenticatedDoctor = DbContext.Doctors.First(u => u.Id == authenticatedUserId);
         var initialAppointmentStatus = DbContext.AppointmentStatuses.First(s => s.Name == initialStatus);
@@ -1230,7 +1230,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_SingleFieldInRequest_UpdatesAppointment(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
         var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
@@ -1292,7 +1292,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_SingleFieldIsInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
         var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
@@ -1333,7 +1333,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var appointmentId = Guid.NewGuid();
         var updateAppointmentRequest = new UpdateAppointmentRequest
@@ -1358,7 +1358,7 @@ public class AppointmentControllerTests : IntegrationTest
     public async Task UpdateAppointmentById_AuthenticatedUserIsAdmin_ReturnsForbidden()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var appointmentId = Guid.NewGuid();

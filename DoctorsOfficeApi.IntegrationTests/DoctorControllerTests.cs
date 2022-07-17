@@ -26,7 +26,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAuthenticatedDoctor_AuthenticatedUserIsDoctor_ReturnsAuthenticatedDoctor()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
         var authenticatedDoctor = await DbContext.Doctors.FindAsync(authenticatedDoctorId);
 
@@ -46,7 +46,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAuthenticatedDoctor_AuthenticatedUserDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
         var authenticatedDoctor = await DbContext.Doctors.FindAsync(authenticatedDoctorId);
 
@@ -64,7 +64,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAuthenticatedDoctor_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth");
@@ -79,7 +79,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAuthenticatedDoctor_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
@@ -93,7 +93,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAllDoctors_AuthenticatedUserIsAdmin_ReturnsAllDoctors()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
@@ -116,7 +116,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAllDoctors_NoDoctors_ReturnsEmptyList()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         DbContext.Doctors.RemoveRange(DbContext.Doctors);
@@ -136,7 +136,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAllDoctors_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}");
@@ -151,7 +151,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task GetAllDoctors_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
@@ -165,7 +165,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_ValidRequest_CreatesDoctor()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var request = new CreateDoctorRequest
@@ -200,7 +200,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var request = new CreateDoctorRequest
@@ -224,7 +224,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_UserNameAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var request = new CreateDoctorRequest
@@ -257,7 +257,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_EmailAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var request = new CreateDoctorRequest
@@ -291,7 +291,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var request = new CreateDoctorRequest
         {
@@ -314,7 +314,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task CreateDoctor_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var request = new CreateDoctorRequest
@@ -336,7 +336,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_ValidRequest_UpdatesAuthenticatedDoctor()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
@@ -384,7 +384,7 @@ public class DoctorControllerTests : IntegrationTest
         string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
@@ -442,7 +442,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_SingleFiledInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
@@ -476,7 +476,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_UserNameAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string conflictingUserName = "conflictingUserName";
 
@@ -519,7 +519,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_EmailAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string conflictingEmail = "conflictingMail@mail.com";
 
@@ -563,7 +563,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_ConfirmPasswordDoesntMatch_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
@@ -596,7 +596,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_CurrentPasswordIncorrect_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
@@ -628,7 +628,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
@@ -651,7 +651,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedDoctor_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
@@ -673,7 +673,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_DoctorExists_UpdatesDoctor()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -724,7 +724,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_UserWithSpecifiedIdIsNotDoctor_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -770,7 +770,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_UserWithSpecifiedIdDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
@@ -803,7 +803,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_SingleFieldProvided_UpdatesSpecifiedField(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -869,7 +869,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -907,7 +907,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_UserNameAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -958,7 +958,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_EmailAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string oldDoctorPassword = "oldPassword1234#";
@@ -1009,7 +1009,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var doctorId = Guid.NewGuid();
         var updateDoctorRequest = new UpdateDoctorRequest
@@ -1033,7 +1033,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task UpdateDoctorById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var doctorId = Guid.NewGuid();
@@ -1056,7 +1056,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task DeleteDoctorById_DoctorExists_DeletesDoctorWithSpecifiedId()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
@@ -1078,7 +1078,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task DeleteDoctorById_UserWithSpecifiedIdIsNotDoctor_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var notDoctorId = Guid.NewGuid();
@@ -1103,7 +1103,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task DeleteDoctorById_UserWithSpecifiedIdDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = "1";
@@ -1119,7 +1119,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task DeleteDoctorById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var doctorId = Guid.NewGuid();
 
@@ -1136,7 +1136,7 @@ public class DoctorControllerTests : IntegrationTest
     public async Task DeleteDoctorById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var doctorId = Guid.NewGuid();

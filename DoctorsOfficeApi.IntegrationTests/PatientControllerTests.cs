@@ -27,7 +27,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task GetAuthenticatedPatient_AuthenticatedUserIsPatient_ReturnsAuthenticatedUser()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
         var expectedResponse = new PatientResponse((await DbContext.Patients.FindAsync(authenticatedPatientId))!);
@@ -48,7 +48,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task GetAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(string roleType)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleType);
 
         // act
@@ -62,7 +62,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task GetAuthenticatedPatient_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth");
@@ -75,7 +75,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task GetAuthenticatedPatient_AuthenticatedUserDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = await DbContext.Patients.FindAsync(authenticatedPatientId);
 
@@ -93,7 +93,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_ValidRequest_CreatesPatient()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var createPatientRequest = new CreatePatientRequest
         {
@@ -141,7 +141,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_SingleFieldInvalid_ReturnsBadRequest(string filedName, string fieldValue)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var createPatientRequest = new CreatePatientRequest
@@ -170,7 +170,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_UserNameAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var createPatientRequest = new CreatePatientRequest
@@ -212,7 +212,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_EmailAlreadyExists_ReturnsConflict()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var createPatientRequest = new CreatePatientRequest
@@ -255,7 +255,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_PasswordAndConfirmPasswordDontMatch_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var createPatientRequest = new CreatePatientRequest
@@ -282,7 +282,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_PasswordIsTooWeak_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
 
         var createPatientRequest = new CreatePatientRequest
@@ -309,7 +309,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task CreatePatient_ProvidedDateOfBirthHasTimeComponent_StripsTimeComponent()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var createPatientRequest = new CreatePatientRequest
         {
@@ -339,7 +339,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_ValidRequest_UpdatesPatient()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -398,7 +398,7 @@ public class PatientControllerTests : IntegrationTest
     [Fact]
     public async Task UpdateAuthenticatedPatient_UserNameAlreadyExists_ReturnsConflict()
     {
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -449,7 +449,7 @@ public class PatientControllerTests : IntegrationTest
     [Fact]
     public async Task UpdateAuthenticatedPatient_EmailAlreadyExists_ReturnsConflict()
     {
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -501,7 +501,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_CurrentPasswordDoesntMatch_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string patientPassword = "oldPassword12345#";
 
@@ -539,7 +539,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_NewPasswordTooWeak_ReturnsBadRequest()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string patientPassword = "oldPassword12345#";
 
@@ -579,7 +579,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_AuthenticatedUserOtherThanPatient_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         await AuthenticateAsRoleAsync(client, roleName);
 
@@ -603,7 +603,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -624,7 +624,7 @@ public class PatientControllerTests : IntegrationTest
     [Fact]
     public async Task UpdateAuthenticatedPatient_AuthenticatedUserDoesntExist_ReturnsNotFound()
     {
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         const string patientPassword = "oldPassword12345#";
 
@@ -674,7 +674,7 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("Email", "newMail@mail.com")]
     public async Task UpdateAuthenticatedPatient_SingleFiledPresent_UpdatesField(string fieldName, string fieldValue)
     {
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -762,7 +762,7 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("Email", "aaa")]
     public async Task UpdateAuthenticatedPatient_SingleInvalidField_ReturnsBadRequest(string fieldName, string fieldValue)
     {
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -832,7 +832,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task UpdateAuthenticatedPatient_ProvidedDateOfBirthHasTimeComponent_StripsTimeComponent()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
@@ -876,7 +876,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task DeleteAuthenticatedPatient_AuthenticatedUserIsPatient_DeletesAuthenticatedUser()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
         // act
@@ -894,7 +894,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task DeleteAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act  
@@ -908,7 +908,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task DeleteAuthenticatedPatient_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act  
         var response = await client.DeleteAsync($"{UrlPrefix}/auth");
@@ -921,7 +921,7 @@ public class PatientControllerTests : IntegrationTest
     public async Task DeleteAuthenticatedPatient_AuthenticatedUserDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
         DbContext.Patients.Remove(DbContext.Patients.First(p => p.Id == authenticatedPatientId));

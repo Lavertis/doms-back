@@ -6,6 +6,6 @@ namespace DoctorsOfficeApi.Entities.UserTypes;
 [Table("Admins")]
 public class Admin
 {
-    [Key] [ForeignKey(nameof(AppUser))] public Guid Id { get; set; } = default!;
+    [Key] [ForeignKey(nameof(AppUser))] public Guid Id { get; set; }
     public virtual AppUser AppUser { get; set; } = default!;
 }

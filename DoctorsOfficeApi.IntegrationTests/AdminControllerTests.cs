@@ -20,7 +20,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAuthenticatedAdmin_AuthenticatedUserIsAdmin_ReturnsAuthenticatedAdmin()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedAdminId = await AuthenticateAsAdminAsync(client);
 
         // act
@@ -37,7 +37,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAuthenticatedAdmin_AuthenticatedUserDoesntExist_ReturnsNotFoundException()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         var authenticatedAdminId = await AuthenticateAsAdminAsync(client);
         var authenticatedAdmin = await DbContext.Admins.FindAsync(authenticatedAdminId);
 
@@ -55,7 +55,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAuthenticatedAdmin_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth");
@@ -70,7 +70,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAuthenticatedAdmin_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
@@ -84,7 +84,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAdminById_AdminWithSpecifiedIdExist_ReturnsAdminWithSpecifiedId()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var admin = new Admin
@@ -109,7 +109,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAdminById_AdminWithSpecifiedIdDoesntExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var nonExistingAdminId = Guid.NewGuid();
@@ -125,7 +125,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAdminById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         var nonExistingAdminId = Guid.NewGuid();
 
@@ -142,7 +142,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAdminById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var nonExistingAdminId = Guid.NewGuid();
@@ -158,7 +158,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAllAdmins_ThereAreAdmins_ReturnsAllAdmins()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var admins = new List<Admin>
@@ -186,7 +186,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAllAdmins_ThereAreNoAdmins_ReturnsEmptyList()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         DbContext.Admins.RemoveRange(DbContext.Admins);
@@ -206,7 +206,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAllAdmins_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}");
@@ -221,7 +221,7 @@ public class AdminControllerTests : IntegrationTest
     public async Task GetAllAdmins_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act

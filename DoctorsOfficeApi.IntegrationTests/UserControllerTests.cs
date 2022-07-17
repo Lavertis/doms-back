@@ -21,7 +21,7 @@ public class UserControllerTests : IntegrationTest
     public async void GetAllUsers_AuthenticatedUserIsAdmin_ReturnsAllUsers()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var users = new List<AppUser>
@@ -51,7 +51,7 @@ public class UserControllerTests : IntegrationTest
     public async void GetAllUsers_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
@@ -65,7 +65,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetUserById_RequestedUserExists_ReturnsUserWithSpecifiedId()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var user = new AppUser
@@ -92,7 +92,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetUserById_RequestedUserDoesNotExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var nonExistingUserId = Guid.NewGuid();
@@ -110,7 +110,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetUserById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var dummyUserId = Guid.NewGuid();
@@ -126,7 +126,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetRefreshTokensByUserId_RequestedUserExists_ReturnsAllRefreshTokens()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var user = new AppUser
@@ -158,7 +158,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetRefreshTokensByUserId_RequestedUserDoesNotExist_ReturnsNotFound()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         const string nonExistingUserId = "nonExistingUserId";
@@ -174,7 +174,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetRefreshTokensByUserId_UserDoesntHaveRefreshTokens_ReturnsEmptyList()
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsAdminAsync(client);
 
         var user = new AppUser
@@ -201,7 +201,7 @@ public class UserControllerTests : IntegrationTest
     public async Task GetRefreshTokensByUserId_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
-        var client = GetHttpClient();
+        var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
 
         var dummyUserId = Guid.NewGuid();

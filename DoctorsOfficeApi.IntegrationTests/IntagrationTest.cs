@@ -27,6 +27,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     private const string TestPatientPassword = "PatientPassword123!";
 
     private readonly WebApplicationFactory<Program> _factory;
+    private UserManager<AppUser> _userManager = null!;
     protected AppDbContext DbContext = null!;
 
     protected IntegrationTest(WebApplicationFactory<Program> factory)
@@ -47,6 +48,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
                 services.AddDbContext<AppDbContext>(options => { options.UseInMemoryDatabase(inMemoryDbName); });
 
                 DbContext = services.BuildServiceProvider().GetService<AppDbContext>()!;
+                _userManager = services.BuildServiceProvider().GetService<UserManager<AppUser>>()!;
             });
         });
     }
@@ -58,80 +60,59 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         DbContext = context;
     }
 
-    protected HttpClient GetHttpClient()
+    protected async Task<HttpClient> GetHttpClientAsync()
     {
         var client = _factory.CreateClient();
-        DbContext.Database.EnsureDeleted();
-        DbContext.Database.EnsureCreated();
-        SeedUsers(DbContext);
+        await DbContext.Database.EnsureDeletedAsync();
+        await DbContext.Database.EnsureCreatedAsync();
+        await SeedUsers();
         return client;
     }
 
-    private void SeedUsers(AppDbContext dbContext)
+    private async Task SeedUsers()
     {
-        var hasher = new PasswordHasher<AppUser>();
-
-        var testAdminUserId = Guid.NewGuid();
         var testAdminUser = new AppUser
         {
-            Id = testAdminUserId,
-            UserName = TestAdminUserName,
-            NormalizedUserName = TestAdminUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, TestAdminPassword),
-            SecurityStamp = Guid.NewGuid().ToString()
+            UserName = TestAdminUserName
         };
-        var testAdmin = new Admin { AppUser = testAdminUser };
-        dbContext.Admins.Add(testAdmin);
-        var adminRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Admin)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
-        {
-            UserId = testAdminUserId,
-            RoleId = adminRoleId,
-        });
+        await CreateUserAsync(testAdminUser, TestAdminPassword, RoleTypes.Admin);
+        var testAdmin = new Admin { Id = testAdminUser.Id, };
+        await DbContext.Admins.AddAsync(testAdmin);
 
-        var testDoctorUserId = Guid.NewGuid();
         var testDoctorUser = new AppUser
         {
-            Id = testDoctorUserId,
-            UserName = TestDoctorUserName,
-            NormalizedUserName = TestDoctorUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, TestDoctorPassword),
-            SecurityStamp = Guid.NewGuid().ToString()
+            UserName = TestDoctorUserName
         };
-        var testDoctor = new Doctor { AppUser = testDoctorUser };
-        dbContext.Doctors.Add(testDoctor);
-        var doctorRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Doctor)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
-        {
-            UserId = testDoctorUserId,
-            RoleId = doctorRoleId,
-        });
+        await CreateUserAsync(testDoctorUser, TestDoctorPassword, RoleTypes.Doctor);
+        var testDoctor = new Doctor { Id = testDoctorUser.Id, };
+        await DbContext.Doctors.AddAsync(testDoctor);
 
-        var patientUserId = Guid.NewGuid();
         var testPatientUser = new AppUser
         {
-            Id = patientUserId,
-            UserName = TestPatientUserName,
-            NormalizedUserName = TestPatientUserName.ToUpper(),
-            PasswordHash = hasher.HashPassword(null!, TestPatientPassword),
-            SecurityStamp = Guid.NewGuid().ToString()
+            UserName = TestPatientUserName
         };
+        await CreateUserAsync(testPatientUser, TestPatientPassword, RoleTypes.Patient);
         var testPatient = new Patient
         {
+            Id = testPatientUser.Id,
             FirstName = "testPatientFirstName",
             LastName = "testPatientLastName",
-            Address = "testPatientAddress",
-            AppUser = testPatientUser
+            Address = "testPatientAddress"
         };
-        dbContext.Patients.Add(testPatient);
-        var patientRoleId = dbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
-        dbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
-        {
-            UserId = patientUserId,
-            RoleId = patientRoleId,
-        });
+        await DbContext.Patients.AddAsync(testPatient);
 
-        dbContext.SaveChanges();
+        await DbContext.SaveChangesAsync();
+        RefreshDbContext();
+    }
+
+    private async Task CreateUserAsync(AppUser appUser, string password, string roleName)
+    {
+        var createUserIdentityResult = await _userManager.CreateAsync(appUser, password);
+        if (!createUserIdentityResult.Succeeded)
+            throw new AppException("UserManager could not create user");
+        var addToRoleIdentityResult = await _userManager.AddToRoleAsync(appUser, roleName);
+        if (!addToRoleIdentityResult.Succeeded)
+            throw new AppException("UserManager could not add user to role");
     }
 
     protected static async Task<Guid> AuthenticateAsRoleAsync(HttpClient client, string roleName)
