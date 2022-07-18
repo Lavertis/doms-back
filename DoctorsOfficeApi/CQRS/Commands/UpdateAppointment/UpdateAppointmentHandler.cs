@@ -1,42 +1,50 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Exceptions;
+﻿using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.AppointmentService;
+using DoctorsOfficeApi.Repositories.AppointmentRepository;
+using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
+using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
 using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Commands.UpdateAppointment;
 
 public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand, AppointmentResponse>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IAppointmentService _appointmentService;
+    private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IAppointmentStatusRepository _appointmentStatusRepository;
+    private readonly IAppointmentTypeRepository _appointmentTypeRepository;
 
-    public UpdateAppointmentHandler(AppDbContext dbContext, IAppointmentService appointmentService)
+    public UpdateAppointmentHandler(
+        IAppointmentRepository appointmentRepository,
+        IAppointmentStatusRepository appointmentStatusRepository,
+        IAppointmentTypeRepository appointmentTypeRepository)
     {
-        _dbContext = dbContext;
-        _appointmentService = appointmentService;
+        _appointmentRepository = appointmentRepository;
+        _appointmentStatusRepository = appointmentStatusRepository;
+        _appointmentTypeRepository = appointmentTypeRepository;
     }
 
     public async Task<AppointmentResponse> Handle(UpdateAppointmentCommand request, CancellationToken cancellationToken)
     {
-        var appointment = await _appointmentService.GetAppointmentByIdAsync(request.AppointmentId);
-        appointment.Date = request.Date ?? appointment.Date;
-        appointment.Description = request.Description ?? appointment.Description;
+        var appointmentToUpdate = await _appointmentRepository.GetByIdAsync(
+            request.AppointmentId,
+            a => a.Status,
+            a => a.Type);
+
+        appointmentToUpdate.Date = request.Date ?? appointmentToUpdate.Date;
+        appointmentToUpdate.Description = request.Description ?? appointmentToUpdate.Description;
         try
         {
             if (request.Type is not null)
-                appointment.Type = await _appointmentService.GetAppointmentTypeByNameAsync(request.Type);
+                appointmentToUpdate.Type = await _appointmentTypeRepository.GetByNameAsync(request.Type);
             if (request.Status is not null)
-                appointment.Status = await _appointmentService.GetAppointmentStatusByNameAsync(request.Status);
+                appointmentToUpdate.Status = await _appointmentStatusRepository.GetByNameAsync(request.Status);
         }
         catch (NotFoundException e)
         {
             throw new BadRequestException(e.Message);
         }
 
-        _dbContext.Appointments.Update(appointment);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-
-        return new AppointmentResponse(appointment);
+        var appointmentEntity = await _appointmentRepository.UpdateByIdAsync(request.AppointmentId, appointmentToUpdate);
+        return new AppointmentResponse(appointmentEntity);
     }
 }

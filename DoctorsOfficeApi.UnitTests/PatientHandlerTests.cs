@@ -1,39 +1,34 @@
-﻿using DoctorsOfficeApi.CQRS.Commands.CreatePatient;
+﻿using System.Linq.Expressions;
+using DoctorsOfficeApi.CQRS.Commands.CreatePatient;
 using DoctorsOfficeApi.CQRS.Commands.DeletePatientById;
 using DoctorsOfficeApi.CQRS.Commands.UpdatePatientById;
 using DoctorsOfficeApi.CQRS.Queries.GetPatientByIdQuery;
-using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.PatientService;
+using DoctorsOfficeApi.Repositories.PatientRepository;
 using DoctorsOfficeApi.Services.UserService;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using MockQueryable.FakeItEasy;
 using Xunit;
 
 namespace DoctorsOfficeApi.UnitTests;
 
 public class PatientHandlerTests
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IPatientService _fakePatientService;
+    private readonly IPatientRepository _fakePatientRepository;
     private readonly IUserService _fakeUserService;
+    private readonly UserManager<AppUser> _fakeUserManager;
 
     public PatientHandlerTests()
     {
+        _fakePatientRepository = A.Fake<IPatientRepository>();
         _fakeUserService = A.Fake<IUserService>();
-        var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid();
-        var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(inMemoryDbName)
-            .Options;
-        _dbContext = new AppDbContext(dbContextOptions);
-
-        _fakePatientService = A.Fake<IPatientService>();
+        _fakeUserManager = A.Fake<UserManager<AppUser>>();
     }
 
     [Fact]
@@ -44,12 +39,13 @@ public class PatientHandlerTests
         {
             AppUser = new AppUser { Id = Guid.NewGuid() }
         };
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored)).Returns(patient);
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
+            .Returns(patient);
 
         var expectedResult = new PatientResponse(patient);
 
         var query = new GetPatientByIdQuery(patient.Id);
-        var handler = new GetPatientByIdHandler(_fakePatientService);
+        var handler = new GetPatientByIdHandler(_fakePatientRepository);
 
         // act
         var result = await handler.Handle(query, default);
@@ -62,13 +58,13 @@ public class PatientHandlerTests
     public async Task GetPatientByIdHandler_PatientDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
             .Throws(new NotFoundException(""));
 
         var patientId = Guid.NewGuid();
 
         var query = new GetPatientByIdQuery(patientId);
-        var handler = new GetPatientByIdHandler(_fakePatientService);
+        var handler = new GetPatientByIdHandler(_fakePatientRepository);
 
         // act
         var action = async () => await handler.Handle(query, default);
@@ -106,39 +102,33 @@ public class PatientHandlerTests
             .Returns(newAppUser);
 
 
-        var handler = new CreatePatientHandler(_dbContext, _fakeUserService);
+        var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService);
 
         // act
         var result = await handler.Handle(createPatientCommand, default);
 
         // assert
-        var createdPatient = _dbContext.Patients.ToList().First(p => p.UserName == createPatientCommand.UserName);
-        createdPatient.UserName.Should().Be(createPatientCommand.UserName);
-        createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientCommand.UserName.ToUpper());
-        createdPatient.FirstName.Should().Be(createPatientCommand.FirstName);
-        createdPatient.LastName.Should().Be(createPatientCommand.LastName);
-        createdPatient.Email.Should().Be(createPatientCommand.Email);
-        createdPatient.AppUser.NormalizedEmail.Should().Be(createPatientCommand.Email.ToUpper());
-        createdPatient.PhoneNumber.Should().Be(createPatientCommand.PhoneNumber);
-        createdPatient.Address.Should().Be(createPatientCommand.Address);
-        createdPatient.DateOfBirth.Should().Be(createPatientCommand.DateOfBirth);
+        A.CallTo(() => _fakePatientRepository.CreateAsync(A<Patient>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public async Task UpdatePatientByIdHandler_ValidRequest_UpdatesUser()
     {
         // arrange
+        var patientId = Guid.NewGuid();
         const string oldPassword = "oldPassword12345#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(new AppUser(), oldPassword);
         var patientToUpdate = new Patient
         {
+            Id = patientId,
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Address = "oldAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
             {
-                Id = Guid.NewGuid(),
+                Id = patientId,
                 UserName = "oldUserName",
                 NormalizedUserName = "oldUserName".ToUpper(),
                 Email = "oldMail@mail.com",
@@ -148,15 +138,14 @@ public class PatientHandlerTests
             }
         };
 
-        _dbContext.Patients.Add(patientToUpdate);
-        await _dbContext.SaveChangesAsync();
-
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
+        A.CallTo(() => _fakeUserManager.Users)
+            .Returns(new List<AppUser> { patientToUpdate.AppUser }.AsQueryable().BuildMock());
 
         var updatePatientCommand = new UpdatePatientByIdCommand
         {
-            Id = patientToUpdate.Id,
+            Id = patientId,
             UserName = "newUserName",
             FirstName = "newFirstName",
             LastName = "newLastName",
@@ -166,7 +155,7 @@ public class PatientHandlerTests
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
             NewPassword = "newPassword1234#"
         };
-        var handler = new UpdatePatientByIdHandler(_dbContext, _fakePatientService, _fakeUserService);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
@@ -174,16 +163,8 @@ public class PatientHandlerTests
         // assert
         A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored))
             .MustHaveHappenedOnceExactly();
-        var updatedPatient = _dbContext.Patients.First(p => p.Id == patientToUpdate.Id);
-        updatedPatient.UserName.Should().Be(updatePatientCommand.UserName);
-        updatedPatient.AppUser.NormalizedUserName.Should().Be(updatePatientCommand.UserName.ToUpper());
-        updatedPatient.FirstName.Should().Be(updatePatientCommand.FirstName);
-        updatedPatient.LastName.Should().Be(updatePatientCommand.LastName);
-        updatedPatient.Email.Should().Be(updatePatientCommand.Email);
-        updatedPatient.AppUser.NormalizedEmail.Should().Be(updatePatientCommand.Email.ToUpper());
-        updatedPatient.PhoneNumber.Should().Be(updatePatientCommand.PhoneNumber);
-        updatedPatient.Address.Should().Be(updatePatientCommand.Address);
-        updatedPatient.DateOfBirth.Should().Be(updatePatientCommand.DateOfBirth);
+        A.CallTo(() => _fakePatientRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Patient>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Theory]
@@ -200,15 +181,17 @@ public class PatientHandlerTests
         // arrange
         const string oldPassword = "oldPassword12345#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(new AppUser(), oldPassword);
+        var patientId = Guid.NewGuid();
         var patientToUpdate = new Patient
         {
+            Id = patientId,
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Address = "oldAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
             {
-                Id = Guid.NewGuid(),
+                Id = patientId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789",
@@ -216,52 +199,48 @@ public class PatientHandlerTests
             }
         };
 
-        _dbContext.Patients.Add(patientToUpdate);
-        await _dbContext.SaveChangesAsync();
-
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
+        A.CallTo(() => _fakeUserManager.Users)
+            .Returns(new List<AppUser> { patientToUpdate.AppUser }.AsQueryable().BuildMock());
 
         var updatePatientCommand = new UpdatePatientByIdCommand
         {
-            Id = patientToUpdate.Id,
+            Id = patientId,
         };
         if (fieldName == "DateOfBirth")
             updatePatientCommand.DateOfBirth = DateTime.Parse(fieldValue);
         else
             typeof(UpdatePatientByIdCommand).GetProperty(fieldName)!.SetValue(updatePatientCommand, fieldValue);
 
-        var handler = new UpdatePatientByIdHandler(_dbContext, _fakePatientService, _fakeUserService);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
 
         // assert
-        var updatedPatient = _dbContext.Patients.First(p => p.Id == patientToUpdate.Id);
         switch (fieldName)
         {
             case "UserName":
-                updatedPatient.UserName.Should().Be(fieldValue);
-                updatedPatient.AppUser.NormalizedUserName.Should().Be(fieldValue.ToUpper());
+                result.UserName.Should().Be(fieldValue);
                 break;
             case "FirstName":
-                updatedPatient.FirstName.Should().Be(fieldValue);
+                result.FirstName.Should().Be(fieldValue);
                 break;
             case "LastName":
-                updatedPatient.LastName.Should().Be(fieldValue);
+                result.LastName.Should().Be(fieldValue);
                 break;
             case "Email":
-                updatedPatient.Email.Should().Be(fieldValue);
-                updatedPatient.AppUser.NormalizedEmail.Should().Be(fieldValue.ToUpper());
+                result.Email.Should().Be(fieldValue);
                 break;
             case "PhoneNumber":
-                updatedPatient.PhoneNumber.Should().Be(fieldValue);
+                result.PhoneNumber.Should().Be(fieldValue);
                 break;
             case "Address":
-                updatedPatient.Address.Should().Be(fieldValue);
+                result.Address.Should().Be(fieldValue);
                 break;
             case "DateOfBirth":
-                updatedPatient.DateOfBirth.Should().Be(DateTime.Parse(fieldValue));
+                result.DateOfBirth.Should().Be(DateTime.Parse(fieldValue));
                 break;
             case "NewPassword":
                 A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored))
@@ -274,7 +253,7 @@ public class PatientHandlerTests
     public async Task UpdatePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
         var updatePatientCommand = new UpdatePatientByIdCommand
@@ -282,7 +261,7 @@ public class PatientHandlerTests
             Id = Guid.NewGuid(),
         };
 
-        var handler = new UpdatePatientByIdHandler(_dbContext, _fakePatientService, _fakeUserService);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
         // act
         var action = async () => await handler.Handle(updatePatientCommand, default);
@@ -303,33 +282,27 @@ public class PatientHandlerTests
             AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
-        _dbContext.Patients.Add(patientToDelete);
-        await _dbContext.SaveChangesAsync();
-
-
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
-            .Returns(patientToDelete);
-
         var command = new DeletePatientByIdCommand(patientToDelete.Id);
-        var handler = new DeletePatientByIdHandler(_dbContext, _fakePatientService);
+        var handler = new DeletePatientByIdHandler(_fakePatientRepository);
 
         // act
         await handler.Handle(command, default);
 
         // assert
-        _dbContext.Patients.Any(p => p.Id == patientToDelete.Id).Should().BeFalse();
+        A.CallTo(() => _fakePatientRepository.DeleteByIdAsync(A<Guid>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public async Task DeletePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored))
+        A.CallTo(() => _fakePatientRepository.DeleteByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
         var patientId = Guid.NewGuid();
 
         var command = new DeletePatientByIdCommand(patientId);
-        var handler = new DeletePatientByIdHandler(_dbContext, _fakePatientService);
+        var handler = new DeletePatientByIdHandler(_fakePatientRepository);
 
         // act
         var action = async () => await handler.Handle(command, default);

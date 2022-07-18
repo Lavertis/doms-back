@@ -4,12 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DoctorsOfficeApi.Entities.UserTypes;
 
 [Table("Doctors")]
-public class Doctor
+public class Doctor : BaseEntity
 {
-    [Key] [ForeignKey(nameof(AppUser))] public Guid Id { get; set; }
+    [Key] [ForeignKey(nameof(AppUser))] public new Guid Id { get; set; }
     public virtual AppUser AppUser { get; set; } = default!;
-
-    public string UserName => AppUser.UserName;
-    public string Email => AppUser.Email;
-    public string PhoneNumber => AppUser.PhoneNumber;
 }

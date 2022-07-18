@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
-using DoctorsOfficeApi.Services.AppointmentService;
+using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
+using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
 using FluentValidation;
 
 namespace DoctorsOfficeApi.Models.Requests;
@@ -14,7 +15,10 @@ public class UpdateAppointmentRequest
 
 public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppointmentRequest>
 {
-    public UpdateAppointmentRequestValidator(IAppointmentService appointmentService, IHttpContextAccessor httpContextAccessor)
+    public UpdateAppointmentRequestValidator(
+        IHttpContextAccessor httpContextAccessor,
+        IAppointmentStatusRepository appointmentStatusRepository,
+        IAppointmentTypeRepository appointmentTypeRepository)
     {
         var httpContext = httpContextAccessor.HttpContext!;
         var userRole = httpContext.User.FindFirst(ClaimTypes.Role)!.Value;
@@ -27,14 +31,14 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
         RuleFor(e => e.Description);
 
         RuleFor(e => e.Type)
-            .MustAsync((type, cancellationToken) => appointmentService.AppointmentTypeExistsAsync(type!))
+            .MustAsync((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type!))
             .WithMessage("Type does not exist")
             .Unless(e => string.IsNullOrEmpty(e.Type));
 
         When(req => !string.IsNullOrEmpty(req.Status), () =>
         {
             RuleFor(e => e.Status)
-                .MustAsync((status, cancellationToken) => appointmentService.AppointmentStatusExistsAsync(status!))
+                .MustAsync((status, cancellationToken) => appointmentStatusRepository.ExistsByNameAsync(status!))
                 .WithMessage("Status does not exist");
 
             RuleFor(e => e.Status)

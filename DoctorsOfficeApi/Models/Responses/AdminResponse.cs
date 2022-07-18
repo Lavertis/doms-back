@@ -18,4 +18,11 @@ public class AdminResponse
         UserName = admin.AppUser.UserName;
         Email = admin.AppUser.Email;
     }
+
+    public AdminResponse(AppUser appUser)
+    {
+        Id = appUser.Id;
+        UserName = appUser.UserName;
+        Email = appUser.Email;
+    }
 }

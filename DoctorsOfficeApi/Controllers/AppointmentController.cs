@@ -119,7 +119,6 @@ public class AppointmentController : Controller
     {
         var authenticatedUserId = User.FindFirstValue(ClaimTypes.Sid)!;
         if (appointmentRequest.DoctorId != authenticatedUserId)
-
             throw new BadRequestException("Cannot create appointment for another doctor");
 
         var command = new CreateAppointmentCommand(appointmentRequest)

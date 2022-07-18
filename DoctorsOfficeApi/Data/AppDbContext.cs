@@ -21,12 +21,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseLazyLoadingProxies();
-    }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -80,7 +74,8 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
                 Id = adminUserId,
                 UserName = "admin",
                 NormalizedUserName = "admin".ToUpper(),
-                PasswordHash = hasher.HashPassword(null!, "admin")
+                PasswordHash = hasher.HashPassword(null!, "admin"),
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         );
         builder.Entity<IdentityUserRole<Guid>>().HasData(
@@ -106,9 +101,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
         foreach (var entityEntry in entityEntries)
         {
             var now = DateTime.UtcNow;
-            ((BaseEntity) entityEntry.Entity).UpdatedAt = now;
+            ((BaseEntity)entityEntry.Entity).UpdatedAt = now;
             if (entityEntry.State == EntityState.Added)
-                ((BaseEntity) entityEntry.Entity).CreatedAt = now;
+                ((BaseEntity)entityEntry.Entity).CreatedAt = now;
         }
     }
 

@@ -1,21 +1,21 @@
 ﻿using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.DoctorService;
+using DoctorsOfficeApi.Repositories.DoctorRepository;
 using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Queries.GetDoctorById;
 
 public class GetDoctorByIdHandler : IRequestHandler<GetDoctorByIdQuery, DoctorResponse>
 {
-    private readonly IDoctorService _doctorService;
+    private readonly IDoctorRepository _doctorRepository;
 
-    public GetDoctorByIdHandler(IDoctorService doctorService)
+    public GetDoctorByIdHandler(IDoctorRepository doctorRepository)
     {
-        _doctorService = doctorService;
+        _doctorRepository = doctorRepository;
     }
 
     public async Task<DoctorResponse> Handle(GetDoctorByIdQuery request, CancellationToken cancellationToken)
     {
-        var doctor = await _doctorService.GetDoctorByIdAsync(request.Id);
+        var doctor = await _doctorRepository.GetByIdAsync(request.Id, d => d.AppUser);
         return new DoctorResponse(doctor);
     }
 }

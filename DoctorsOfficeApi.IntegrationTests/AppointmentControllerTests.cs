@@ -7,6 +7,7 @@ using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -695,7 +696,10 @@ public class AppointmentControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
 
         responseContent.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
-        var allAuthenticatedPatientAppointments = DbContext.Appointments.Where(a => a.Patient.Id == authenticatedUserId).ToList();
+        var allAuthenticatedPatientAppointments = DbContext.Appointments
+            .Include(a => a.Status)
+            .Include(a => a.Type)
+            .Where(a => a.PatientId == authenticatedUserId).ToList();
         responseContent.Should().BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentResponse(a)));
     }
 
@@ -786,13 +790,22 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var createdAppointment = await response.Content.ReadAsAsync<AppointmentResponse>();
+        var createdAppointmentResponse = await response.Content.ReadAsAsync<AppointmentResponse>();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        DbContext.Appointments
-            .Where(a => a.Doctor.Id == authenticatedUserId)
-            .ToList()
-            .Should().Contain(a => a.Id == createdAppointment.Id);
+
+        var createdAppointment = DbContext.Appointments
+            .Include(a => a.Doctor)
+            .Include(a => a.Patient)
+            .Include(a => a.Status)
+            .Include(a => a.Type)
+            .First(a => a.Id == createdAppointmentResponse.Id);
+        
+        createdAppointment.Date.Should().Be(createAppointmentRequest.Date);
+        createdAppointment.Description.Should().Be(createAppointmentRequest.Description);
+        createdAppointment.Doctor.Id.Should().Be(createAppointmentRequest.DoctorId);
+        createdAppointment.Patient.Id.Should().Be(createAppointmentRequest.PatientId);
+        createdAppointment.Type.Name.Should().Be(createAppointmentRequest.Type);
     }
 
     [Theory]
@@ -1054,7 +1067,10 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         RefreshDbContext();
-        var updatedAppointment = DbContext.Appointments.First(a => a.Id == appointmentId);
+        var updatedAppointment = DbContext.Appointments
+            .Include(a => a.Status)
+            .Include(a => a.Type)
+            .First(a => a.Id == appointmentId);
 
         updatedAppointment.Date.Should().Be(updateAppointmentRequest.Date);
         updatedAppointment.Description.Should().Be(updateAppointmentRequest.Description);
@@ -1158,7 +1174,9 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         RefreshDbContext();
-        var updatedAppointment = DbContext.Appointments.First(a => a.Id == appointmentId);
+        var updatedAppointment = DbContext.Appointments
+            .Include(a => a.Status)
+            .First(a => a.Id == appointmentId);
 
         updatedAppointment.Status.Name.Should().Be(updateAppointmentRequest.Status);
     }
@@ -1267,7 +1285,10 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         RefreshDbContext();
-        var updatedAppointment = DbContext.Appointments.First(a => a.Id == appointmentId);
+        var updatedAppointment = DbContext.Appointments
+            .Include(a => a.Status)
+            .Include(a => a.Type)
+            .First(a => a.Id == appointmentId);
 
         switch (fieldName)
         {

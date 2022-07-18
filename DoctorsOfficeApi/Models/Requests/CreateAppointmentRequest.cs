@@ -1,4 +1,4 @@
-﻿using DoctorsOfficeApi.Services.AppointmentService;
+﻿using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
 using DoctorsOfficeApi.Services.UserService;
 using FluentValidation;
 
@@ -15,7 +15,7 @@ public class CreateAppointmentRequest
 
 public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppointmentRequest>
 {
-    public CreateAppointmentRequestValidator(IUserService userService, IAppointmentService appointmentService)
+    public CreateAppointmentRequestValidator(IUserService userService, IAppointmentTypeRepository appointmentTypeRepository)
     {
         CascadeMode = CascadeMode.Stop;
         RuleFor(e => e.Date)
@@ -43,7 +43,7 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
         RuleFor(e => e.Type)
             .NotEmpty()
             .WithMessage("Type is required")
-            .MustAsync(((type, cancellationToken) => appointmentService.AppointmentTypeExistsAsync(type)))
+            .MustAsync(((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type)))
             .WithMessage("Type does not exist");
     }
 }

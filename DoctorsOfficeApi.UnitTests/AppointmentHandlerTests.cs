@@ -1,43 +1,43 @@
-﻿using DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
+﻿using System.Linq.Expressions;
+using DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
 using DoctorsOfficeApi.CQRS.Commands.UpdateAppointment;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentById;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByDoctorId;
 using DoctorsOfficeApi.CQRS.Queries.GetAppointmentsByPatientId;
 using DoctorsOfficeApi.CQRS.Queries.GetFilteredAppointments;
-using DoctorsOfficeApi.Data;
 using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.AppointmentService;
-using DoctorsOfficeApi.Services.DoctorService;
-using DoctorsOfficeApi.Services.PatientService;
+using DoctorsOfficeApi.Repositories.AppointmentRepository;
+using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
+using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
+using DoctorsOfficeApi.Repositories.DoctorRepository;
+using DoctorsOfficeApi.Repositories.PatientRepository;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.EntityFrameworkCore;
+using MockQueryable.FakeItEasy;
 using Xunit;
 
 namespace DoctorsOfficeApi.UnitTests;
 
 public class AppointmentHandlerTests
 {
-    private readonly AppDbContext _appDbContext;
-    private readonly IAppointmentService _fakeAppointmentService;
-    private readonly IPatientService _fakePatientService;
-    private readonly IDoctorService _fakeDoctorService;
+    private readonly IAppointmentRepository _fakeAppointmentRepository;
+    private readonly IAppointmentStatusRepository _fakeAppointmentStatusRepository;
+    private readonly IAppointmentTypeRepository _fakeAppointmentTypeRepository;
+    private readonly IDoctorRepository _fakeDoctorRepository;
+    private readonly IPatientRepository _fakePatientRepository;
+
 
     public AppointmentHandlerTests()
     {
-        var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid();
-        var dbContextOptions = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(inMemoryDbName)
-            .Options;
-        _appDbContext = new AppDbContext(dbContextOptions);
-
-        _fakeAppointmentService = A.Fake<IAppointmentService>();
-        _fakePatientService = A.Fake<IPatientService>();
-        _fakeDoctorService = A.Fake<IDoctorService>();
+        _fakeAppointmentRepository = A.Fake<IAppointmentRepository>();
+        _fakeAppointmentStatusRepository = A.Fake<IAppointmentStatusRepository>();
+        _fakeAppointmentTypeRepository = A.Fake<IAppointmentTypeRepository>();
+        _fakeDoctorRepository = A.Fake<IDoctorRepository>();
+        _fakePatientRepository = A.Fake<IPatientRepository>();
     }
 
     [Fact]
@@ -45,14 +45,19 @@ public class AppointmentHandlerTests
     {
         // arrange
         var patientId = Guid.NewGuid();
-        var appointments = GetAppointments(3, patientId: patientId, doctorId: Guid.NewGuid());
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        var appointmentsQueryable = GetAppointments(3, patientId: patientId, doctorId: Guid.NewGuid()).BuildMock();
 
-        var expectedResponse = appointments.Select(a => new AppointmentResponse(a));
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointmentsQueryable);
+
+        var expectedResponse = appointmentsQueryable.Select(a => new AppointmentResponse(a));
 
         var query = new GetAppointmentsByPatientIdQuery(patientId);
-        var handler = new GetAppointmentsByPatientIdHandler(_appDbContext);
+        var handler = new GetAppointmentsByPatientIdHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -67,8 +72,17 @@ public class AppointmentHandlerTests
         // arrange
         var patientId = Guid.NewGuid();
 
+        var emptyAppointmentQueryable = A.CollectionOfDummy<Appointment>(0).BuildMock();
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(emptyAppointmentQueryable);
+
         var query = new GetAppointmentsByPatientIdQuery(patientId);
-        var handler = new GetAppointmentsByPatientIdHandler(_appDbContext);
+        var handler = new GetAppointmentsByPatientIdHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -82,14 +96,19 @@ public class AppointmentHandlerTests
     {
         // arrange
         var doctorId = Guid.NewGuid();
-        var appointments = GetAppointments(3, patientId: Guid.NewGuid(), doctorId: doctorId);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        var appointmentsQueryable = GetAppointments(3, patientId: Guid.NewGuid(), doctorId: doctorId).BuildMock();
 
-        var expectedResponse = appointments.Select(a => new AppointmentResponse(a));
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointmentsQueryable);
+
+        var expectedResponse = appointmentsQueryable.Select(a => new AppointmentResponse(a));
 
         var query = new GetAppointmentsByDoctorIdQuery(doctorId);
-        var handler = new GetAppointmentsByDoctorIdHandler(_appDbContext);
+        var handler = new GetAppointmentsByDoctorIdHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -104,8 +123,17 @@ public class AppointmentHandlerTests
         // arrange
         var doctorId = Guid.NewGuid();
 
+        var emptyAppointmentQueryable = A.CollectionOfDummy<Appointment>(0).BuildMock();
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(emptyAppointmentQueryable);
+
         var query = new GetAppointmentsByDoctorIdQuery(doctorId);
-        var handler = new GetAppointmentsByDoctorIdHandler(_appDbContext);
+        var handler = new GetAppointmentsByDoctorIdHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -119,12 +147,17 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored)).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored, A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointment);
 
         var expectedResponse = new AppointmentResponse(appointment);
 
         var query = new GetAppointmentByIdQuery(appointment.Id);
-        var handler = new GetAppointmentByIdHandler(_fakeAppointmentService);
+        var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -139,10 +172,16 @@ public class AppointmentHandlerTests
         // arrange
         var nonExistingAppointmentId = Guid.NewGuid();
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Throws(new NotFoundException(""));
 
         var query = new GetAppointmentByIdQuery(nonExistingAppointmentId);
-        var handler = new GetAppointmentByIdHandler(_fakeAppointmentService);
+        var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository);
 
         // act
         var action = async () => await handler.Handle(query, CancellationToken.None);
@@ -156,13 +195,18 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointments = GetAppointments(3);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
 
         var expectedResponse = appointments.Select(a => new AppointmentResponse(a));
 
         var query = new GetFilteredAppointmentsQuery(null, null, null, null, null, null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -196,8 +240,12 @@ public class AppointmentHandlerTests
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var query = new GetFilteredAppointmentsQuery(
             DateTime.UtcNow.AddDays(1),
@@ -206,7 +254,7 @@ public class AppointmentHandlerTests
             null,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -220,8 +268,13 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointments = GetAppointments(3);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidType = "InvalidType";
 
@@ -232,7 +285,7 @@ public class AppointmentHandlerTests
             null,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -246,8 +299,13 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointments = GetAppointments(3);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidStatus = "InvalidStatus";
 
@@ -258,7 +316,7 @@ public class AppointmentHandlerTests
             invalidStatus,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -272,8 +330,12 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointments = GetAppointments(3);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidPatientId = Guid.NewGuid();
 
@@ -281,7 +343,7 @@ public class AppointmentHandlerTests
         {
             patientId = invalidPatientId
         };
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -295,8 +357,12 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointments = GetAppointments(3);
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidDoctorId = Guid.NewGuid();
 
@@ -304,7 +370,7 @@ public class AppointmentHandlerTests
         {
             doctorId = invalidDoctorId
         };
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -338,8 +404,12 @@ public class AppointmentHandlerTests
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var dateStart = DateTime.UtcNow.AddDays(1);
         var dateEnd = DateTime.UtcNow.AddDays(2);
@@ -351,7 +421,7 @@ public class AppointmentHandlerTests
             null,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -391,10 +461,14 @@ public class AppointmentHandlerTests
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
-
         var selectedType = types[1];
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var query = new GetFilteredAppointmentsQuery(
             null,
@@ -403,7 +477,7 @@ public class AppointmentHandlerTests
             null,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -443,8 +517,12 @@ public class AppointmentHandlerTests
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedStatus = statuses[1];
 
@@ -455,7 +533,7 @@ public class AppointmentHandlerTests
             selectedStatus.Name,
             null,
             null);
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -489,14 +567,19 @@ public class AppointmentHandlerTests
                 Date = DateTime.UtcNow.AddDays(i),
                 Doctor = doctor,
                 Patient = patients[i % patients.Count],
+                PatientId = patients[i % patients.Count].Id,
                 Status = status,
                 Type = type,
                 Description = ""
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedPatient = patients[1];
 
@@ -504,7 +587,7 @@ public class AppointmentHandlerTests
         {
             patientId = selectedPatient.Id
         };
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -537,6 +620,7 @@ public class AppointmentHandlerTests
                 Id = Guid.NewGuid(),
                 Date = DateTime.UtcNow.AddDays(i),
                 Doctor = doctors[i % doctors.Count],
+                DoctorId = doctors[i % doctors.Count].Id,
                 Patient = patient,
                 Status = status,
                 Type = type,
@@ -544,8 +628,12 @@ public class AppointmentHandlerTests
             });
         }
 
-        _appDbContext.AddRange(appointments);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll(
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedDoctor = doctors[1];
 
@@ -553,7 +641,7 @@ public class AppointmentHandlerTests
         {
             doctorId = selectedDoctor.Id
         };
-        var handler = new GetFilteredAppointmentsHandler(_appDbContext);
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -572,16 +660,10 @@ public class AppointmentHandlerTests
         var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
         var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
 
-        _appDbContext.Doctors.Add(doctor);
-        _appDbContext.Patients.Add(patient);
-        _appDbContext.AppointmentStatuses.Add(status);
-        _appDbContext.AppointmentTypes.Add(type);
-        await _appDbContext.SaveChangesAsync();
-
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
-        A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored)).Returns(patient);
-        A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Returns(doctor);
+        A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(patient);
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(status);
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(type);
 
         var createAppointmentCommand = new CreateAppointmentCommand
         {
@@ -592,24 +674,19 @@ public class AppointmentHandlerTests
             Type = type.Name,
             Description = ""
         };
-        var handler = new CreateAppointmentHandler(_appDbContext, _fakeAppointmentService, _fakePatientService, _fakeDoctorService);
+        var handler = new CreateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeDoctorRepository,
+            _fakePatientRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var result = await handler.Handle(createAppointmentCommand, CancellationToken.None);
 
         // assert
-        result.Should().NotBeNull();
-        _appDbContext.Appointments.Should().NotBeEmpty();
-        _appDbContext.Appointments.Should().ContainSingle(a => a.Id == result.Id);
-        _appDbContext.Appointments.Should().ContainSingle(a =>
-            a.Id == result.Id &&
-            a.Date == createAppointmentCommand.Date &&
-            a.Doctor.Id == createAppointmentCommand.DoctorId &&
-            a.Patient.Id == createAppointmentCommand.PatientId &&
-            a.Status.Name == createAppointmentCommand.Status &&
-            a.Type.Name == createAppointmentCommand.Type &&
-            a.Description == createAppointmentCommand.Description
-        );
+        A.CallTo(() => _fakeAppointmentRepository.CreateAsync(A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Theory]
@@ -625,12 +702,6 @@ public class AppointmentHandlerTests
         var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
         var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
 
-        _appDbContext.Doctors.Add(doctor);
-        _appDbContext.Patients.Add(patient);
-        _appDbContext.AppointmentStatuses.Add(status);
-        _appDbContext.AppointmentTypes.Add(type);
-        await _appDbContext.SaveChangesAsync();
-
         var createAppointmentCommand = new CreateAppointmentCommand
         {
             Date = DateTime.UtcNow.AddDays(1),
@@ -642,31 +713,37 @@ public class AppointmentHandlerTests
         };
 
         if (fieldName == "Status")
-            A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(status);
+            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(status);
 
         if (fieldName == "Type")
-            A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(type);
+            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(type);
 
         if (fieldName == "PatientId")
-            A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => _fakePatientService.GetPatientByIdAsync(A<Guid>.Ignored)).Returns(patient);
+            A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(patient);
 
         if (fieldName == "DoctorId")
-            A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+            A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
         else
-            A.CallTo(() => _fakeDoctorService.GetDoctorByIdAsync(A<Guid>.Ignored)).Returns(doctor);
+            A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
 
         if (Guid.TryParse(fieldValue, out var guid))
             typeof(CreateAppointmentCommand).GetProperty(fieldName)!.SetValue(createAppointmentCommand, guid);
         else
             typeof(CreateAppointmentCommand).GetProperty(fieldName)!.SetValue(createAppointmentCommand, fieldValue);
 
-        var handler = new CreateAppointmentHandler(_appDbContext, _fakeAppointmentService, _fakePatientService, _fakeDoctorService);
+        var handler = new CreateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeDoctorRepository,
+            _fakePatientRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var action = async () => await handler.Handle(createAppointmentCommand, CancellationToken.None);
@@ -683,10 +760,13 @@ public class AppointmentHandlerTests
         var newAppointmentType = new AppointmentType { Id = Guid.NewGuid(), Name = "new type" };
         var newAppointmentStatus = new AppointmentStatus { Id = Guid.NewGuid(), Name = "new status" };
 
-        await _appDbContext.AppointmentTypes.AddAsync(newAppointmentType);
-        await _appDbContext.AppointmentStatuses.AddAsync(newAppointmentStatus);
-        await _appDbContext.AddAsync(appointment);
-        await _appDbContext.SaveChangesAsync();
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
 
         var updateAppointmentCommand = new UpdateAppointmentCommand
         {
@@ -697,30 +777,29 @@ public class AppointmentHandlerTests
             Status = newAppointmentStatus.Name
         };
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored)).Returns(appointment);
-
-
-        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        _appDbContext.Appointments.Should().ContainSingle(a =>
-            a.Id == updateAppointmentCommand.AppointmentId &&
-            a.Date == updateAppointmentCommand.Date &&
-            a.Type.Name == updateAppointmentCommand.Type &&
-            a.Status.Name == updateAppointmentCommand.Status &&
-            a.Description == updateAppointmentCommand.Description
-        );
+        A.CallTo(() => _fakeAppointmentRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
     public void UpdateAppointmentHandler_IdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Throws(new NotFoundException(""));
+
         var updateAppointmentCommand = new UpdateAppointmentCommand
         {
             AppointmentId = Guid.NewGuid(),
@@ -730,14 +809,11 @@ public class AppointmentHandlerTests
             Status = "new status"
         };
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
-            .Returns(new AppointmentType());
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
-            .Returns(new AppointmentStatus());
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored))
-            .Throws(new NotFoundException(""));
-
-        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -758,11 +834,6 @@ public class AppointmentHandlerTests
         var newAppointmentType = new AppointmentType { Id = Guid.NewGuid(), Name = "new type" };
         var newAppointmentStatus = new AppointmentStatus { Id = Guid.NewGuid(), Name = "new status" };
 
-        await _appDbContext.AppointmentTypes.AddAsync(newAppointmentType);
-        await _appDbContext.AppointmentStatuses.AddAsync(newAppointmentStatus);
-        await _appDbContext.AddAsync(appointment);
-        await _appDbContext.SaveChangesAsync();
-
         var updateAppointmentCommand = new UpdateAppointmentCommand { AppointmentId = appointment.Id };
 
         if (fieldName == "Date")
@@ -770,37 +841,25 @@ public class AppointmentHandlerTests
         else
             typeof(UpdateAppointmentCommand).GetProperty(fieldName)!.SetValue(updateAppointmentCommand, fieldValue);
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored)).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentStatus);
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
 
-
-        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        if (updateAppointmentCommand.Date is not null)
-            _appDbContext.Appointments.Should().ContainSingle(a =>
-                a.Id == updateAppointmentCommand.AppointmentId &&
-                a.Date == updateAppointmentCommand.Date
-            );
-        if (updateAppointmentCommand.Type is not null)
-            _appDbContext.Appointments.Should().ContainSingle(a =>
-                a.Id == updateAppointmentCommand.AppointmentId &&
-                a.Type.Name == updateAppointmentCommand.Type
-            );
-        if (updateAppointmentCommand.Status is not null)
-            _appDbContext.Appointments.Should().ContainSingle(a =>
-                a.Id == updateAppointmentCommand.AppointmentId &&
-                a.Status.Name == updateAppointmentCommand.Status
-            );
-        if (updateAppointmentCommand.Description is not null)
-            _appDbContext.Appointments.Should().ContainSingle(a =>
-                a.Id == updateAppointmentCommand.AppointmentId &&
-                a.Description == updateAppointmentCommand.Description
-            );
+        A.CallTo(() => _fakeAppointmentRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -808,9 +867,6 @@ public class AppointmentHandlerTests
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-
-        await _appDbContext.AddAsync(appointment);
-        await _appDbContext.SaveChangesAsync();
 
         var updateAppointmentCommand = new UpdateAppointmentCommand
         {
@@ -820,14 +876,19 @@ public class AppointmentHandlerTests
             Description = ""
         };
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
-            .Throws(new NotFoundException(""));
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
-            .Returns(new AppointmentStatus());
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored))
-            .Returns(appointment);
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(new AppointmentStatus());
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
@@ -843,9 +904,6 @@ public class AppointmentHandlerTests
         // arrange
         var appointment = GetAppointments(1)[0];
 
-        await _appDbContext.AddAsync(appointment);
-        await _appDbContext.SaveChangesAsync();
-
         var updateAppointmentCommand = new UpdateAppointmentCommand
         {
             AppointmentId = appointment.Id,
@@ -854,14 +912,19 @@ public class AppointmentHandlerTests
             Description = ""
         };
 
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentTypeByNameAsync(A<string>.Ignored))
-            .Returns(new AppointmentType());
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentStatusByNameAsync(A<string>.Ignored))
-            .Throws(new NotFoundException(""));
-        A.CallTo(() => _fakeAppointmentService.GetAppointmentByIdAsync(A<Guid>.Ignored))
-            .Returns(appointment);
+        A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
+            A<Guid>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored,
+            A<Expression<Func<Appointment, object>>>.Ignored
+        )).Returns(appointment);
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Throws(new NotFoundException(""));
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(new AppointmentType());
 
-        var handler = new UpdateAppointmentHandler(_appDbContext, _fakeAppointmentService);
+        var handler = new UpdateAppointmentHandler(
+            _fakeAppointmentRepository,
+            _fakeAppointmentStatusRepository,
+            _fakeAppointmentTypeRepository
+        );
 
         // act
         var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);

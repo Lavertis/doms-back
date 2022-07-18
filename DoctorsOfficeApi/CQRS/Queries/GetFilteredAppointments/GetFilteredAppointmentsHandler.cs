@@ -1,5 +1,5 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Models.Responses;
+﻿using DoctorsOfficeApi.Models.Responses;
+using DoctorsOfficeApi.Repositories.AppointmentRepository;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,16 +7,21 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetFilteredAppointments;
 
 public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppointmentsQuery, IList<AppointmentResponse>>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IAppointmentRepository _appointmentRepository;
 
-    public GetFilteredAppointmentsHandler(AppDbContext dbContext)
+    public GetFilteredAppointmentsHandler(IAppointmentRepository appointmentRepository)
     {
-        _dbContext = dbContext;
+        _appointmentRepository = appointmentRepository;
     }
 
     public async Task<IList<AppointmentResponse>> Handle(GetFilteredAppointmentsQuery request, CancellationToken cancellationToken)
     {
-        var appointmentsQueryable = _dbContext.Appointments.AsQueryable();
+        var appointmentsQueryable = _appointmentRepository.GetAll(
+            a => a.Doctor,
+            a => a.Patient,
+            a => a.Type,
+            a => a.Status
+        );
         if (request.dateStart is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Date >= request.dateStart);
         if (request.dateEnd is not null)

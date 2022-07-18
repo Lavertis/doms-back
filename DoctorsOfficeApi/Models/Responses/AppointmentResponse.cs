@@ -17,8 +17,8 @@ public class AppointmentResponse
         Id = appointment.Id;
         Date = appointment.Date;
         Description = appointment.Description;
-        PatientId = appointment.Patient.Id;
-        DoctorId = appointment.Doctor.Id;
+        PatientId = appointment.PatientId;
+        DoctorId = appointment.DoctorId;
         Status = appointment.Status.Name;
         Type = appointment.Type.Name;
     }

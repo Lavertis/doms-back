@@ -1,5 +1,5 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Models.Responses;
+﻿using DoctorsOfficeApi.Models.Responses;
+using DoctorsOfficeApi.Repositories.AdminRepository;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,16 +7,18 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetAllAdmins;
 
 public class GetAllAdminsHandler : IRequestHandler<GetAllAdminsQuery, IList<AdminResponse>>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IAdminRepository _adminRepository;
 
-    public GetAllAdminsHandler(AppDbContext dbContext)
+    public GetAllAdminsHandler(IAdminRepository adminRepository)
     {
-        _dbContext = dbContext;
+        _adminRepository = adminRepository;
     }
 
     public async Task<IList<AdminResponse>> Handle(GetAllAdminsQuery request, CancellationToken cancellationToken)
     {
-        var adminResponses = await _dbContext.Admins.Select(a => new AdminResponse(a))
+        var adminResponses = await _adminRepository
+            .GetAll(a => a.AppUser)
+            .Select(a => new AdminResponse(a))
             .ToListAsync(cancellationToken: cancellationToken);
         return adminResponses;
     }

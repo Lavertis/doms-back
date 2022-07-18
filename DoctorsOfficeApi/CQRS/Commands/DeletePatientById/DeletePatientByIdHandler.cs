@@ -1,26 +1,20 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Services.PatientService;
+﻿using DoctorsOfficeApi.Repositories.PatientRepository;
 using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Commands.DeletePatientById;
 
 public class DeletePatientByIdHandler : IRequestHandler<DeletePatientByIdCommand, Unit>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IPatientService _patientService;
+    private readonly IPatientRepository _patientRepository;
 
-    public DeletePatientByIdHandler(AppDbContext dbContext, IPatientService patientService)
+    public DeletePatientByIdHandler(IPatientRepository patientRepository)
     {
-        _dbContext = dbContext;
-        _patientService = patientService;
+        _patientRepository = patientRepository;
     }
 
     public async Task<Unit> Handle(DeletePatientByIdCommand request, CancellationToken cancellationToken)
     {
-        var patient = await _patientService.GetPatientByIdAsync(request.Id);
-
-        _dbContext.Patients.Remove(patient);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _patientRepository.DeleteByIdAsync(request.Id);
         return Unit.Value;
     }
 }

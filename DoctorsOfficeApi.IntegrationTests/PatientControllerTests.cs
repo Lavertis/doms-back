@@ -30,7 +30,9 @@ public class PatientControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
-        var expectedResponse = new PatientResponse((await DbContext.Patients.FindAsync(authenticatedPatientId))!);
+        var expectedResponse = new PatientResponse((await DbContext.Patients
+            .Include(p => p.AppUser)
+            .FirstAsync(p => p.Id == authenticatedPatientId))!);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/auth");
@@ -115,15 +117,18 @@ public class PatientControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         RefreshDbContext();
 
-        var createdPatient = DbContext.Patients.ToList().First(p => p.UserName == createPatientRequest.UserName)!;
+        var createdPatient = DbContext.Patients
+            .Include(p => p.AppUser)
+            .ToList()
+            .First(p => p.AppUser.UserName == createPatientRequest.UserName)!;
 
-        createdPatient.UserName.Should().Be(createPatientRequest.UserName);
+        createdPatient.AppUser.UserName.Should().Be(createPatientRequest.UserName);
         createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientRequest.UserName.ToUpper());
         createdPatient.FirstName.Should().Be(createPatientRequest.FirstName);
         createdPatient.LastName.Should().Be(createPatientRequest.LastName);
-        createdPatient.Email.Should().Be(createPatientRequest.Email);
+        createdPatient.AppUser.Email.Should().Be(createPatientRequest.Email);
         createdPatient.AppUser.NormalizedEmail.Should().Be(createPatientRequest.Email.ToUpper());
-        createdPatient.PhoneNumber.Should().Be(createPatientRequest.PhoneNumber);
+        createdPatient.AppUser.PhoneNumber.Should().Be(createPatientRequest.PhoneNumber);
         createdPatient.Address.Should().Be(createPatientRequest.Address);
         createdPatient.DateOfBirth.Should().Be(createPatientRequest.DateOfBirth.Date);
     }
@@ -331,7 +336,10 @@ public class PatientControllerTests : IntegrationTest
         RefreshDbContext();
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        DbContext.Patients.ToList().First(p => p.UserName == createPatientRequest.UserName).DateOfBirth
+        DbContext.Patients
+            .Include(p => p.AppUser)
+            .ToList()
+            .First(p => p.AppUser.UserName == createPatientRequest.UserName).DateOfBirth
             .Should().Be(DateTime.Parse("2020-07-10"));
     }
 
@@ -357,7 +365,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -382,14 +390,16 @@ public class PatientControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        var updatedPatient = DbContext.Patients.FirstOrDefault(p => p.Id == authenticatedPatientId)!;
-        updatedPatient.UserName.Should().Be(updatePatientRequest.UserName);
+        var updatedPatient = DbContext.Patients
+            .Include(p => p.AppUser)
+            .FirstOrDefault(p => p.Id == authenticatedPatientId)!;
+        updatedPatient.AppUser.UserName.Should().Be(updatePatientRequest.UserName);
         updatedPatient.AppUser.NormalizedUserName.Should().Be(updatePatientRequest.UserName.ToUpper());
         updatedPatient.FirstName.Should().Be(updatePatientRequest.FirstName);
         updatedPatient.LastName.Should().Be(updatePatientRequest.LastName);
-        updatedPatient.Email.Should().Be(updatePatientRequest.Email);
+        updatedPatient.AppUser.Email.Should().Be(updatePatientRequest.Email);
         updatedPatient.AppUser.NormalizedEmail.Should().Be(updatePatientRequest.Email.ToUpper());
-        updatedPatient.PhoneNumber.Should().Be(updatePatientRequest.PhoneNumber);
+        updatedPatient.AppUser.PhoneNumber.Should().Be(updatePatientRequest.PhoneNumber);
         updatedPatient.Address.Should().Be(updatePatientRequest.Address);
         updatedPatient.DateOfBirth.Should().Be(updatePatientRequest.DateOfBirth.Value.Date);
         updatedPatient.AppUser.PasswordHash.Should().NotBe(oldPasswordHash);
@@ -428,11 +438,11 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
-            UserName = conflictPatient.UserName,
+            UserName = conflictPatient.AppUser.UserName,
             CurrentPassword = patientPassword
         };
 
@@ -479,11 +489,11 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
-            Email = conflictPatient.Email,
+            Email = conflictPatient.AppUser.Email,
             CurrentPassword = patientPassword
         };
 
@@ -517,7 +527,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -555,7 +565,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -640,7 +650,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
@@ -692,7 +702,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
@@ -718,7 +728,9 @@ public class PatientControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
-        var updatedPatient = DbContext.Patients.First(p => p.Id == authenticatedPatientId);
+        var updatedPatient = DbContext.Patients
+            .Include(p => p.AppUser)
+            .First(p => p.Id == authenticatedPatientId);
 
         switch (fieldName)
         {
@@ -780,7 +792,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
@@ -801,7 +813,9 @@ public class PatientControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         RefreshDbContext();
-        var updatedPatient = DbContext.Patients.First(p => p.Id == authenticatedPatientId);
+        var updatedPatient = DbContext.Patients
+            .Include(p => p.AppUser)
+            .First(p => p.Id == authenticatedPatientId);
         switch (fieldName)
         {
             case "FirstName":
@@ -834,9 +848,7 @@ public class PatientControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
 
-        var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
-        var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
         {
@@ -850,7 +862,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.UserName, patientPassword);
+        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {

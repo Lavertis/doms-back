@@ -16,8 +16,8 @@ public class DoctorResponse
     public DoctorResponse(Doctor doctor)
     {
         Id = doctor.Id;
-        UserName = doctor.UserName;
-        Email = doctor.Email;
-        PhoneNumber = doctor.PhoneNumber;
+        UserName = doctor.AppUser.UserName;
+        Email = doctor.AppUser.Email;
+        PhoneNumber = doctor.AppUser.PhoneNumber;
     }
 }

@@ -1,8 +1,8 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Entities.UserTypes;
+﻿using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
+using DoctorsOfficeApi.Repositories.PatientRepository;
 using DoctorsOfficeApi.Services.UserService;
 using MediatR;
 
@@ -10,12 +10,13 @@ namespace DoctorsOfficeApi.CQRS.Commands.CreatePatient;
 
 public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, PatientResponse>
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IPatientRepository _patientRepository;
     private readonly IUserService _userService;
 
-    public CreatePatientHandler(AppDbContext dbContext, IUserService userService)
+
+    public CreatePatientHandler(IPatientRepository patientRepository, IUserService userService)
     {
-        _dbContext = dbContext;
+        _patientRepository = patientRepository;
         _userService = userService;
     }
 
@@ -39,8 +40,7 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, Patien
             AppUser = newUser
         };
 
-        var patientEntity = (await _dbContext.Patients.AddAsync(newPatient, cancellationToken)).Entity;
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        var patientEntity = await _patientRepository.CreateAsync(newPatient);
 
         return new PatientResponse(patientEntity);
     }

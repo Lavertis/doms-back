@@ -1,50 +1,41 @@
-﻿using DoctorsOfficeApi.Data;
+﻿using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.DoctorService;
+using DoctorsOfficeApi.Repositories.DoctorRepository;
 using DoctorsOfficeApi.Services.UserService;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 
 namespace DoctorsOfficeApi.CQRS.Commands.UpdateDoctorById;
 
 public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, DoctorResponse>
 {
-    private readonly AppDbContext _context;
-    private readonly IDoctorService _doctorService;
+    private readonly IDoctorRepository _doctorRepository;
     private readonly IUserService _userService;
+    private readonly UserManager<AppUser> _userManager;
 
-    public UpdateDoctorByIdHandler(AppDbContext context, IDoctorService doctorService, IUserService userService)
+    public UpdateDoctorByIdHandler(IDoctorRepository doctorRepository, IUserService userService, UserManager<AppUser> userManager)
     {
-        _context = context;
-        _doctorService = doctorService;
+        _doctorRepository = doctorRepository;
         _userService = userService;
+        _userManager = userManager;
     }
 
     public async Task<DoctorResponse> Handle(UpdateDoctorByIdCommand request, CancellationToken cancellationToken)
     {
-        var doctor = await _doctorService.GetDoctorByIdAsync(request.Id);
+        var doctor = await _doctorRepository.GetByIdAsync(request.Id);
+        var appUser = _userManager.Users.First(x => x.Id == doctor.Id);
 
-        if (request.UserName is not null)
-        {
-            doctor.AppUser.UserName = request.UserName;
-            doctor.AppUser.NormalizedUserName = request.UserName.ToUpper();
-        }
-
-        if (request.Email is not null)
-        {
-            doctor.AppUser.Email = request.Email;
-            doctor.AppUser.NormalizedEmail = request.Email.ToUpper();
-        }
-
-        doctor.AppUser.PhoneNumber = request.PhoneNumber ?? doctor.PhoneNumber;
-
+        appUser.UserName = request.UserName ?? appUser.UserName;
+        appUser.Email = request.Email ?? appUser.Email;
+        appUser.PhoneNumber = request.PhoneNumber ?? appUser.PhoneNumber;
         if (!string.IsNullOrEmpty(request.Password))
         {
-            _userService.SetUserPassword(doctor.AppUser, request.Password!);
+            _userService.SetUserPassword(appUser, request.Password!);
         }
 
-        var doctorEntity = _context.Doctors.Update(doctor).Entity;
-        await _context.SaveChangesAsync(cancellationToken);
+        await _userManager.UpdateAsync(appUser);
 
-        return new DoctorResponse(doctorEntity);
+        doctor.AppUser = appUser;
+        return new DoctorResponse(doctor);
     }
 }

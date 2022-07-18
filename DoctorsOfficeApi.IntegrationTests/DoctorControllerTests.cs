@@ -28,7 +28,9 @@ public class DoctorControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
-        var authenticatedDoctor = await DbContext.Doctors.FindAsync(authenticatedDoctorId);
+        var authenticatedDoctor = await DbContext.Doctors
+            .Include(d => d.AppUser)
+            .FirstAsync(d => d.Id == authenticatedDoctorId);
 
         var expectedResponse = new DoctorResponse(authenticatedDoctor!);
 
@@ -109,7 +111,11 @@ public class DoctorControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<IList<DoctorResponse>>();
 
         responseContent.Count.Should().Be(DbContext.Doctors.Count());
-        responseContent.Should().BeEquivalentTo(DbContext.Doctors.Select(d => new DoctorResponse(d)));
+        responseContent.Should().BeEquivalentTo(
+            DbContext.Doctors
+                .Include(a => a.AppUser)
+                .Select(d => new DoctorResponse(d))
+        );
     }
 
     [Fact]
@@ -183,10 +189,13 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         RefreshDbContext();
 
-        var createdDoctor = (await DbContext.Doctors.ToListAsync()).First(d => d.UserName == request.UserName);
+        var createdDoctor = (await DbContext.Doctors
+                .Include(d => d.AppUser)
+                .ToListAsync())
+            .First(d => d.AppUser.UserName == request.UserName);
         createdDoctor.Should().NotBeNull();
-        createdDoctor.Email.Should().Be(request.Email);
-        createdDoctor.PhoneNumber.Should().Be(request.PhoneNumber);
+        createdDoctor.AppUser.Email.Should().Be(request.Email);
+        createdDoctor.AppUser.PhoneNumber.Should().Be(request.PhoneNumber);
     }
 
     [Theory]
@@ -369,7 +378,11 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        var updatedDoctor = DbContext.Doctors.ToList().First(d => d.Id == authenticatedDoctorId);
+        var updatedDoctor = DbContext.Doctors
+            .Include(d => d.AppUser)
+            .ToList()
+            .First(d => d.Id == authenticatedDoctorId);
+
         updatedDoctor.Should().NotBeNull();
         updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.UserName);
         updatedDoctor.AppUser.Email.Should().Be(updateDoctorRequest.Email);
@@ -414,7 +427,9 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        var updatedDoctor = await DbContext.Doctors.FirstAsync(d => d.Id == authenticatedDoctorId);
+        var updatedDoctor = await DbContext.Doctors
+            .Include(d => d.AppUser)
+            .FirstAsync(d => d.Id == authenticatedDoctorId);
         updatedDoctor.Should().NotBeNull();
 
         switch (fieldName)
@@ -687,7 +702,8 @@ public class DoctorControllerTests : IntegrationTest
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789",
-                PasswordHash = oldPasswordHash
+                PasswordHash = oldPasswordHash,
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         };
         DbContext.Doctors.Add(doctorToUpdate);
@@ -712,7 +728,10 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        var updatedDoctor = DbContext.Doctors.First(d => d.AppUser.Id == doctorId);
+        var updatedDoctor = DbContext.Doctors
+            .Include(d => d.AppUser)
+            .First(d => d.AppUser.Id == doctorId);
+
         updatedDoctor.Should().NotBeNull();
         updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.UserName);
         updatedDoctor.AppUser.Email.Should().Be(updateDoctorRequest.Email);
@@ -817,7 +836,8 @@ public class DoctorControllerTests : IntegrationTest
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
                 PhoneNumber = "123456789",
-                PasswordHash = oldPasswordHash
+                PasswordHash = oldPasswordHash,
+                SecurityStamp = Guid.NewGuid().ToString()
             }
         };
         DbContext.Doctors.Add(doctorToUpdate);
@@ -837,7 +857,9 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        var updatedDoctor = DbContext.Doctors.First(d => d.AppUser.Id == doctorId);
+        var updatedDoctor = DbContext.Doctors
+            .Include(d => d.AppUser)
+            .First(d => d.AppUser.Id == doctorId);
         updatedDoctor.Should().NotBeNull();
 
         switch (fieldName)

@@ -20,7 +20,7 @@ public class PatientResponse
     public PatientResponse(Patient patient)
     {
         Id = patient.Id;
-        UserName = patient.UserName;
+        UserName = patient.AppUser.UserName;
         Email = patient.AppUser.Email;
         PhoneNumber = patient.AppUser.PhoneNumber;
         FirstName = patient.FirstName;

@@ -1,42 +1,50 @@
-﻿using DoctorsOfficeApi.Data;
-using DoctorsOfficeApi.Entities;
+﻿using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Exceptions;
 using DoctorsOfficeApi.Models.Responses;
-using DoctorsOfficeApi.Services.AppointmentService;
-using DoctorsOfficeApi.Services.DoctorService;
-using DoctorsOfficeApi.Services.PatientService;
+using DoctorsOfficeApi.Repositories.AppointmentRepository;
+using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
+using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
+using DoctorsOfficeApi.Repositories.DoctorRepository;
+using DoctorsOfficeApi.Repositories.PatientRepository;
 using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
 
 public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand, AppointmentResponse>
 {
-    private readonly AppDbContext _dbContext;
-    private readonly IAppointmentService _appointmentService;
-    private readonly IPatientService _patientService;
-    private readonly IDoctorService _doctorService;
+    private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IDoctorRepository _doctorRepository;
+    private readonly IPatientRepository _patientRepository;
+    private readonly IAppointmentStatusRepository _appointmentStatusRepository;
+    private readonly IAppointmentTypeRepository _appointmentTypeRepository;
 
-    public CreateAppointmentHandler(AppDbContext dbContext, IAppointmentService appointmentService, IPatientService patientService, IDoctorService doctorService)
+    public CreateAppointmentHandler(
+        IAppointmentRepository appointmentRepository,
+        IDoctorRepository doctorRepository,
+        IPatientRepository patientRepository,
+        IAppointmentStatusRepository appointmentStatusRepository,
+        IAppointmentTypeRepository appointmentTypeRepository)
     {
-        _dbContext = dbContext;
-        _appointmentService = appointmentService;
-        _patientService = patientService;
-        _doctorService = doctorService;
+        _appointmentRepository = appointmentRepository;
+        _doctorRepository = doctorRepository;
+        _patientRepository = patientRepository;
+        _appointmentStatusRepository = appointmentStatusRepository;
+        _appointmentTypeRepository = appointmentTypeRepository;
     }
 
     public async Task<AppointmentResponse> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
     {
-        Appointment appointment;
+        Appointment newAppointment;
         try
         {
-            appointment = new Appointment
+            newAppointment = new Appointment
             {
                 Date = request.Date,
                 Description = request.Description,
-                Patient = await _patientService.GetPatientByIdAsync(request.PatientId),
-                Doctor = await _doctorService.GetDoctorByIdAsync(request.DoctorId),
-                Status = await _appointmentService.GetAppointmentStatusByNameAsync(request.Status),
-                Type = await _appointmentService.GetAppointmentTypeByNameAsync(request.Type),
+                PatientId = (await _patientRepository.GetByIdAsync(request.PatientId)).Id,
+                DoctorId = (await _doctorRepository.GetByIdAsync(request.DoctorId)).Id,
+                StatusId = (await _appointmentStatusRepository.GetByNameAsync(request.Status)).Id,
+                TypeId = (await _appointmentTypeRepository.GetByNameAsync(request.Type)).Id,
             };
         }
         catch (NotFoundException e)
@@ -44,8 +52,11 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
             throw new BadRequestException(e.Message);
         }
 
-        _dbContext.Appointments.Add(appointment);
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return new AppointmentResponse(appointment);
+        var createdAppointmentId = (await _appointmentRepository.CreateAsync(newAppointment)).Id;
+        var createdAppointment = await _appointmentRepository.GetByIdAsync(
+            createdAppointmentId,
+            a => a.Status,
+            a => a.Type);
+        return new AppointmentResponse(createdAppointment);
     }
 }
