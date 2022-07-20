@@ -16,6 +16,8 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public virtual DbSet<Doctor> Doctors { get; set; } = default!;
     public virtual DbSet<Patient> Patients { get; set; } = default!;
     public virtual DbSet<Admin> Admins { get; set; } = default!;
+    public virtual DbSet<Prescription> Prescriptions { get; set; } = default!;
+    public virtual DbSet<DrugItem> DrugItems { get; set; } = default!;
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

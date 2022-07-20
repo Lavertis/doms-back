@@ -4,6 +4,7 @@ using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
 using DoctorsOfficeApi.Repositories.AppointmentTypeRepository;
 using DoctorsOfficeApi.Repositories.DoctorRepository;
 using DoctorsOfficeApi.Repositories.PatientRepository;
+using DoctorsOfficeApi.Repositories.PrescriptionRepository;
 
 namespace DoctorsOfficeApi.Modules;
 
@@ -17,5 +18,6 @@ public static class Repositories
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<IAppointmentStatusRepository, AppointmentStatusRepository>();
         services.AddScoped<IAppointmentTypeRepository, AppointmentTypeRepository>();
+        services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
     }
 }

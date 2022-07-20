@@ -74,4 +74,9 @@ public class Repository<TEntity> : IRepository<TEntity>
         DbContext.Set<TEntity>().Remove(entity);
         await DbContext.SaveChangesAsync();
     }
+
+    public async Task<bool> ExistsByIdAsync(Guid id)
+    {
+        return await DbContext.Set<TEntity>().FindAsync(id) is not null;
+    }
 }

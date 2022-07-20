@@ -13,4 +13,5 @@ public interface IRepository<TEntity>
     Task<TEntity> CreateAsync(TEntity entity);
     Task<TEntity> UpdateByIdAsync(Guid id, TEntity entity);
     Task DeleteByIdAsync(Guid id);
+    Task<bool> ExistsByIdAsync(Guid id);
 }
