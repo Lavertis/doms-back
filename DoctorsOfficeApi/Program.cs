@@ -22,9 +22,23 @@ builder.Services.AddValidators();
 
 builder.Services.AddRepositories();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("AppDb")!)
-);
+string GetHerokuConnectionString()
+{
+    var connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    if (connectionUrl is null)
+        return string.Empty;
+
+    var databaseUri = new Uri(connectionUrl!);
+    var db = databaseUri.LocalPath.TrimStart('/');
+    var userInfo = databaseUri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
+    return
+        $"UserID={userInfo[0]};Password={userInfo[1]};Host={databaseUri.Host};Port={databaseUri.Port};Database={db};" +
+        "Pooling=true;SSLMode=Require;TrustServerCertificate=True;";
+}
+
+var isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+var connectionString = isDevelopment ? builder.Configuration.GetConnectionString("AppDb") : GetHerokuConnectionString();
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
@@ -32,7 +46,15 @@ builder.Services.AddMediatR(typeof(Program));
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+}
+
+if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
