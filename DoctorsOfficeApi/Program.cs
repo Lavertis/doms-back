@@ -44,6 +44,23 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSet
 
 builder.Services.AddMediatR(typeof(Program));
 
+const string corsPolicy = "DefaultPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicy,
+        policyBuilder =>
+        {
+            policyBuilder
+                .WithOrigins(
+                    "http://localhost:3000",
+                    "https://localhost:3000",
+                    "https://doms-back.herokuapp.com"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -59,6 +76,8 @@ if (!app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(corsPolicy);
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
