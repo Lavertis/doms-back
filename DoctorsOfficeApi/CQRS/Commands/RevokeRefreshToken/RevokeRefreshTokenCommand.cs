@@ -1,19 +1,16 @@
-﻿using MediatR;
+﻿using DoctorsOfficeApi.Models.Requests;
+using MediatR;
 
 namespace DoctorsOfficeApi.CQRS.Commands.RevokeRefreshToken;
 
 public class RevokeRefreshTokenCommand : IRequest<Unit>
 {
-    public string RefreshToken { get; set; } = default!;
-    public string? IpAddress { get; set; } = default!;
+    public readonly string? IpAddress;
+    public readonly string RefreshToken;
 
-    public RevokeRefreshTokenCommand()
+    public RevokeRefreshTokenCommand(RevokeRefreshTokenRequest request, string? ipAddress)
     {
-    }
-
-    public RevokeRefreshTokenCommand(string refreshToken, string? ipAddress)
-    {
-        RefreshToken = refreshToken;
+        RefreshToken = request.RefreshToken;
         IpAddress = ipAddress;
     }
 }

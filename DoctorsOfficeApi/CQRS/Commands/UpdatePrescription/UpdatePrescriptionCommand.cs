@@ -6,23 +6,18 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdatePrescription;
 
 public class UpdatePrescriptionCommand : IRequest<PrescriptionResponse>
 {
-    public Guid PrescriptionId { get; set; }
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public Guid? DoctorId { get; set; }
-    public Guid? PatientId { get; set; }
-    public IList<Guid>? DrugsIds { get; set; }
+    public readonly string? Description;
+    public readonly IList<Guid>? DrugsIds;
+    public readonly Guid? PatientId;
+    public readonly Guid PrescriptionId;
+    public readonly string? Title;
 
-    public UpdatePrescriptionCommand()
+    public UpdatePrescriptionCommand(UpdatePrescriptionRequest request, Guid prescriptionId)
     {
-    }
-
-    public UpdatePrescriptionCommand(Guid id, UpdatePrescriptionRequest request)
-    {
-        PrescriptionId = id;
+        PrescriptionId = prescriptionId;
         Title = request.Title;
         Description = request.Description;
-        PatientId = request.PatientId is not null ? Guid.Parse(request.PatientId) : null;
+        PatientId = request.PatientId;
         DrugsIds = request.DrugsIds;
     }
 }

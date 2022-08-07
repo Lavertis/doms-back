@@ -2,9 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorsOfficeApi", "DoctorsOfficeApi\DoctorsOfficeApi.csproj", "{31BCDB85-8F26-46D7-93E0-75E1F2017487}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorsOfficeApi.UnitTests", "DoctorsOfficeApi.UnitTests\DoctorsOfficeApi.UnitTests.csproj", "{306D5CC6-E6C1-4150-A969-549760A45F31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{306D5CC6-E6C1-4150-A969-549760A45F31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoctorsOfficeApi.IntegrationTests", "DoctorsOfficeApi.IntegrationTests\DoctorsOfficeApi.IntegrationTests.csproj", "{3132AADD-AC8B-4DA5-B70C-64BE210D84F0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{3132AADD-AC8B-4DA5-B70C-64BE210D84F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{78104BEE-8277-4009-B024-674C8B8E6862}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{3132AADD-AC8B-4DA5-B70C-64BE210D84F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3132AADD-AC8B-4DA5-B70C-64BE210D84F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3132AADD-AC8B-4DA5-B70C-64BE210D84F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3132AADD-AC8B-4DA5-B70C-64BE210D84F0} = {78104BEE-8277-4009-B024-674C8B8E6862}
+		{306D5CC6-E6C1-4150-A969-549760A45F31} = {78104BEE-8277-4009-B024-674C8B8E6862}
 	EndGlobalSection
 EndGlobal

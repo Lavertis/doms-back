@@ -13,7 +13,8 @@ public class GetRefreshTokensByUserIdHandler : IRequestHandler<GetRefreshTokensB
         _userService = userService;
     }
 
-    public async Task<IList<RefreshToken>> Handle(GetRefreshTokensByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<IList<RefreshToken>> Handle(GetRefreshTokensByUserIdQuery request,
+        CancellationToken cancellationToken)
     {
         var user = await _userService.GetUserByIdAsync(request.UserId);
         var refreshTokens = user.RefreshTokens.ToList();

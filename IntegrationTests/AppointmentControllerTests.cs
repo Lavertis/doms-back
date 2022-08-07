@@ -375,20 +375,20 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
 
         var doctor1 = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
-        var doctor2 = new Doctor { AppUser = new AppUser() };
+        var doctor2 = new Doctor {AppUser = new AppUser()};
         DbContext.Doctors.Add(doctor2);
-        var doctors = new List<Doctor> { doctor1, doctor2 };
+        var doctors = new List<Doctor> {doctor1, doctor2};
 
         var patient1 = DbContext.Patients.First();
         var patient2 = new Patient
         {
-            AppUser = new AppUser { Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e") },
+            AppUser = new AppUser {Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e")},
             FirstName = "",
             LastName = "",
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> { patient1, patient2 };
+        var patients = new List<Patient> {patient1, patient2};
 
         var appointmentTypes = DbContext.AppointmentTypes.ToList();
         var appointmentStatuses = DbContext.AppointmentStatuses.ToList();
@@ -462,9 +462,9 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
-        var otherDoctor = new Doctor { AppUser = new AppUser() };
+        var otherDoctor = new Doctor {AppUser = new AppUser()};
         DbContext.Doctors.Add(otherDoctor);
-        var doctors = new List<Doctor> { doctor, otherDoctor };
+        var doctors = new List<Doctor> {doctor, otherDoctor};
 
         var patient = DbContext.Patients.First();
 
@@ -493,7 +493,8 @@ public class AppointmentControllerTests : IntegrationTest
         RefreshDbContext();
         var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
         responseContent.Should().OnlyContain(a => a.DoctorId == authenticatedUserId);
-        var allAuthenticatedDoctorAppointments = DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList();
+        var allAuthenticatedDoctorAppointments =
+            DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList();
         allAuthenticatedDoctorAppointments.Should().OnlyContain(
             doctorAppointment =>
                 responseContent.Any(responseAppointment => responseAppointment.Id == doctorAppointment.Id)
@@ -570,8 +571,9 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("dateEnd", "2022-07-04T15:12:52Z")]
     [InlineData("type", "Consultation")]
     [InlineData("status", "Pending")]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_SingleFieldProvided_ReturnsAppointmentsMatchingProvidedFilter(
-        string filterName, string filterValue)
+    public async Task
+        GetAppointmentsForAuthenticatedUserFiltered_SingleFieldProvided_ReturnsAppointmentsMatchingProvidedFilter(
+            string filterName, string filterValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -586,7 +588,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> { patient1, patient2 };
+        var patients = new List<Patient> {patient1, patient2};
 
         var doctor = DbContext.Doctors.First();
 
@@ -659,7 +661,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> { patient1, patient2 };
+        var patients = new List<Patient> {patient1, patient2};
 
         var doctor = DbContext.Doctors.First();
 
@@ -700,7 +702,8 @@ public class AppointmentControllerTests : IntegrationTest
             .Include(a => a.Status)
             .Include(a => a.Type)
             .Where(a => a.PatientId == authenticatedUserId).ToList();
-        responseContent.Should().BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentResponse(a)));
+        responseContent.Should()
+            .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentResponse(a)));
     }
 
     [Theory]
@@ -755,7 +758,8 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData(RoleTypes.Doctor)]
     [InlineData(RoleTypes.Admin)]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(string roleType)
+    public async Task GetAppointmentsForAuthenticatedUserFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(
+        string roleType)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -780,8 +784,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = authenticatedUserId.ToString(),
-            PatientId = patient.Id.ToString(),
+            DoctorId = authenticatedUserId,
+            PatientId = patient.Id,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -800,7 +804,7 @@ public class AppointmentControllerTests : IntegrationTest
             .Include(a => a.Status)
             .Include(a => a.Type)
             .First(a => a.Id == createdAppointmentResponse.Id);
-        
+
         createdAppointment.Date.Should().Be(createAppointmentRequest.Date);
         createdAppointment.Description.Should().Be(createAppointmentRequest.Description);
         createdAppointment.Doctor.Id.Should().Be(createAppointmentRequest.DoctorId);
@@ -817,7 +821,7 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("Type", "")]
     [InlineData("Type", "nonExistingTypeName")]
     public async Task CreateAppointment_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
-        string fieldName, string fieldValue)
+        string fieldName, object fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -828,12 +832,24 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = authenticatedUserId.ToString(),
-            PatientId = patient.Id.ToString(),
+            DoctorId = authenticatedUserId,
+            PatientId = patient.Id,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
-        typeof(CreateAppointmentRequest).GetProperty(fieldName)!.SetValue(createAppointmentRequest, fieldValue);
+        if (fieldName.EndsWith("Id"))
+        {
+            Guid.TryParse(fieldName, out var fieldNameAsGuid);
+            typeof(CreateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(createAppointmentRequest, fieldNameAsGuid);
+        }
+        else
+        {
+            typeof(CreateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(createAppointmentRequest, fieldValue);
+        }
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
@@ -881,7 +897,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
-        var otherDoctor = new Doctor { AppUser = new AppUser() };
+        var otherDoctor = new Doctor {AppUser = new AppUser()};
         DbContext.Doctors.Add(otherDoctor);
         var patient = DbContext.Patients.First();
 
@@ -889,8 +905,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = otherDoctor.Id.ToString(),
-            PatientId = patient.Id.ToString(),
+            DoctorId = otherDoctor.Id,
+            PatientId = patient.Id,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -913,8 +929,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id.ToString(),
-            PatientId = authenticatedUserId.ToString(),
+            DoctorId = doctor.Id,
+            PatientId = authenticatedUserId,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -941,7 +957,7 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("Type", "")]
     [InlineData("Type", "nonExistingTypeName")]
     public async Task CreateAppointmentRequest_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
-        string filedName, string fieldValue)
+        string fieldName, string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -952,12 +968,24 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id.ToString(),
-            PatientId = authenticatedUserId.ToString(),
+            DoctorId = doctor.Id,
+            PatientId = authenticatedUserId,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
-        typeof(CreateAppointmentRequest).GetProperty(filedName)!.SetValue(createAppointmentRequest, fieldValue);
+        if (fieldName.EndsWith("Id"))
+        {
+            Guid.TryParse(fieldName, out var fieldNameAsGuid);
+            typeof(CreateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(createAppointmentRequest, fieldNameAsGuid);
+        }
+        else
+        {
+            typeof(CreateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(createAppointmentRequest, fieldValue);
+        }
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
@@ -1000,12 +1028,13 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task CreateAppointmentRequest_IdForOtherThanAuthorizedPatientIsProvidedInTheRequest_CreatesAppointmentRequestForAuthenticatedUser()
+    public async Task
+        CreateAppointmentRequest_IdForOtherThanAuthorizedPatientIsProvidedInTheRequest_CreatesAppointmentRequestForAuthenticatedUser()
     {
         // arrange
         var client = await GetHttpClientAsync();
         AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
-        var otherPatient = new Patient { AppUser = new AppUser() };
+        var otherPatient = new Patient {AppUser = new AppUser()};
         DbContext.Patients.Add(otherPatient);
         var doctor = DbContext.Doctors.First();
 
@@ -1013,8 +1042,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(1),
             Description = "Description",
-            DoctorId = doctor.Id.ToString(),
-            PatientId = otherPatient.Id.ToString(),
+            DoctorId = doctor.Id,
+            PatientId = otherPatient.Id,
             Type = DbContext.AppointmentTypes.First().Name
         };
 
@@ -1271,7 +1300,8 @@ public class AppointmentControllerTests : IntegrationTest
         var updateAppointmentRequest = new UpdateAppointmentRequest();
 
         if (fieldName == "Date")
-            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, DateTime.Parse(fieldValue));
+            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
+                DateTime.Parse(fieldValue));
         else
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, fieldValue);
 
@@ -1336,7 +1366,8 @@ public class AppointmentControllerTests : IntegrationTest
         var updateAppointmentRequest = new UpdateAppointmentRequest();
 
         if (fieldName == "Date")
-            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, DateTime.Parse(fieldValue));
+            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
+                DateTime.Parse(fieldValue));
         else
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, fieldValue);
 

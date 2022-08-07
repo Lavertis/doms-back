@@ -21,8 +21,8 @@ namespace DoctorsOfficeApi.UnitTests;
 public class PatientHandlerTests
 {
     private readonly IPatientRepository _fakePatientRepository;
-    private readonly IUserService _fakeUserService;
     private readonly UserManager<AppUser> _fakeUserManager;
+    private readonly IUserService _fakeUserService;
 
     public PatientHandlerTests()
     {
@@ -37,9 +37,10 @@ public class PatientHandlerTests
         // arrange
         var patient = new Patient
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
-        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
+        A.CallTo(() =>
+                _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
             .Returns(patient);
 
         var expectedResult = new PatientResponse(patient);
@@ -58,7 +59,8 @@ public class PatientHandlerTests
     public async Task GetPatientByIdHandler_PatientDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
+        A.CallTo(() =>
+                _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
             .Throws(new NotFoundException(""));
 
         var patientId = Guid.NewGuid();
@@ -77,7 +79,7 @@ public class PatientHandlerTests
     public async Task CreatePatientHandler_ValidRequest_CreatesPatient()
     {
         // arrange
-        var createPatientCommand = new CreatePatientCommand
+        var request = new CreatePatientRequest
         {
             UserName = "testUserName",
             FirstName = "John",
@@ -88,14 +90,15 @@ public class PatientHandlerTests
             DateOfBirth = DateTime.UtcNow,
             Password = "TestPassword12345#"
         };
+        var command = new CreatePatientCommand(request);
 
         var newAppUser = new AppUser
         {
-            UserName = createPatientCommand.UserName,
-            NormalizedUserName = createPatientCommand.UserName.ToUpper(),
-            Email = createPatientCommand.Email,
-            NormalizedEmail = createPatientCommand.Email.ToUpper(),
-            PhoneNumber = createPatientCommand.PhoneNumber
+            UserName = command.UserName,
+            NormalizedUserName = command.UserName.ToUpper(),
+            Email = command.Email,
+            NormalizedEmail = command.Email.ToUpper(),
+            PhoneNumber = command.PhoneNumber
         };
 
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
@@ -105,7 +108,7 @@ public class PatientHandlerTests
         var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService);
 
         // act
-        var result = await handler.Handle(createPatientCommand, default);
+        var result = await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakePatientRepository.CreateAsync(A<Patient>.Ignored))
@@ -141,11 +144,10 @@ public class PatientHandlerTests
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
         A.CallTo(() => _fakeUserManager.Users)
-            .Returns(new List<AppUser> { patientToUpdate.AppUser }.AsQueryable().BuildMock());
+            .Returns(new List<AppUser> {patientToUpdate.AppUser}.AsQueryable().BuildMock());
 
-        var updatePatientCommand = new UpdatePatientByIdCommand
+        var request = new UpdateAuthenticatedPatientRequest
         {
-            Id = patientId,
             UserName = "newUserName",
             FirstName = "newFirstName",
             LastName = "newLastName",
@@ -155,6 +157,7 @@ public class PatientHandlerTests
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
             NewPassword = "newPassword1234#"
         };
+        var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
         var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
         // act
@@ -176,7 +179,8 @@ public class PatientHandlerTests
     [InlineData("Address", "newAddress")]
     [InlineData("DateOfBirth", "2020-01-01")]
     [InlineData("NewPassword", "newPassword1234#")]
-    public async Task UpdatePatientByIdHandler_SingleFieldPresent_UpdatesSpecifiedField(string fieldName, string fieldValue)
+    public async Task UpdatePatientByIdHandler_SingleFieldPresent_UpdatesSpecifiedField(string fieldName,
+        string fieldValue)
     {
         // arrange
         const string oldPassword = "oldPassword12345#";
@@ -202,17 +206,21 @@ public class PatientHandlerTests
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
         A.CallTo(() => _fakeUserManager.Users)
-            .Returns(new List<AppUser> { patientToUpdate.AppUser }.AsQueryable().BuildMock());
+            .Returns(new List<AppUser> {patientToUpdate.AppUser}.AsQueryable().BuildMock());
 
-        var updatePatientCommand = new UpdatePatientByIdCommand
-        {
-            Id = patientId,
-        };
+        var request = new UpdateAuthenticatedPatientRequest();
         if (fieldName == "DateOfBirth")
-            updatePatientCommand.DateOfBirth = DateTime.Parse(fieldValue);
+        {
+            request.DateOfBirth = DateTime.Parse(fieldValue);
+        }
         else
-            typeof(UpdatePatientByIdCommand).GetProperty(fieldName)!.SetValue(updatePatientCommand, fieldValue);
+        {
+            typeof(UpdateAuthenticatedPatientRequest)
+                .GetProperty(fieldName)!
+                .SetValue(request, fieldValue);
+        }
 
+        var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
         var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
         // act
@@ -256,10 +264,8 @@ public class PatientHandlerTests
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
 
-        var updatePatientCommand = new UpdatePatientByIdCommand
-        {
-            Id = Guid.NewGuid(),
-        };
+        var request = new UpdateAuthenticatedPatientRequest();
+        var updatePatientCommand = new UpdatePatientByIdCommand(request, Guid.NewGuid());
 
         var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
 
@@ -279,7 +285,7 @@ public class PatientHandlerTests
             FirstName = "firstName",
             LastName = "lastName",
             Address = "address",
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
 
         var command = new DeletePatientByIdCommand(patientToDelete.Id);

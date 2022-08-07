@@ -5,6 +5,7 @@ using DoctorsOfficeApi.CQRS.Commands.RevokeRefreshToken;
 using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Exceptions;
+using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Services.AuthService;
 using DoctorsOfficeApi.Services.JwtService;
 using DoctorsOfficeApi.Services.UserService;
@@ -19,10 +20,10 @@ namespace DoctorsOfficeApi.UnitTests;
 
 public class AuthHandlerTests
 {
+    private readonly IAuthService _fakeAuthService;
+    private readonly IJwtService _fakeJwtService;
     private readonly UserManager<AppUser> _fakeUserManager;
     private readonly IUserService _fakeUserService;
-    private readonly IJwtService _fakeJwtService;
-    private readonly IAuthService _fakeAuthService;
 
     public AuthHandlerTests()
     {
@@ -37,7 +38,7 @@ public class AuthHandlerTests
     {
         // arrange
         const string dummyJwtToken = "dummyJwtToken";
-        var dummyRefreshToken = new RefreshToken { Token = "dummyRefreshToken" };
+        var dummyRefreshToken = new RefreshToken {Token = "dummyRefreshToken"};
 
         A.CallTo(() => _fakeUserService.GetUserByUserNameAsync(A<string>.Ignored)).Returns(new AppUser());
         A.CallTo(() => _fakeUserService.GetUserRolesAsClaimsAsync(A<AppUser>.Ignored)).Returns(new List<Claim>());
@@ -48,7 +49,12 @@ public class AuthHandlerTests
         const string ipAddress = "dummyIpAddress";
         var cancellationToken = new CancellationToken();
 
-        var command = new AuthenticateCommand("dummyUserName", "dummyPassword", ipAddress);
+        var request = new AuthenticateRequest
+        {
+            UserName = "dummyUserName",
+            Password = "dummyPassword"
+        };
+        var command = new AuthenticateCommand(request, ipAddress);
         var handler = new AuthenticateHandler(_fakeUserService, _fakeJwtService, _fakeAuthService, _fakeUserManager);
 
         // act
@@ -66,9 +72,9 @@ public class AuthHandlerTests
         // arrange
         const string dummyJwtToken = "dummyJwtToken";
         var oldRefreshToken = new RefreshToken
-            { Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
-        var newRefreshToken = new RefreshToken { Token = "newRefreshToken" };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
+            {Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes())};
+        var newRefreshToken = new RefreshToken {Token = "newRefreshToken"};
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {oldRefreshToken}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
@@ -80,11 +86,8 @@ public class AuthHandlerTests
         A.CallTo(() => _fakeJwtService.GenerateRefreshTokenAsync(A<string?>.Ignored, A<CancellationToken>.Ignored))
             .Returns(newRefreshToken);
 
-        var command = new RefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = oldRefreshToken.Token
-        };
+        var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
+        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
@@ -101,19 +104,16 @@ public class AuthHandlerTests
     {
         // arrange
         var oldRefreshToken = new RefreshToken
-            { Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
+            {Token = "oldRefreshToken", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes())};
         var fakeAppUserQueryable = new List<AppUser>
         {
-            new() { RefreshTokens = new List<RefreshToken> { oldRefreshToken } }
+            new() {RefreshTokens = new List<RefreshToken> {oldRefreshToken}}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
 
-        var command = new RefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = "nonExistingRefreshToken"
-        };
+        var request = new RefreshTokenRequest {RefreshToken = "nonExistingRefreshToken"};
+        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
@@ -133,18 +133,15 @@ public class AuthHandlerTests
             RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
             ExpiresAt = DateTime.UtcNow.Add(5.Minutes())
         };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {oldRefreshToken}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = oldRefreshToken.Token
-        };
+        var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
+        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
@@ -197,11 +194,8 @@ public class AuthHandlerTests
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = oldRefreshToken.Token
-        };
+        var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
+        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
@@ -228,18 +222,15 @@ public class AuthHandlerTests
             RevokedAt = null,
             ExpiresAt = DateTime.UtcNow.Subtract(5.Minutes())
         };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { oldRefreshToken } };
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {oldRefreshToken}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = oldRefreshToken.Token
-        };
+        var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
+        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
@@ -254,19 +245,16 @@ public class AuthHandlerTests
     {
         // arrange
         var refreshTokenToBeRevoked = new RefreshToken
-            { Token = "refreshTokenToBeRevoked", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes()) };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
+            {Token = "refreshTokenToBeRevoked", RevokedAt = null, ExpiresAt = DateTime.UtcNow.Add(5.Minutes())};
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {refreshTokenToBeRevoked}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = refreshTokenToBeRevoked.Token
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = refreshTokenToBeRevoked.Token};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
@@ -285,11 +273,8 @@ public class AuthHandlerTests
     public async void RevokeRefreshTokenHandler_EmptyToken_ThrowsBadRequestException()
     {
         // arrange
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = string.Empty
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = string.Empty};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
@@ -303,12 +288,8 @@ public class AuthHandlerTests
     public async void RevokeRefreshTokenHandler_NullToken_ThrowsBadRequestException()
     {
         // arrange
-
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = null!
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = null!};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
@@ -324,16 +305,13 @@ public class AuthHandlerTests
         // arrange
         var fakeAppUserQueryable = new List<AppUser>
         {
-            new() { RefreshTokens = new List<RefreshToken>() }
+            new() {RefreshTokens = new List<RefreshToken>()}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
 
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = "nonExistingRefreshToken"
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = "nonExistingRefreshToken"};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
@@ -353,18 +331,15 @@ public class AuthHandlerTests
             RevokedAt = DateTime.UtcNow.Subtract(5.Minutes()),
             ExpiresAt = DateTime.UtcNow.Add(5.Minutes())
         };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {refreshTokenToBeRevoked}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = refreshTokenToBeRevoked.Token
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = refreshTokenToBeRevoked.Token};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
@@ -384,18 +359,15 @@ public class AuthHandlerTests
             RevokedAt = null,
             ExpiresAt = DateTime.UtcNow.Subtract(5.Minutes())
         };
-        var appUser = new AppUser { RefreshTokens = new List<RefreshToken> { refreshTokenToBeRevoked } };
+        var appUser = new AppUser {RefreshTokens = new List<RefreshToken> {refreshTokenToBeRevoked}};
 
         A.CallTo(() => _fakeAuthService.GetUserByRefreshTokenAsync(
             A<string>.Ignored,
             A<CancellationToken>.Ignored)
         ).Returns(appUser);
 
-        var command = new RevokeRefreshTokenCommand
-        {
-            IpAddress = "dummyIpAddress",
-            RefreshToken = refreshTokenToBeRevoked.Token
-        };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = refreshTokenToBeRevoked.Token};
+        var command = new RevokeRefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act

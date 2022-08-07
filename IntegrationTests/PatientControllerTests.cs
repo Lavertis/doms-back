@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text;
-using DoctorsOfficeApi.CQRS.Commands.CreatePatient;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
@@ -353,7 +352,7 @@ public class PatientControllerTests : IntegrationTest
         const string patientPassword = "oldPassword12345#";
         var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -365,7 +364,8 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
+        var authenticatedPatientId =
+            await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -414,7 +414,7 @@ public class PatientControllerTests : IntegrationTest
         const string patientPassword = "oldPassword12345#";
         var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -426,7 +426,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var conflictPatient = await CreatePatient(new CreatePatientCommand
+        var conflictPatient = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName2",
             FirstName = "oldFirstName2",
@@ -465,7 +465,7 @@ public class PatientControllerTests : IntegrationTest
         const string patientPassword = "oldPassword12345#";
         var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -477,7 +477,7 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var conflictPatient = await CreatePatient(new CreatePatientCommand
+        var conflictPatient = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName2",
             FirstName = "oldFirstName2",
@@ -515,7 +515,7 @@ public class PatientControllerTests : IntegrationTest
 
         const string patientPassword = "oldPassword12345#";
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -553,7 +553,7 @@ public class PatientControllerTests : IntegrationTest
 
         const string patientPassword = "oldPassword12345#";
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -638,7 +638,7 @@ public class PatientControllerTests : IntegrationTest
 
         const string patientPassword = "oldPassword12345#";
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -690,7 +690,7 @@ public class PatientControllerTests : IntegrationTest
         const string patientPassword = "oldPassword12345#";
         var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -702,7 +702,8 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
+        var authenticatedPatientId =
+            await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
@@ -714,7 +715,8 @@ public class PatientControllerTests : IntegrationTest
         }
         else
         {
-            typeof(UpdateAuthenticatedPatientRequest).GetProperty(fieldName)!.SetValue(updatePatientRequest, fieldValue);
+            typeof(UpdateAuthenticatedPatientRequest).GetProperty(fieldName)!.SetValue(updatePatientRequest,
+                fieldValue);
         }
 
         DbContext.Patients.Remove(patientToBeUpdated);
@@ -772,7 +774,8 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("UserName", "")]
     [InlineData("Email", "")]
     [InlineData("Email", "aaa")]
-    public async Task UpdateAuthenticatedPatient_SingleInvalidField_ReturnsBadRequest(string fieldName, string fieldValue)
+    public async Task UpdateAuthenticatedPatient_SingleInvalidField_ReturnsBadRequest(string fieldName,
+        string fieldValue)
     {
         var client = await GetHttpClientAsync();
 
@@ -780,7 +783,7 @@ public class PatientControllerTests : IntegrationTest
         const string patientPassword = "oldPassword12345#";
         var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -792,7 +795,8 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
+        var authenticatedPatientId =
+            await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
@@ -850,7 +854,7 @@ public class PatientControllerTests : IntegrationTest
 
         const string patientPassword = "oldPassword12345#";
 
-        var patientToBeUpdated = await CreatePatient(new CreatePatientCommand
+        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
             UserName = "oldUserName",
             FirstName = "oldFirstName",
@@ -862,7 +866,8 @@ public class PatientControllerTests : IntegrationTest
             Password = patientPassword
         });
 
-        var authenticatedPatientId = await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
+        var authenticatedPatientId =
+            await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
         {
@@ -946,7 +951,7 @@ public class PatientControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    private async Task<Patient> CreatePatient(CreatePatientCommand createPatientCommand)
+    private async Task<Patient> CreatePatient(CreatePatientRequest createPatientCommand)
     {
         var hasher = new PasswordHasher<AppUser>();
 

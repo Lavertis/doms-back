@@ -10,10 +10,11 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdateDoctorById;
 public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, DoctorResponse>
 {
     private readonly IDoctorRepository _doctorRepository;
-    private readonly IUserService _userService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
-    public UpdateDoctorByIdHandler(IDoctorRepository doctorRepository, IUserService userService, UserManager<AppUser> userManager)
+    public UpdateDoctorByIdHandler(IDoctorRepository doctorRepository, IUserService userService,
+        UserManager<AppUser> userManager)
     {
         _doctorRepository = doctorRepository;
         _userService = userService;
@@ -22,7 +23,7 @@ public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, 
 
     public async Task<DoctorResponse> Handle(UpdateDoctorByIdCommand request, CancellationToken cancellationToken)
     {
-        var doctor = await _doctorRepository.GetByIdAsync(request.Id);
+        var doctor = await _doctorRepository.GetByIdAsync(request.DoctorId);
         var appUser = _userManager.Users.First(x => x.Id == doctor.Id);
 
         appUser.UserName = request.UserName ?? appUser.UserName;

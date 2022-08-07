@@ -123,7 +123,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RefreshTokenRequest { RefreshToken = testToken };
+        var request = new RefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
@@ -141,7 +141,7 @@ public class AuthControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
 
-        var request = new RefreshTokenRequest { RefreshToken = "nonExistingToken" };
+        var request = new RefreshTokenRequest {RefreshToken = "nonExistingToken"};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
@@ -157,7 +157,7 @@ public class AuthControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser {UserName = "testUser"};
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
@@ -167,7 +167,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RefreshTokenRequest { RefreshToken = testToken };
+        var request = new RefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
@@ -197,7 +197,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RefreshTokenRequest { RefreshToken = testToken };
+        var request = new RefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
@@ -238,7 +238,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RefreshTokenRequest { RefreshToken = testToken };
+        var request = new RefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
@@ -273,7 +273,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RevokeRefreshTokenRequest { RefreshToken = testToken };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/revoke-token", request);
@@ -292,7 +292,7 @@ public class AuthControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
 
-        var request = new RevokeRefreshTokenRequest { RefreshToken = "nonExistingToken" };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = "nonExistingToken"};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/revoke-token", request);
@@ -308,7 +308,7 @@ public class AuthControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser {UserName = "testUser"};
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
@@ -318,7 +318,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RevokeRefreshTokenRequest { RefreshToken = testToken };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/revoke-token", request);
@@ -334,7 +334,7 @@ public class AuthControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser { UserName = "testUser" };
+        var testUser = new AppUser {UserName = "testUser"};
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
@@ -344,7 +344,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RevokeRefreshTokenRequest { RefreshToken = testToken };
+        var request = new RevokeRefreshTokenRequest {RefreshToken = testToken};
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/revoke-token", request);

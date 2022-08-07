@@ -11,10 +11,10 @@ namespace DoctorsOfficeApi.CQRS.Commands.RefreshToken;
 
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, AuthenticateResponse>
 {
-    private readonly IUserService _userService;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IJwtService _jwtService;
     private readonly IAuthService _authService;
+    private readonly IJwtService _jwtService;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
     public RefreshTokenHandler(
         UserManager<AppUser> userManager,
@@ -61,7 +61,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Authenti
         return new AuthenticateResponse(jwtToken, newRefreshToken.Token);
     }
 
-    private void RevokeDescendantRefreshTokens(Entities.RefreshToken refreshToken, AppUser user, string? ipAddress, string reason)
+    private void RevokeDescendantRefreshTokens(Entities.RefreshToken refreshToken, AppUser user, string? ipAddress,
+        string reason)
     {
         if (string.IsNullOrEmpty(refreshToken.ReplacedByToken)) return;
 
@@ -74,7 +75,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Authenti
             RevokeDescendantRefreshTokens(childToken, user, ipAddress, reason);
     }
 
-    private static void RevokeRefreshToken(Entities.RefreshToken token, string? ipAddress, string? reason = null, string? replacedByToken = null)
+    private static void RevokeRefreshToken(Entities.RefreshToken token, string? ipAddress, string? reason = null,
+        string? replacedByToken = null)
     {
         token.RevokedAt = DateTime.UtcNow;
         token.RevokedByIp = ipAddress;
@@ -82,7 +84,8 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, Authenti
         token.ReplacedByToken = replacedByToken;
     }
 
-    private async Task<Entities.RefreshToken> RotateRefreshTokenAsync(Entities.RefreshToken refreshToken, string? ipAddress, CancellationToken cancellationToken = default)
+    private async Task<Entities.RefreshToken> RotateRefreshTokenAsync(Entities.RefreshToken refreshToken,
+        string? ipAddress, CancellationToken cancellationToken = default)
     {
         var newRefreshToken = await _jwtService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
         RevokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);

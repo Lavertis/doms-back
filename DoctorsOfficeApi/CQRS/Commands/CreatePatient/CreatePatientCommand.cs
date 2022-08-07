@@ -6,18 +6,14 @@ namespace DoctorsOfficeApi.CQRS.Commands.CreatePatient;
 
 public class CreatePatientCommand : IRequest<PatientResponse>
 {
-    public string UserName { get; set; } = default!;
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Address { get; set; } = default!;
-    public DateTime DateOfBirth { get; set; }
-    public string Password { get; set; } = default!;
-
-    public CreatePatientCommand()
-    {
-    }
+    public readonly string Address;
+    public readonly DateTime DateOfBirth;
+    public readonly string Email;
+    public readonly string FirstName;
+    public readonly string LastName;
+    public readonly string Password;
+    public readonly string PhoneNumber;
+    public readonly string UserName;
 
     public CreatePatientCommand(CreatePatientRequest request)
     {

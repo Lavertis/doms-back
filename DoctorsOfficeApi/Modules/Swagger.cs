@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -24,17 +23,6 @@ public static class Swagger
             // Set the comments path for the Swagger JSON and UI.
             var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-
-            options.TagActionsBy(api =>
-            {
-                if (api.GroupName is not null)
-                    return new[] { api.GroupName };
-                if (api.ActionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
-                    return new[] { controllerActionDescriptor.ControllerName };
-
-                throw new InvalidOperationException("Unable to determine tag for endpoint.");
-            });
-            options.DocInclusionPredicate((_, _) => true);
         });
     }
 }

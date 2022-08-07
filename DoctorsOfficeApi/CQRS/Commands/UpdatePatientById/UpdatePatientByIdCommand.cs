@@ -6,32 +6,27 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdatePatientById;
 
 public class UpdatePatientByIdCommand : IRequest<PatientResponse>
 {
-    public Guid Id { get; set; } = default!;
-    public string? UserName { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? Email { get; set; }
-    public string? PhoneNumber { get; set; }
-    public string? Address { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string? NewPassword { get; set; }
-    public string CurrentPassword { get; set; } = default!;
+    public readonly string? Address;
+    public readonly string CurrentPassword;
+    public readonly DateTime? DateOfBirth;
+    public readonly string? Email;
+    public readonly string? FirstName;
+    public readonly string? LastName;
+    public readonly string? NewPassword;
+    public readonly Guid PatientId;
+    public readonly string? PhoneNumber;
+    public readonly string? UserName;
 
-    public UpdatePatientByIdCommand()
+    public UpdatePatientByIdCommand(UpdateAuthenticatedPatientRequest request, Guid patientId)
     {
-    }
-
-    public UpdatePatientByIdCommand(Guid id, UpdateAuthenticatedPatientRequest request)
-    {
-        Id = id;
+        PatientId = patientId;
         UserName = request.UserName;
         FirstName = request.FirstName;
         LastName = request.LastName;
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
         Address = request.Address;
-        if (request.DateOfBirth is not null)
-            DateOfBirth = request.DateOfBirth.Value.Date;
+        DateOfBirth = request.DateOfBirth?.Date;
         NewPassword = request.NewPassword;
         CurrentPassword = request.CurrentPassword;
     }

@@ -146,8 +146,7 @@ public class UserServiceTests
     [InlineData("ConfirmPassword", "")]
     [InlineData("RoleName", "")]
     public async void CreateUserAsync_InvalidProperty_ThrowsBadRequestException(
-        string propertyName,
-        string propertyValue)
+        string propertyName, string propertyValue)
     {
         // arrange
         A.CallTo(() => _fakeRoleManager.RoleExistsAsync(A<string>.Ignored)).Returns(true);
@@ -189,7 +188,7 @@ public class UserServiceTests
             PhoneNumberConfirmed = true,
             PasswordHash = oldPasswordHash
         };
-        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
         A.CallTo(() => _fakeUserManager.FindByNameAsync(A<string>.Ignored)).Returns(appUser);
@@ -242,7 +241,7 @@ public class UserServiceTests
             PhoneNumberConfirmed = true,
             PasswordHash = oldPasswordHash
         };
-        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
@@ -260,7 +259,8 @@ public class UserServiceTests
 
         // assert
         if (updateUserRequest.UserName is not null) result.UserName.Should().Be(updateUserRequest.UserName);
-        if (updateUserRequest.UserName is not null) result.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
+        if (updateUserRequest.UserName is not null)
+            result.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
         if (updateUserRequest.Email is not null) result.Email.Should().Be(updateUserRequest.Email);
         if (updateUserRequest.Email is not null) result.NormalizedEmail.Should().Be(updateUserRequest.Email.ToUpper());
         if (updateUserRequest.PhoneNumber is not null) result.PhoneNumber.Should().Be(updateUserRequest.PhoneNumber);
@@ -290,7 +290,7 @@ public class UserServiceTests
             PhoneNumberConfirmed = true,
             PasswordHash = oldPasswordHash
         };
-        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
 
         var updateUserRequest = new UpdateUserRequest
@@ -335,14 +335,14 @@ public class UserServiceTests
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        var appUser = new AppUser { Id = Guid.NewGuid(), UserName = "testUserName", PasswordHash = oldPasswordHash };
-        var conflictingUser = new AppUser { Id = Guid.NewGuid(), UserName = "conflictingUserName" };
-        var usersQueryable = new List<AppUser> { appUser, conflictingUser }.AsQueryable().BuildMock();
+        var appUser = new AppUser {Id = Guid.NewGuid(), UserName = "testUserName", PasswordHash = oldPasswordHash};
+        var conflictingUser = new AppUser {Id = Guid.NewGuid(), UserName = "conflictingUserName"};
+        var usersQueryable = new List<AppUser> {appUser, conflictingUser}.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
 
-        var updateUserRequest = new UpdateUserRequest { UserName = "conflictingUserName" };
+        var updateUserRequest = new UpdateUserRequest {UserName = "conflictingUserName"};
 
         // act
         var action = async () => await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
@@ -357,8 +357,12 @@ public class UserServiceTests
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        var appUser = new AppUser { Id = Guid.NewGuid(), UserName = "testUserName", NormalizedUserName = "TESTUSERSNAME", PasswordHash = oldPasswordHash };
-        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        var appUser = new AppUser
+        {
+            Id = Guid.NewGuid(), UserName = "testUserName", NormalizedUserName = "TESTUSERSNAME",
+            PasswordHash = oldPasswordHash
+        };
+        var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
@@ -446,7 +450,7 @@ public class UserServiceTests
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
-        var roles = new List<string> { "role1", "role2" };
+        var roles = new List<string> {"role1", "role2"};
         A.CallTo(() => _fakeUserManager.GetRolesAsync(A<AppUser>.Ignored)).Returns(roles);
 
         // act
@@ -477,7 +481,7 @@ public class UserServiceTests
         // arrange
         var fakeAppUserQueryable = new List<AppUser>
         {
-            new AppUser { UserName = "userName", NormalizedUserName = "USERNAME" }
+            new AppUser {UserName = "userName", NormalizedUserName = "USERNAME"}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
@@ -599,7 +603,7 @@ public class UserServiceTests
     {
         // arrange
         var appUser = new AppUser();
-        var usersQueryable = new List<AppUser> { appUser }.AsQueryable().BuildMock();
+        var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
 
         // act

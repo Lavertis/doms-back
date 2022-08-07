@@ -26,9 +26,9 @@ public class UserControllerTests : IntegrationTest
 
         var users = new List<AppUser>
         {
-            new() { UserName = "user1" },
-            new() { UserName = "user2" },
-            new() { UserName = "user3" },
+            new() {UserName = "user1"},
+            new() {UserName = "user2"},
+            new() {UserName = "user3"},
         };
         DbContext.Users.AddRange(users);
         await DbContext.SaveChangesAsync();
@@ -136,9 +136,9 @@ public class UserControllerTests : IntegrationTest
         };
         var refreshTokens = new List<RefreshToken>
         {
-            new() { Id = Guid.NewGuid(), Token = "token1" },
-            new() { Id = Guid.NewGuid(), Token = "token2" },
-            new() { Id = Guid.NewGuid(), Token = "token3" },
+            new() {Id = Guid.NewGuid(), Token = "token1"},
+            new() {Id = Guid.NewGuid(), Token = "token2"},
+            new() {Id = Guid.NewGuid(), Token = "token3"},
         };
         user.RefreshTokens.AddRange(refreshTokens);
         DbContext.Users.Add(user);

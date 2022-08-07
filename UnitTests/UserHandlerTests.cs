@@ -118,7 +118,7 @@ public class UserHandlerTests
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
-        var refreshTokens = new List<RefreshToken> { A.Dummy<RefreshToken>() };
+        var refreshTokens = new List<RefreshToken> {A.Dummy<RefreshToken>()};
         A.CallTo(() => appUser.RefreshTokens).Returns(refreshTokens);
         A.CallTo(() => _fakeUserService.GetUserByIdAsync(A<Guid>.Ignored)).Returns(appUser);
 

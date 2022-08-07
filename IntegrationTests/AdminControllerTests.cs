@@ -89,7 +89,7 @@ public class AdminControllerTests : IntegrationTest
 
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
 
         DbContext.Admins.Add(admin);
@@ -163,9 +163,9 @@ public class AdminControllerTests : IntegrationTest
 
         var admins = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         };
 
         DbContext.Admins.AddRange(admins);

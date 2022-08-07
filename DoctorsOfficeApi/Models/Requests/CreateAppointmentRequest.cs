@@ -8,14 +8,15 @@ public class CreateAppointmentRequest
 {
     public DateTime Date { get; set; }
     public string Description { get; set; } = default!;
-    public string PatientId { get; set; } = default!;
-    public string DoctorId { get; set; } = default!;
+    public Guid PatientId { get; set; }
+    public Guid DoctorId { get; set; }
     public string Type { get; set; } = default!;
 }
 
 public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppointmentRequest>
 {
-    public CreateAppointmentRequestValidator(IUserService userService, IAppointmentTypeRepository appointmentTypeRepository)
+    public CreateAppointmentRequestValidator(IUserService userService,
+        IAppointmentTypeRepository appointmentTypeRepository)
     {
         CascadeMode = CascadeMode.Stop;
         RuleFor(e => e.Date)
@@ -31,19 +32,19 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
         RuleFor(e => e.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
-            .MustAsync((patientId, cancellationToken) => userService.UserExistsByIdAsync(Guid.Parse(patientId)))
+            .MustAsync((patientId, cancellationToken) => userService.UserExistsByIdAsync(patientId))
             .WithMessage("Patient does not exist");
 
         RuleFor(e => e.DoctorId)
             .NotEmpty()
             .WithMessage("DoctorId is required")
-            .MustAsync(((doctorId, cancellationToken) => userService.UserExistsByIdAsync(Guid.Parse(doctorId))))
+            .MustAsync((doctorId, cancellationToken) => userService.UserExistsByIdAsync(doctorId))
             .WithMessage("Doctor does not exist");
 
         RuleFor(e => e.Type)
             .NotEmpty()
             .WithMessage("Type is required")
-            .MustAsync(((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type)))
+            .MustAsync((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type))
             .WithMessage("Type does not exist");
     }
 }

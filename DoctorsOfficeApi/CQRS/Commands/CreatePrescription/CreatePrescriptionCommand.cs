@@ -1,3 +1,4 @@
+using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
 using MediatR;
 
@@ -5,23 +6,18 @@ namespace DoctorsOfficeApi.CQRS.Commands.CreatePrescription;
 
 public class CreatePrescriptionCommand : IRequest<PrescriptionResponse>
 {
-    public string Title { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public Guid DoctorId { get; set; }
-    public Guid PatientId { get; set; }
-    public IList<Guid> DrugsIds { get; set; } = default!;
+    public readonly string Description;
+    public readonly Guid DoctorId;
+    public readonly IList<Guid> DrugsIds;
+    public readonly Guid PatientId;
+    public readonly string Title;
 
-
-    public CreatePrescriptionCommand()
+    public CreatePrescriptionCommand(CreatePrescriptionRequest request, Guid doctorId)
     {
-    }
-
-    public CreatePrescriptionCommand(string title, string description, Guid doctorId, Guid patientId, IList<Guid> drugsIds)
-    {
-        Title = title;
-        Description = description;
+        Title = request.Title;
+        Description = request.Description;
+        PatientId = request.PatientId;
+        DrugsIds = request.DrugsIds;
         DoctorId = doctorId;
-        PatientId = patientId;
-        DrugsIds = drugsIds;
     }
 }

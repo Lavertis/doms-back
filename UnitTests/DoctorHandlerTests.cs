@@ -21,8 +21,8 @@ namespace DoctorsOfficeApi.UnitTests;
 public class DoctorHandlerTests
 {
     private readonly IDoctorRepository _fakeDoctorRepository;
-    private readonly IUserService _fakeUserService;
     private readonly UserManager<AppUser> _fakeUserManager;
+    private readonly IUserService _fakeUserService;
 
     public DoctorHandlerTests()
     {
@@ -85,7 +85,7 @@ public class DoctorHandlerTests
 
         var doctor = new Doctor
         {
-            AppUser = new AppUser { Id = doctorId }
+            AppUser = new AppUser {Id = doctorId}
         };
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(doctorId, A<Expression<Func<Doctor, object>>>.Ignored))
@@ -109,7 +109,7 @@ public class DoctorHandlerTests
 
         var doctor = new Doctor
         {
-            AppUser = new AppUser { Id = doctorId }
+            AppUser = new AppUser {Id = doctorId}
         };
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(doctorId, A<Expression<Func<Doctor, object>>>.Ignored))
@@ -129,14 +129,14 @@ public class DoctorHandlerTests
     public async Task CreateDoctorHandler_ValidRequest_CreatesNewDoctor()
     {
         // arrange
-
-        var command = new CreateDoctorCommand
+        var request = new CreateDoctorRequest
         {
             UserName = "userName",
             Email = "mail@mail.com",
             PhoneNumber = "123456789",
             Password = "Password1234#"
         };
+        var command = new CreateDoctorCommand(request);
 
         var appUser = new AppUser
         {
@@ -152,7 +152,7 @@ public class DoctorHandlerTests
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored)).Returns(appUser);
 
         // act
-        var result = await handler.Handle(command, default);
+        await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored)).MustHaveHappenedOnceExactly();
@@ -177,18 +177,19 @@ public class DoctorHandlerTests
             }
         };
 
-        var command = new UpdateDoctorByIdCommand
+        var request = new UpdateDoctorRequest
         {
-            Id = doctorId,
             UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
-            Password = "newPassword1234#"
+            NewPassword = "newPassword1234#"
         };
+        var command = new UpdateDoctorByIdCommand(request, doctorId);
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(doctorToUpdate);
-        A.CallTo(() => _fakeUserManager.Users).Returns(new List<AppUser> { doctorToUpdate.AppUser }.AsQueryable().BuildMock());
+        A.CallTo(() => _fakeUserManager.Users)
+            .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeUserService, _fakeUserManager);
 
@@ -205,14 +206,14 @@ public class DoctorHandlerTests
     [Fact]
     public async Task UpdateDoctorByIdHandler_DoctorWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
-        var command = new UpdateDoctorByIdCommand
+        var request = new UpdateDoctorRequest
         {
-            Id = Guid.NewGuid(),
             UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "123456789",
-            Password = "newPassword1234#"
+            NewPassword = "newPassword1234#"
         };
+        var command = new UpdateDoctorByIdCommand(request, Guid.NewGuid());
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored))
             .Throws(new NotFoundException(""));
@@ -230,7 +231,7 @@ public class DoctorHandlerTests
     [InlineData("UserName", "newUserName")]
     [InlineData("Email", "newMail@mail.com")]
     [InlineData("PhoneNumber", "987654321")]
-    [InlineData("Password", "newPassword1234#")]
+    [InlineData("NewPassword", "newPassword1234#")]
     public async Task UpdateDoctorByIdHandler_SingleFieldPresent_UpdatesSpecifiedField(
         string fieldName, string fieldValue)
     {
@@ -248,15 +249,14 @@ public class DoctorHandlerTests
             }
         };
 
-        var command = new UpdateDoctorByIdCommand
-        {
-            Id = doctorId,
-        };
-        typeof(UpdateDoctorByIdCommand).GetProperty(fieldName)!.SetValue(command, fieldValue);
+        var request = new UpdateDoctorRequest();
+        var command = new UpdateDoctorByIdCommand(request, doctorId);
+        typeof(UpdateDoctorRequest).GetProperty(fieldName)!.SetValue(request, fieldValue);
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(doctorToUpdate);
-        A.CallTo(() => _fakeUserManager.Users).Returns(new List<AppUser> { doctorToUpdate.AppUser }.AsQueryable().BuildMock());
+        A.CallTo(() => _fakeUserManager.Users)
+            .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeUserService, _fakeUserManager);
 
@@ -274,7 +274,7 @@ public class DoctorHandlerTests
         // arrange
         var doctorToDelete = new Doctor
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
 
         var command = new DeleteDoctorByIdCommand(doctorToDelete.AppUser.Id);

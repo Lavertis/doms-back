@@ -5,7 +5,7 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetPrescriptionById;
 
 public class GetPrescriptionByIdQuery : IRequest<PrescriptionResponse>
 {
-    public Guid Id { get; set; }
+    public readonly Guid Id;
 
     public GetPrescriptionByIdQuery(Guid id)
     {

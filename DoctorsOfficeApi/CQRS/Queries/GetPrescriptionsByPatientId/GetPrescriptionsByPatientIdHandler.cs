@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOfficeApi.CQRS.Queries.GetPrescriptionsByPatientId;
 
-public class GetPrescriptionsByPatientIdHandler : IRequestHandler<GetPrescriptionsByPatientIdQuery, IList<PrescriptionResponse>>
+public class
+    GetPrescriptionsByPatientIdHandler : IRequestHandler<GetPrescriptionsByPatientIdQuery, IList<PrescriptionResponse>>
 {
     private readonly IPrescriptionRepository _prescriptionRepository;
 
@@ -14,7 +15,8 @@ public class GetPrescriptionsByPatientIdHandler : IRequestHandler<GetPrescriptio
         _prescriptionRepository = prescriptionRepository;
     }
 
-    public async Task<IList<PrescriptionResponse>> Handle(GetPrescriptionsByPatientIdQuery request, CancellationToken cancellationToken)
+    public async Task<IList<PrescriptionResponse>> Handle(GetPrescriptionsByPatientIdQuery request,
+        CancellationToken cancellationToken)
     {
         var prescriptions = _prescriptionRepository.GetByPatientId(request.PatientId, p => p.DrugItems);
         var prescriptionResponses = await prescriptions

@@ -7,7 +7,7 @@ public class CreatePrescriptionRequest
 {
     public string Title { get; set; } = default!;
     public string Description { get; set; } = default!;
-    public string PatientId { get; set; } = default!;
+    public Guid PatientId { get; set; }
     public IList<Guid> DrugsIds { get; set; } = default!;
 }
 
@@ -26,12 +26,7 @@ public class CreatePrescriptionRequestValidator : AbstractValidator<CreatePrescr
         RuleFor(x => x.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
-            .MustAsync(async (id, cancellationToken) =>
-            {
-                if (!Guid.TryParse(id, out var guid))
-                    return false;
-                return await patientRepository.ExistsByIdAsync(guid);
-            })
+            .MustAsync(async (id, cancellationToken) => await patientRepository.ExistsByIdAsync(id))
             .WithMessage("Patient with specified id does not exist");
 
         RuleFor(x => x.DrugsIds)

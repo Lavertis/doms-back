@@ -1,5 +1,6 @@
 ﻿using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Exceptions;
+using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Responses;
 using DoctorsOfficeApi.Repositories.AppointmentRepository;
 using DoctorsOfficeApi.Repositories.AppointmentStatusRepository;
@@ -13,10 +14,10 @@ namespace DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
 public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand, AppointmentResponse>
 {
     private readonly IAppointmentRepository _appointmentRepository;
-    private readonly IDoctorRepository _doctorRepository;
-    private readonly IPatientRepository _patientRepository;
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
+    private readonly IDoctorRepository _doctorRepository;
+    private readonly IPatientRepository _patientRepository;
 
     public CreateAppointmentHandler(
         IAppointmentRepository appointmentRepository,
@@ -34,6 +35,14 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
 
     public async Task<AppointmentResponse> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
     {
+        switch (request.Role)
+        {
+            case RoleTypes.Doctor when request.DoctorId != request.UserId:
+                throw new BadRequestException("Cannot create appointment for another doctor");
+            case RoleTypes.Patient when request.PatientId != request.UserId:
+                throw new BadRequestException("Cannot create appointment request for another patient");
+        }
+
         Appointment newAppointment;
         try
         {

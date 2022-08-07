@@ -10,10 +10,11 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdatePatientById;
 public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand, PatientResponse>
 {
     private readonly IPatientRepository _patientRepository;
-    private readonly IUserService _userService;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IUserService _userService;
 
-    public UpdatePatientByIdHandler(IPatientRepository patientRepository, IUserService userService, UserManager<AppUser> userManager)
+    public UpdatePatientByIdHandler(IPatientRepository patientRepository, IUserService userService,
+        UserManager<AppUser> userManager)
     {
         _patientRepository = patientRepository;
         _userService = userService;
@@ -22,7 +23,7 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
 
     public async Task<PatientResponse> Handle(UpdatePatientByIdCommand request, CancellationToken cancellationToken)
     {
-        var patient = await _patientRepository.GetByIdAsync(request.Id);
+        var patient = await _patientRepository.GetByIdAsync(request.PatientId);
         var appUser = _userManager.Users.First(x => x.Id == patient.Id);
 
         appUser.UserName = request.UserName ?? appUser.UserName;
@@ -37,7 +38,7 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
         patient.DateOfBirth = request.DateOfBirth ?? patient.DateOfBirth;
 
         await _userManager.UpdateAsync(appUser);
-        await _patientRepository.UpdateByIdAsync(request.Id, patient);
+        await _patientRepository.UpdateByIdAsync(request.PatientId, patient);
 
         patient.AppUser = appUser;
         return new PatientResponse(patient);

@@ -44,7 +44,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
                 if (dbContextOptions is not null)
                     services.Remove(dbContextOptions);
 
-                var inMemoryDbName = "InMemoryDb_" + Guid.NewGuid(); // workaround for concurrent integration tests using same db
+                var inMemoryDbName =
+                    "InMemoryDb_" + Guid.NewGuid(); // workaround for concurrent integration tests using same db
                 services.AddDbContext<AppDbContext>(options => { options.UseInMemoryDatabase(inMemoryDbName); });
 
                 DbContext = services.BuildServiceProvider().GetService<AppDbContext>()!;
@@ -76,7 +77,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             UserName = TestAdminUserName
         };
         await CreateUserAsync(testAdminUser, TestAdminPassword, RoleTypes.Admin);
-        var testAdmin = new Admin { Id = testAdminUser.Id, };
+        var testAdmin = new Admin {Id = testAdminUser.Id,};
         await DbContext.Admins.AddAsync(testAdmin);
 
         var testDoctorUser = new AppUser
@@ -84,7 +85,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             UserName = TestDoctorUserName
         };
         await CreateUserAsync(testDoctorUser, TestDoctorPassword, RoleTypes.Doctor);
-        var testDoctor = new Doctor { Id = testDoctorUser.Id, };
+        var testDoctor = new Doctor {Id = testDoctorUser.Id,};
         await DbContext.Doctors.AddAsync(testDoctor);
 
         var testPatientUser = new AppUser

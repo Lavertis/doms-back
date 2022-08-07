@@ -5,7 +5,7 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetUserById;
 
 public class GetUserByIdQuery : IRequest<UserResponse>
 {
-    public Guid UserId { get; set; }
+    public readonly Guid UserId;
 
     public GetUserByIdQuery(Guid userId)
     {

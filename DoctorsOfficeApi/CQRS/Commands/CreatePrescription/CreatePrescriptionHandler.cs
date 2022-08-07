@@ -14,7 +14,8 @@ public class CreatePrescriptionHandler : IRequestHandler<CreatePrescriptionComma
         _prescriptionRepository = prescriptionRepository;
     }
 
-    public async Task<PrescriptionResponse> Handle(CreatePrescriptionCommand request, CancellationToken cancellationToken)
+    public async Task<PrescriptionResponse> Handle(CreatePrescriptionCommand request,
+        CancellationToken cancellationToken)
     {
         var newPrescription = new Prescription
         {
@@ -22,7 +23,7 @@ public class CreatePrescriptionHandler : IRequestHandler<CreatePrescriptionComma
             Description = request.Description,
             PatientId = request.PatientId,
             DoctorId = request.DoctorId,
-            DrugItems = request.DrugsIds.Select(id => new DrugItem { Id = id }).ToList()
+            DrugItems = request.DrugsIds.Select(id => new DrugItem {Id = id}).ToList()
         };
         var prescriptionEntity = await _prescriptionRepository.CreateAsync(newPrescription);
         return new PrescriptionResponse(prescriptionEntity);

@@ -14,7 +14,8 @@ public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppoint
         _appointmentRepository = appointmentRepository;
     }
 
-    public async Task<IList<AppointmentResponse>> Handle(GetFilteredAppointmentsQuery request, CancellationToken cancellationToken)
+    public async Task<IList<AppointmentResponse>> Handle(GetFilteredAppointmentsQuery request,
+        CancellationToken cancellationToken)
     {
         var appointmentsQueryable = _appointmentRepository.GetAll(
             a => a.Doctor,
@@ -22,18 +23,18 @@ public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppoint
             a => a.Type,
             a => a.Status
         );
-        if (request.dateStart is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Date >= request.dateStart);
-        if (request.dateEnd is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Date <= request.dateEnd);
-        if (request.type is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Type.Name == request.type);
-        if (request.status is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Status.Name == request.status);
-        if (request.patientId is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Patient.Id == request.patientId);
-        if (request.doctorId is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Doctor.Id == request.doctorId);
+        if (request.DateStart is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Date >= request.DateStart);
+        if (request.DateEnd is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Date <= request.DateEnd);
+        if (request.Type is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Type.Name == request.Type);
+        if (request.Status is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Status.Name == request.Status);
+        if (request.PatientId is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Patient.Id == request.PatientId);
+        if (request.DoctorId is not null)
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Doctor.Id == request.DoctorId);
 
         var appointmentResponses = await appointmentsQueryable
             .OrderBy(a => a.Date)

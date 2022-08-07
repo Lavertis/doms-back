@@ -28,9 +28,10 @@ public class AdminHandlerTests
         var adminId = Guid.NewGuid();
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
-        A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored)).Returns(admin);
+        A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored))
+            .Returns(admin);
 
         var expectedResponse = new AdminResponse(admin);
 
@@ -68,9 +69,9 @@ public class AdminHandlerTests
         // arrange
         var adminsQueryable = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeAdminRepository.GetAll(A<Expression<Func<Admin, object>>>.Ignored))

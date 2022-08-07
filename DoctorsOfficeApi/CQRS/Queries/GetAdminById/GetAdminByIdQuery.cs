@@ -5,10 +5,10 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetAdminById;
 
 public class GetAdminByIdQuery : IRequest<AdminResponse>
 {
-    public Guid Id { get; set; }
+    public readonly Guid AdminId;
 
-    public GetAdminByIdQuery(Guid id)
+    public GetAdminByIdQuery(Guid adminId)
     {
-        Id = id;
+        AdminId = adminId;
     }
 }

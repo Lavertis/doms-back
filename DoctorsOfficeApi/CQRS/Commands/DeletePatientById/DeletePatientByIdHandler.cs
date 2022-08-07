@@ -14,7 +14,7 @@ public class DeletePatientByIdHandler : IRequestHandler<DeletePatientByIdCommand
 
     public async Task<Unit> Handle(DeletePatientByIdCommand request, CancellationToken cancellationToken)
     {
-        await _patientRepository.DeleteByIdAsync(request.Id);
+        await _patientRepository.DeleteByIdAsync(request.PatientId);
         return Unit.Value;
     }
 }

@@ -15,7 +15,7 @@ public class GetAdminByIdHandler : IRequestHandler<GetAdminByIdQuery, AdminRespo
 
     public async Task<AdminResponse> Handle(GetAdminByIdQuery request, CancellationToken cancellationToken)
     {
-        var admin = await _adminRepository.GetByIdAsync(request.Id, a => a.AppUser);
+        var admin = await _adminRepository.GetByIdAsync(request.AdminId, a => a.AppUser);
         return new AdminResponse(admin);
     }
 }

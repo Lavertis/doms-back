@@ -5,10 +5,14 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetAppointmentById;
 
 public class GetAppointmentByIdQuery : IRequest<AppointmentResponse>
 {
-    public Guid Id { get; set; }
+    public readonly Guid AppointmentId;
+    public readonly string RoleName;
+    public readonly Guid UserId;
 
-    public GetAppointmentByIdQuery(Guid id)
+    public GetAppointmentByIdQuery(Guid appointmentId, Guid userId, string roleName)
     {
-        Id = id;
+        AppointmentId = appointmentId;
+        UserId = userId;
+        RoleName = roleName;
     }
 }

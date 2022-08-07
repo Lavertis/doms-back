@@ -9,6 +9,10 @@ namespace DoctorsOfficeApi.Data;
 
 public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
 {
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+
     public virtual DbSet<IdentityUserRole<Guid>> IdentityUserRole { get; set; } = default!;
     public virtual DbSet<Appointment> Appointments { get; set; } = default!;
     public virtual DbSet<AppointmentStatus> AppointmentStatuses { get; set; } = default!;
@@ -18,10 +22,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public virtual DbSet<Admin> Admins { get; set; } = default!;
     public virtual DbSet<Prescription> Prescriptions { get; set; } = default!;
     public virtual DbSet<DrugItem> DrugItems { get; set; } = default!;
-
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -59,9 +59,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         var roles = new List<AppRole>
         {
-            new() { Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId },
-            new() { Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper(), Id = Guid.NewGuid() },
-            new() { Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper(), Id = Guid.NewGuid() }
+            new() {Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId},
+            new() {Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper(), Id = Guid.NewGuid()},
+            new() {Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper(), Id = Guid.NewGuid()}
         };
         builder.Entity<AppRole>().HasData(roles);
     }
@@ -103,9 +103,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
         foreach (var entityEntry in entityEntries)
         {
             var now = DateTime.UtcNow;
-            ((BaseEntity)entityEntry.Entity).UpdatedAt = now;
+            ((BaseEntity) entityEntry.Entity).UpdatedAt = now;
             if (entityEntry.State == EntityState.Added)
-                ((BaseEntity)entityEntry.Entity).CreatedAt = now;
+                ((BaseEntity) entityEntry.Entity).CreatedAt = now;
         }
     }
 
@@ -113,16 +113,18 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         var appointmentTypeFields = typeof(AppointmentTypes).GetFields();
         var appointmentTypes = appointmentTypeFields
-            .Select(appointmentTypeField => new AppointmentType { Id = Guid.NewGuid(), Name = appointmentTypeField.Name })
+            .Select(appointmentTypeField => new AppointmentType {Id = Guid.NewGuid(), Name = appointmentTypeField.Name})
             .ToList();
         builder.Entity<AppointmentType>().HasData(appointmentTypes);
     }
 
     private static void SeedAppointmentStatuses(ModelBuilder builder)
     {
-        var appointmentStatusFields = typeof(AppointmentStatuses).GetFields().Where(field => field.Name != "AllowedTransitions");
+        var appointmentStatusFields =
+            typeof(AppointmentStatuses).GetFields().Where(field => field.Name != "AllowedTransitions");
         var appointmentStatuses = appointmentStatusFields
-            .Select(appointmentStatusField => new AppointmentStatus { Id = Guid.NewGuid(), Name = appointmentStatusField.Name })
+            .Select(appointmentStatusField => new AppointmentStatus
+                {Id = Guid.NewGuid(), Name = appointmentStatusField.Name})
             .ToList();
         builder.Entity<AppointmentStatus>().HasData(appointmentStatuses);
     }

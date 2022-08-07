@@ -15,7 +15,7 @@ public class GetDoctorByIdHandler : IRequestHandler<GetDoctorByIdQuery, DoctorRe
 
     public async Task<DoctorResponse> Handle(GetDoctorByIdQuery request, CancellationToken cancellationToken)
     {
-        var doctor = await _doctorRepository.GetByIdAsync(request.Id, d => d.AppUser);
+        var doctor = await _doctorRepository.GetByIdAsync(request.DoctorId, d => d.AppUser);
         return new DoctorResponse(doctor);
     }
 }

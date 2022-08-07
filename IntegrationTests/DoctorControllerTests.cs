@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text;
-using DoctorsOfficeApi.CQRS.Commands.CreateDoctor;
 using DoctorsOfficeApi.Entities.UserTypes;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Requests;
@@ -99,7 +98,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
 
         await DbContext.SaveChangesAsync();
 
@@ -348,7 +347,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -356,7 +355,8 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var authenticatedDoctorId = await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
+        var authenticatedDoctorId =
+            await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
@@ -400,7 +400,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -408,7 +408,8 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var authenticatedDoctorId = await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
+        var authenticatedDoctorId =
+            await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
@@ -454,13 +455,14 @@ public class DoctorControllerTests : IntegrationTest
     [InlineData("Email", "")]
     [InlineData("Email", "a")]
     [InlineData("PhoneNumber", "")]
-    public async Task UpdateAuthenticatedDoctor_SingleFiledInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
+    public async Task UpdateAuthenticatedDoctor_SingleFiledInvalid_ReturnsBadRequest(string fieldName,
+        string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -496,7 +498,7 @@ public class DoctorControllerTests : IntegrationTest
         const string conflictingUserName = "conflictingUserName";
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -504,7 +506,7 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorCommand
+        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = conflictingUserName,
             Email = "mail@mail.com",
@@ -539,7 +541,7 @@ public class DoctorControllerTests : IntegrationTest
         const string conflictingEmail = "conflictingMail@mail.com";
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -547,7 +549,7 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorCommand
+        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "userName",
             Email = conflictingEmail,
@@ -581,7 +583,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -614,7 +616,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorCommand
+        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
@@ -1082,7 +1084,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
-        var doctorToDelete = new Doctor { AppUser = new AppUser { Id = doctorId } };
+        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId}};
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
 
@@ -1109,7 +1111,7 @@ public class DoctorControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = notDoctorId }
+            AppUser = new AppUser {Id = notDoctorId}
         };
         DbContext.Patients.Add(notDoctor);
         await DbContext.SaveChangesAsync();
@@ -1170,7 +1172,7 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    private async Task<Doctor> CreateDoctorAsync(CreateDoctorCommand createPatientCommand)
+    private async Task<Doctor> CreateDoctorAsync(CreateDoctorRequest request)
     {
         var hasher = new PasswordHasher<AppUser>();
 
@@ -1178,12 +1180,12 @@ public class DoctorControllerTests : IntegrationTest
         {
             AppUser = new AppUser
             {
-                UserName = createPatientCommand.UserName,
-                NormalizedUserName = createPatientCommand.UserName.ToUpper(),
-                Email = createPatientCommand.Email,
-                NormalizedEmail = createPatientCommand.Email.ToUpper(),
-                PhoneNumber = createPatientCommand.PhoneNumber,
-                PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password),
+                UserName = request.UserName,
+                NormalizedUserName = request.UserName.ToUpper(),
+                Email = request.Email,
+                NormalizedEmail = request.Email.ToUpper(),
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = hasher.HashPassword(null!, request.Password),
                 SecurityStamp = Guid.NewGuid().ToString()
             }
         };

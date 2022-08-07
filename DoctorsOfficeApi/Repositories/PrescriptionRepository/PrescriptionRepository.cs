@@ -12,7 +12,8 @@ public class PrescriptionRepository : Repository<Prescription>, IPrescriptionRep
     {
     }
 
-    public IQueryable<Prescription> GetByPatientId(Guid patientId, params Expression<Func<Prescription, object>>[] navigationProperties)
+    public IQueryable<Prescription> GetByPatientId(Guid patientId,
+        params Expression<Func<Prescription, object>>[] navigationProperties)
     {
         var prescriptionsQueryable = DbContext.Prescriptions
             .Where(p => p.PatientId == patientId);
@@ -23,7 +24,8 @@ public class PrescriptionRepository : Repository<Prescription>, IPrescriptionRep
         );
     }
 
-    public IQueryable<Prescription> GetByDoctorId(Guid doctorId, params Expression<Func<Prescription, object>>[] navigationProperties)
+    public IQueryable<Prescription> GetByDoctorId(Guid doctorId,
+        params Expression<Func<Prescription, object>>[] navigationProperties)
     {
         var prescriptionsQueryable = DbContext.Prescriptions
             .Where(p => p.DoctorId == doctorId);

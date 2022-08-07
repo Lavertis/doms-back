@@ -1,34 +1,45 @@
-﻿using System.Net;
-using DoctorsOfficeApi.Exceptions;
+﻿using DoctorsOfficeApi.Exceptions;
 
 namespace DoctorsOfficeApi.Middleware;
 
 public class ExceptionHandlerMiddleware : IMiddleware
 {
+    private readonly ILogger<ExceptionHandlerMiddleware> _logger;
+
+    public ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {
             await next(context);
         }
-        catch (Exception error)
+        catch (Exception exception)
         {
             var response = context.Response;
             response.ContentType = "application/json";
 
-            response.StatusCode = error switch
+            response.StatusCode = exception switch
             {
-                BadRequestException => (int)HttpStatusCode.BadRequest,
-                NotFoundException => (int)HttpStatusCode.NotFound,
-                ForbiddenException => (int)HttpStatusCode.Forbidden,
-                ConflictException => (int)HttpStatusCode.Conflict,
-                _ => (int)HttpStatusCode.InternalServerError
+                BadRequestException => StatusCodes.Status400BadRequest,
+                NotFoundException => StatusCodes.Status404NotFound,
+                ForbiddenException => StatusCodes.Status403Forbidden,
+                ConflictException => StatusCodes.Status409Conflict,
+                _ => StatusCodes.Status500InternalServerError
             };
 
-            if (response.StatusCode == (int)HttpStatusCode.InternalServerError)
-                await response.WriteAsJsonAsync(new { succeeded = false, error = "Internal server error" });
+            if (response.StatusCode != StatusCodes.Status500InternalServerError)
+            {
+                await response.WriteAsJsonAsync(new {error = exception.Message});
+            }
             else
-                await response.WriteAsJsonAsync(new { succeeded = false, error = error.Message });
+            {
+                _logger.LogError(exception, "{p0}", exception.Message);
+                await response.WriteAsJsonAsync(new {error = "Internal server error"});
+            }
         }
     }
 }

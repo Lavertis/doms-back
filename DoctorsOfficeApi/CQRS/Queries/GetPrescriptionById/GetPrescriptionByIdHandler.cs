@@ -13,7 +13,8 @@ public class GetPrescriptionByIdHandler : IRequestHandler<GetPrescriptionByIdQue
         _prescriptionRepository = prescriptionRepository;
     }
 
-    public async Task<PrescriptionResponse> Handle(GetPrescriptionByIdQuery request, CancellationToken cancellationToken)
+    public async Task<PrescriptionResponse> Handle(GetPrescriptionByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var prescription = await _prescriptionRepository.GetByIdAsync(request.Id, p => p.DrugItems);
         return new PrescriptionResponse(prescription);

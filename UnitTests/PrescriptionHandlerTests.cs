@@ -6,6 +6,7 @@ using DoctorsOfficeApi.CQRS.Queries.GetPrescriptionsByDoctorId;
 using DoctorsOfficeApi.CQRS.Queries.GetPrescriptionsByPatientId;
 using DoctorsOfficeApi.Entities;
 using DoctorsOfficeApi.Exceptions;
+using DoctorsOfficeApi.Models.Requests;
 using DoctorsOfficeApi.Models.Responses;
 using DoctorsOfficeApi.Repositories.PrescriptionRepository;
 using FakeItEasy;
@@ -33,7 +34,7 @@ public class PrescriptionHandlerTests
         var prescription = new Prescription
         {
             Id = prescriptionId,
-            DrugItems = new List<DrugItem> { new() }
+            DrugItems = new List<DrugItem> {new()}
         };
 
         A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(
@@ -74,9 +75,9 @@ public class PrescriptionHandlerTests
         // arrange
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() { DrugItems = new List<DrugItem> { new() } },
-            new() { DrugItems = new List<DrugItem> { new() } },
-            new() { DrugItems = new List<DrugItem> { new() } }
+            new() {DrugItems = new List<DrugItem> {new()}},
+            new() {DrugItems = new List<DrugItem> {new()}},
+            new() {DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakePrescriptionRepository.GetByPatientId(
@@ -119,9 +120,9 @@ public class PrescriptionHandlerTests
         // arrange
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() { DrugItems = new List<DrugItem> { new() } },
-            new() { DrugItems = new List<DrugItem> { new() } },
-            new() { DrugItems = new List<DrugItem> { new() } }
+            new() {DrugItems = new List<DrugItem> {new()}},
+            new() {DrugItems = new List<DrugItem> {new()}},
+            new() {DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakePrescriptionRepository.GetByDoctorId(
@@ -168,19 +169,19 @@ public class PrescriptionHandlerTests
             Description = "Test Description",
             PatientId = Guid.NewGuid(),
             DoctorId = Guid.NewGuid(),
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new(), new()}
         };
         A.CallTo(() => _fakePrescriptionRepository.CreateAsync(A<Prescription>.Ignored))
             .Returns(expectedPrescription);
 
-        var command = new CreatePrescriptionCommand
+        var request = new CreatePrescriptionRequest
         {
             Title = expectedPrescription.Title,
             Description = expectedPrescription.Description,
             PatientId = expectedPrescription.PatientId,
-            DoctorId = expectedPrescription.DoctorId,
             DrugsIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
+        var command = new CreatePrescriptionCommand(request, expectedPrescription.DoctorId);
         var handler = new CreatePrescriptionHandler(_fakePrescriptionRepository);
 
         // act
@@ -197,39 +198,41 @@ public class PrescriptionHandlerTests
     public async Task UpdatePrescription_ValidRequest_UpdatesPrescription()
     {
         // arrange
-        var oldPrescription = new Prescription()
+        var oldPrescription = new Prescription
         {
             Title = "Old Prescription Title",
             Description = "Old Description",
             PatientId = Guid.NewGuid(),
             DoctorId = Guid.NewGuid(),
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new(), new()}
         };
 
-        var expectedPrescription = new Prescription()
+        var expectedPrescription = new Prescription
         {
             Title = "New Prescription Title",
             Description = "New Description",
             PatientId = Guid.NewGuid(),
             DoctorId = Guid.NewGuid(),
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new(), new()}
         };
 
         A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(oldPrescription);
-        A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored))
+        A.CallTo(() =>
+                _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
+                    A<Expression<Func<Prescription, object>>>.Ignored))
             .Returns(expectedPrescription);
         A.CallTo(() => _fakePrescriptionRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Prescription>.Ignored))
             .Returns(oldPrescription);
 
-        var command = new UpdatePrescriptionCommand
+        var request = new UpdatePrescriptionRequest
         {
             Title = expectedPrescription.Title,
             Description = expectedPrescription.Description,
             PatientId = expectedPrescription.PatientId,
-            DoctorId = expectedPrescription.DoctorId,
             DrugsIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
+        var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
 
         // act
@@ -245,17 +248,19 @@ public class PrescriptionHandlerTests
     public async Task UpdatePrescription_PrescriptionWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
     {
         // arrange
-        A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored))
+        A.CallTo(() =>
+                _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
+                    A<Expression<Func<Prescription, object>>>.Ignored))
             .Throws(new NotFoundException(""));
 
-        var command = new UpdatePrescriptionCommand
+        var request = new UpdatePrescriptionRequest
         {
             Title = "New Prescription Title",
             Description = "New Description",
             PatientId = Guid.NewGuid(),
-            DoctorId = Guid.NewGuid(),
-            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
+        var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
 
         // act

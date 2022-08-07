@@ -15,7 +15,7 @@ public class GetPatientByIdHandler : IRequestHandler<GetPatientByIdQuery, Patien
 
     public async Task<PatientResponse> Handle(GetPatientByIdQuery request, CancellationToken cancellationToken)
     {
-        var patient = await _patientRepository.GetByIdAsync(request.Id, p => p.AppUser);
+        var patient = await _patientRepository.GetByIdAsync(request.PatientId, p => p.AppUser);
 
         return new PatientResponse(patient);
     }

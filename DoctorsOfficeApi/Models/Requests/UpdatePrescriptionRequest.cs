@@ -7,7 +7,7 @@ public class UpdatePrescriptionRequest
 {
     public string? Title { get; set; }
     public string? Description { get; set; }
-    public string? PatientId { get; set; }
+    public Guid? PatientId { get; set; }
     public IList<Guid>? DrugsIds { get; set; }
 }
 
@@ -26,12 +26,7 @@ public class UpdatePrescriptionRequestValidator : AbstractValidator<UpdatePrescr
             .When(x => x.Description != null);
 
         RuleFor(x => x.PatientId)
-            .MustAsync(async (id, cancellationToken) =>
-            {
-                if (!Guid.TryParse(id, out var guid))
-                    return false;
-                return await patientRepository.ExistsByIdAsync(guid);
-            })
+            .MustAsync(async (id, cancellationToken) => await patientRepository.ExistsByIdAsync(id!.Value))
             .WithMessage("Patient with specified id does not exist")
             .When(x => x.PatientId is not null);
 

@@ -5,7 +5,7 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetRefreshTokensByUserId;
 
 public class GetRefreshTokensByUserIdQuery : IRequest<IList<RefreshToken>>
 {
-    public Guid UserId { get; set; }
+    public readonly Guid UserId;
 
     public GetRefreshTokensByUserIdQuery(Guid userId)
     {

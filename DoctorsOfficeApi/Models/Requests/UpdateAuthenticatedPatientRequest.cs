@@ -108,7 +108,8 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
         RuleFor(e => e.CurrentPassword)
             .NotEmpty()
             .WithMessage("Current password is required")
-            .Must(currentPassword => userService.ValidateUserPasswordAsync(authenticatedUser.UserName, currentPassword).Result)
+            .Must(currentPassword =>
+                userService.ValidateUserPasswordAsync(authenticatedUser.UserName, currentPassword).Result)
             .WithMessage("Current password is incorrect");
     }
 }

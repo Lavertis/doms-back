@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using DoctorsOfficeApi.CQRS.Commands.CreatePrescription;
 using DoctorsOfficeApi.CQRS.Commands.UpdatePrescription;
 using DoctorsOfficeApi.CQRS.Queries.GetPrescriptionsByDoctorId;
@@ -14,14 +13,10 @@ namespace DoctorsOfficeApi.Controllers;
 
 [ApiController]
 [Route("api/prescription")]
-[ApiExplorerSettings(GroupName = "Prescription")]
-public class PrescriptionController : Controller
+public class PrescriptionController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public PrescriptionController(IMediator mediator)
+    public PrescriptionController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -30,11 +25,7 @@ public class PrescriptionController : Controller
     [HttpGet("patient/{patientId:guid}")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<IList<PrescriptionResponse>>> GetPrescriptionsByPatientIdAsync(Guid patientId)
-    {
-        var query = new GetPrescriptionsByPatientIdQuery(patientId);
-        var prescriptionResponses = await _mediator.Send(query);
-        return Ok(prescriptionResponses);
-    }
+        => Ok(await Mediator.Send(new GetPrescriptionsByPatientIdQuery(patientId: patientId)));
 
     /// <summary>
     /// Returns all prescriptions for authenticated patient. Only for patients.
@@ -42,12 +33,7 @@ public class PrescriptionController : Controller
     [HttpGet("patient/auth")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<IList<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedPatientAsync()
-    {
-        var authenticatedUserId = Guid.Parse(User.FindFirst(ClaimTypes.Sid)!.Value);
-        var query = new GetPrescriptionsByPatientIdQuery(authenticatedUserId);
-        var prescriptionResponses = await _mediator.Send(query);
-        return Ok(prescriptionResponses);
-    }
+        => Ok(await Mediator.Send(new GetPrescriptionsByPatientIdQuery(patientId: JwtSubject())));
 
     /// <summary>
     /// Returns all prescriptions for authenticated doctor. Only for doctors.
@@ -55,12 +41,7 @@ public class PrescriptionController : Controller
     [HttpGet("doctor/auth")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<IList<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedDoctorAsync()
-    {
-        var authenticatedUserId = Guid.Parse(User.FindFirst(ClaimTypes.Sid)!.Value);
-        var query = new GetPrescriptionsByDoctorIdQuery(authenticatedUserId);
-        var prescriptionResponses = await _mediator.Send(query);
-        return Ok(prescriptionResponses);
-    }
+        => Ok(await Mediator.Send(new GetPrescriptionsByDoctorIdQuery(doctorId: JwtSubject())));
 
     /// <summary>
     /// Creates new prescription. Only for doctors.
@@ -68,29 +49,17 @@ public class PrescriptionController : Controller
     [HttpPost("")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<PrescriptionResponse>> CreatePrescriptionAsync(CreatePrescriptionRequest request)
-    {
-        var authenticatedUserId = Guid.Parse(User.FindFirst(ClaimTypes.Sid)!.Value);
-        var command = new CreatePrescriptionCommand
-        {
-            Title = request.Title,
-            Description = request.Description,
-            PatientId = Guid.Parse(request.PatientId),
-            DoctorId = authenticatedUserId,
-            DrugsIds = request.DrugsIds,
-        };
-        var prescriptionResponse = await _mediator.Send(command);
-        return new ObjectResult(prescriptionResponse) { StatusCode = StatusCodes.Status201Created };
-    }
+        => StatusCode(
+            StatusCodes.Status201Created,
+            await Mediator.Send(new CreatePrescriptionCommand(request: request, doctorId: JwtSubject()))
+        );
 
     /// <summary>
     /// Updates prescription by id prescription. Only for doctors.
     /// </summary>
-    [HttpPatch("{id:guid}")]
+    [HttpPatch("{prescriptionId:guid}")]
     [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<PrescriptionResponse>> UpdatePrescriptionByIdAsync(Guid id, UpdatePrescriptionRequest request)
-    {
-        var command = new UpdatePrescriptionCommand(id, request);
-        var prescriptionResponse = await _mediator.Send(command);
-        return Ok(prescriptionResponse);
-    }
+    public async Task<ActionResult<PrescriptionResponse>> UpdatePrescriptionByIdAsync(
+        UpdatePrescriptionRequest request, Guid prescriptionId)
+        => Ok(await Mediator.Send(new UpdatePrescriptionCommand(request: request, prescriptionId: prescriptionId)));
 }

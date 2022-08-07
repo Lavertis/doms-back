@@ -15,9 +15,9 @@ namespace DoctorsOfficeApi.UnitTests;
 
 public class AuthServiceTests
 {
-    private readonly UserManager<AppUser> _fakeUserManager;
-    private readonly IOptions<AppSettings> _fakeAppSettings;
     private readonly AuthService _authService;
+    private readonly IOptions<AppSettings> _fakeAppSettings;
+    private readonly UserManager<AppUser> _fakeUserManager;
 
     public AuthServiceTests()
     {
@@ -37,7 +37,7 @@ public class AuthServiceTests
             {
                 RefreshTokens = new List<RefreshToken>
                 {
-                    new() { Token = refreshToken, ExpiresAt = DateTime.Now.AddDays(1) }
+                    new() {Token = refreshToken, ExpiresAt = DateTime.Now.AddDays(1)}
                 }
             }
         }.AsQueryable().BuildMock();

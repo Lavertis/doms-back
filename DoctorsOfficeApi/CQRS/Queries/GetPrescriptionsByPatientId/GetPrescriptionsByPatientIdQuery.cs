@@ -5,7 +5,7 @@ namespace DoctorsOfficeApi.CQRS.Queries.GetPrescriptionsByPatientId;
 
 public class GetPrescriptionsByPatientIdQuery : IRequest<IList<PrescriptionResponse>>
 {
-    public Guid PatientId { get; set; }
+    public readonly Guid PatientId;
 
     public GetPrescriptionsByPatientIdQuery(Guid patientId)
     {

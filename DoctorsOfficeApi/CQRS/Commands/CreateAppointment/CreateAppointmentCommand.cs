@@ -6,23 +6,24 @@ namespace DoctorsOfficeApi.CQRS.Commands.CreateAppointment;
 
 public class CreateAppointmentCommand : IRequest<AppointmentResponse>
 {
-    public DateTime Date { get; set; }
-    public string Description { get; set; } = default!;
-    public Guid PatientId { get; set; } = default!;
-    public Guid DoctorId { get; set; } = default!;
-    public string Type { get; set; } = default!;
-    public string Status { get; set; } = default!;
+    public readonly DateTime Date;
+    public readonly string Description;
+    public readonly Guid DoctorId;
+    public readonly Guid PatientId;
+    public readonly string Role;
+    public readonly string Status;
+    public readonly string Type;
+    public readonly Guid UserId;
 
-    public CreateAppointmentCommand()
+    public CreateAppointmentCommand(CreateAppointmentRequest request, string status, string role, Guid userId)
     {
-    }
-
-    public CreateAppointmentCommand(CreateAppointmentRequest createAppointmentRequest)
-    {
-        Date = createAppointmentRequest.Date;
-        Description = createAppointmentRequest.Description;
-        PatientId = Guid.Parse(createAppointmentRequest.PatientId);
-        DoctorId = Guid.Parse(createAppointmentRequest.DoctorId);
-        Type = createAppointmentRequest.Type;
+        Status = status;
+        Role = role;
+        UserId = userId;
+        Date = request.Date;
+        Description = request.Description;
+        PatientId = request.PatientId;
+        DoctorId = request.DoctorId;
+        Type = request.Type;
     }
 }

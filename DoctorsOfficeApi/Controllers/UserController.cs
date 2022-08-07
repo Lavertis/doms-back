@@ -13,46 +13,30 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiController]
 [Route("api/user")]
 [Authorize(Roles = RoleTypes.Admin)]
-[ApiExplorerSettings(GroupName = "User")]
-public class UserController : Controller
+public class UserController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public UserController(IMediator mediator)
+    public UserController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
     /// Returns all base users. Only for admins.
     /// </summary>
-    [HttpGet("")]
+    [HttpGet]
     public async Task<ActionResult<IList<UserResponse>>> GetAllUsersAsync()
-    {
-        var query = new GetAllUsersQuery();
-        var userResponses = await _mediator.Send(query);
-        return Ok(userResponses);
-    }
+        => Ok(await Mediator.Send(new GetAllUsersQuery()));
 
     /// <summary>
     /// Returns base user by id. Only for admins.
     /// </summary>
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(Guid id)
-    {
-        var query = new GetUserByIdQuery(id);
-        var userResponse = await _mediator.Send(query);
-        return Ok(userResponse);
-    }
+    [HttpGet("{userId:guid}")]
+    public async Task<ActionResult<IList<UserResponse>>> GetUserByIdAsync(Guid userId)
+        => Ok(await Mediator.Send(new GetUserByIdQuery(userId: userId)));
 
     /// <summary>
     /// Returns refresh token for user by id. Only for admins.
     /// </summary>
-    [HttpGet("{id:guid}/refresh-tokens")]
-    public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(Guid id)
-    {
-        var query = new GetRefreshTokensByUserIdQuery(id);
-        var refreshTokens = await _mediator.Send(query);
-        return Ok(refreshTokens);
-    }
+    [HttpGet("{userId:guid}/refresh-tokens")]
+    public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(Guid userId)
+        => Ok(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId: userId)));
 }

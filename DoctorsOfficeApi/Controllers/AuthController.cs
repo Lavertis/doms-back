@@ -12,14 +12,10 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiController]
 [Route("api/auth")]
 [AllowAnonymous]
-[ApiExplorerSettings(GroupName = "Auth")]
-public class AuthController : Controller
+public class AuthController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public AuthController(IMediator mediator)
+    public AuthController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -27,39 +23,27 @@ public class AuthController : Controller
     /// </summary>
     [HttpPost("authenticate")]
     public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request)
-    {
-        var command = new AuthenticateCommand(request.UserName, request.Password, IpAddress());
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => Ok(await Mediator.Send(new AuthenticateCommand(request: request, ipAddress: IpAddress())));
 
     /// <summary>
     /// Returns a new pair of access token and refresh token by current refresh token.
     /// </summary>
     [HttpPost("refresh-token")]
     public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync(RefreshTokenRequest request)
-    {
-        var command = new RefreshTokenCommand(request.RefreshToken, IpAddress());
-        var response = await _mediator.Send(command);
-        return Ok(response);
-    }
+        => Ok(await Mediator.Send(new RefreshTokenCommand(request: request, ipAddress: IpAddress())));
 
     /// <summary> 
     /// Revokes specified refresh token.
     /// </summary>
     [HttpPost("revoke-token")]
     public async Task<IActionResult> RevokeTokenAsync(RevokeRefreshTokenRequest request)
-    {
-        var command = new RevokeRefreshTokenCommand(request.RefreshToken, IpAddress());
-        await _mediator.Send(command);
-        return Ok(new { message = "Token revoked" });
-    }
+        => Ok(await Mediator.Send(new RevokeRefreshTokenCommand(request: request, ipAddress: IpAddress())));
 
     private string? IpAddress()
     {
         // get source ip address for the current request
         if (Request.Headers.ContainsKey("X-Forwarded-For"))
             return Request.Headers["X-Forwarded-For"];
-        return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? null;
+        return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
     }
 }

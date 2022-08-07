@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using DoctorsOfficeApi.CQRS.Queries.GetAdminById;
+﻿using DoctorsOfficeApi.CQRS.Queries.GetAdminById;
 using DoctorsOfficeApi.CQRS.Queries.GetAllAdmins;
 using DoctorsOfficeApi.Models;
 using DoctorsOfficeApi.Models.Responses;
@@ -12,14 +11,10 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = RoleTypes.Admin)]
-[ApiExplorerSettings(GroupName = "Admin")]
-public class AdminController : Controller
+public class AdminController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public AdminController(IMediator mediator)
+    public AdminController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -27,32 +22,19 @@ public class AdminController : Controller
     /// </summary>
     [HttpGet("auth")]
     public async Task<ActionResult<AdminResponse>> GetAuthenticatedAdminAsync()
-    {
-        var authenticatedAdminId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
-        var query = new GetAdminByIdQuery(authenticatedAdminId);
-        var adminResponse = await _mediator.Send(query);
-        return Ok(adminResponse);
-    }
+        => Ok(await Mediator.Send(new GetAdminByIdQuery(adminId: JwtSubject())));
 
     /// <summary>
     /// Returns admin with specified id. Only for admins.
     /// </summary>
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<AdminResponse>> GetAdminByIdAsync(Guid id)
-    {
-        var query = new GetAdminByIdQuery(id);
-        var adminResponse = await _mediator.Send(query);
-        return Ok(adminResponse);
-    }
+    [HttpGet("{adminId:guid}")]
+    public async Task<ActionResult<AdminResponse>> GetAdminByIdAsync(Guid adminId)
+        => Ok(await Mediator.Send(new GetAdminByIdQuery(adminId: adminId)));
 
     /// <summary>
-    /// Returns admin with specified id. Only for admins.
+    /// Returns all admins. Only for admins.
     /// </summary>
-    [HttpGet("")]
+    [HttpGet]
     public async Task<ActionResult<IList<AdminResponse>>> GetAllAdminsAsync()
-    {
-        var query = new GetAllAdminsQuery();
-        var adminResponse = await _mediator.Send(query);
-        return Ok(adminResponse);
-    }
+        => Ok(await Mediator.Send(new GetAllAdminsQuery()));
 }

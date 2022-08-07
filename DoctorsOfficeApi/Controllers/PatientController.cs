@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using DoctorsOfficeApi.CQRS.Commands.CreatePatient;
+﻿using DoctorsOfficeApi.CQRS.Commands.CreatePatient;
 using DoctorsOfficeApi.CQRS.Commands.DeletePatientById;
 using DoctorsOfficeApi.CQRS.Commands.UpdatePatientById;
 using DoctorsOfficeApi.CQRS.Queries.GetPatientByIdQuery;
@@ -15,14 +14,10 @@ namespace DoctorsOfficeApi.Controllers;
 [ApiController]
 [Route("api/patient")]
 [Authorize(Roles = RoleTypes.Patient)]
-[ApiExplorerSettings(GroupName = "Patient")]
-public class PatientController : Controller
+public class PatientController : BaseController
 {
-    private readonly IMediator _mediator;
-
-    public PatientController(IMediator mediator)
+    public PatientController(IMediator mediator) : base(mediator)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -30,46 +25,28 @@ public class PatientController : Controller
     /// </summary>
     [HttpGet("auth")]
     public async Task<ActionResult<PatientResponse>> GetAuthenticatedPatientAsync()
-    {
-        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
-        var query = new GetPatientByIdQuery(authenticatedPatientId);
-        var patient = await _mediator.Send(query);
-        return Ok(patient);
-    }
+        => Ok(await Mediator.Send(new GetPatientByIdQuery(patientId: JwtSubject())));
 
     /// <summary>
     /// Creates new patient.
     /// </summary>
-    [HttpPost("")]
+    [HttpPost]
     [AllowAnonymous]
     public async Task<ActionResult<PatientResponse>> CreatePatientAsync(CreatePatientRequest request)
-    {
-        var command = new CreatePatientCommand(request);
-        var patientResponse = await _mediator.Send(command);
-        return new ObjectResult(patientResponse) { StatusCode = StatusCodes.Status201Created };
-    }
+        => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreatePatientCommand(request)));
 
     /// <summary>
     /// Updates account of the authenticated patient. Only for patients
     /// </summary>
     [HttpPatch("auth")]
-    public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(UpdateAuthenticatedPatientRequest request)
-    {
-        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
-        var command = new UpdatePatientByIdCommand(authenticatedPatientId, request);
-        var patientResponse = await _mediator.Send(command);
-        return Ok(patientResponse);
-    }
+    public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(
+        UpdateAuthenticatedPatientRequest request)
+        => Ok(await Mediator.Send(new UpdatePatientByIdCommand(request: request, patientId: JwtSubject())));
 
     /// <summary>
     /// Deletes account of the authenticated patient. Only for patients
     /// </summary>
     [HttpDelete("auth")]
     public async Task<ActionResult> DeleteAuthenticatedPatientAsync()
-    {
-        var authenticatedPatientId = Guid.Parse(User.FindFirstValue(ClaimTypes.Sid)!);
-        var command = new DeletePatientByIdCommand(authenticatedPatientId);
-        await _mediator.Send(command);
-        return Ok();
-    }
+        => Ok(await Mediator.Send(new DeletePatientByIdCommand(patientId: JwtSubject())));
 }

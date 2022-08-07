@@ -6,31 +6,22 @@ namespace DoctorsOfficeApi.CQRS.Commands.UpdateAppointment;
 
 public class UpdateAppointmentCommand : IRequest<AppointmentResponse>
 {
-    public Guid AppointmentId { get; set; }
-    public DateTime? Date { get; set; }
-    public string? Description { get; set; } = default!;
-    public string? Type { get; set; } = default!;
-    public string? Status { get; set; } = default!;
+    public readonly Guid AppointmentId;
+    public readonly DateTime? Date;
+    public readonly string? Description;
+    public readonly string Role;
+    public readonly string? Status;
+    public readonly string? Type;
+    public readonly Guid UserId;
 
-    public UpdateAppointmentCommand()
-    {
-    }
-
-    public UpdateAppointmentCommand(Guid appointmentId, UpdateAppointmentRequest updateAppointmentRequest)
+    public UpdateAppointmentCommand(UpdateAppointmentRequest request, Guid appointmentId, Guid userId, string role)
     {
         AppointmentId = appointmentId;
-        Date = updateAppointmentRequest.Date;
-        Description = updateAppointmentRequest.Description;
-        Type = updateAppointmentRequest.Type;
-        Status = updateAppointmentRequest.Status;
-    }
-
-    public UpdateAppointmentCommand(Guid appointmentId, DateTime? date, string? description, string? type, string? status)
-    {
-        AppointmentId = appointmentId;
-        Date = date;
-        Description = description;
-        Type = type;
-        Status = status;
+        UserId = userId;
+        Role = role;
+        Date = request.Date;
+        Description = request.Description;
+        Type = request.Type;
+        Status = request.Status;
     }
 }
