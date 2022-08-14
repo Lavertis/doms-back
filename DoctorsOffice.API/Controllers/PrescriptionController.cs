@@ -1,7 +1,7 @@
-using DoctorsOffice.Application.CQRS.Commands.CreatePrescription;
-using DoctorsOffice.Application.CQRS.Commands.UpdatePrescription;
-using DoctorsOffice.Application.CQRS.Queries.GetPrescriptionsByDoctorId;
-using DoctorsOffice.Application.CQRS.Queries.GetPrescriptionsByPatientId;
+using DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
+using DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByDoctorId;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
-[Route("api/prescription")]
+[Route("api/prescriptions")]
 public class PrescriptionController : BaseController
 {
     public PrescriptionController(IMediator mediator) : base(mediator)
@@ -30,7 +30,7 @@ public class PrescriptionController : BaseController
     /// <summary>
     /// Returns all prescriptions for authenticated patient. Only for patients.
     /// </summary>
-    [HttpGet("patient/auth")]
+    [HttpGet("patient/current")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<IList<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedPatientAsync()
         => Ok(await Mediator.Send(new GetPrescriptionsByPatientIdQuery(patientId: JwtSubject())));
@@ -38,7 +38,7 @@ public class PrescriptionController : BaseController
     /// <summary>
     /// Returns all prescriptions for authenticated doctor. Only for doctors.
     /// </summary>
-    [HttpGet("doctor/auth")]
+    [HttpGet("doctor/current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<IList<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedDoctorAsync()
         => Ok(await Mediator.Send(new GetPrescriptionsByDoctorIdQuery(doctorId: JwtSubject())));
@@ -46,7 +46,7 @@ public class PrescriptionController : BaseController
     /// <summary>
     /// Creates new prescription. Only for doctors.
     /// </summary>
-    [HttpPost("")]
+    [HttpPost("doctor/current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<PrescriptionResponse>> CreatePrescriptionAsync(CreatePrescriptionRequest request)
         => StatusCode(

@@ -3,12 +3,13 @@ using DoctorsOffice.Application.Services.Jwt;
 using DoctorsOffice.Application.Services.User;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Authenticate;
 
-public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, AuthenticateResponse>
+public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResult<AuthenticateResponse>>
 {
     private readonly IAuthService _authService;
     private readonly IJwtService _jwtService;
@@ -27,8 +28,11 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, Authenti
         _userManager = userManager;
     }
 
-    public async Task<AuthenticateResponse> Handle(AuthenticateCommand request, CancellationToken cancellationToken)
+    public async Task<HttpResult<AuthenticateResponse>> Handle(AuthenticateCommand request,
+        CancellationToken cancellationToken)
     {
+        var result = new HttpResult<AuthenticateResponse>();
+
         var user = await _userService.GetUserByUserNameAsync(request.UserName);
         var userClaims = await _userService.GetUserRolesAsClaimsAsync(user);
         var jwtToken = _jwtService.GenerateJwtToken(userClaims);
@@ -39,10 +43,10 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, Authenti
         user.RefreshTokens.Add(refreshToken);
         await _userManager.UpdateAsync(user);
 
-        return new AuthenticateResponse
+        return result.WithValue(new AuthenticateResponse
         {
             JwtToken = jwtToken,
             RefreshToken = refreshToken.Token
-        };
+        });
     }
 }

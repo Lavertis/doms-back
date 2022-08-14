@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Exceptions;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,6 +15,15 @@ public abstract class BaseController : ControllerBase
     protected BaseController(IMediator mediator)
     {
         Mediator = mediator;
+    }
+
+    protected ActionResult<TValue> CreateResponse<TValue>(HttpResult<TValue> result)
+    {
+        return result.StatusCode switch
+        {
+            >= 200 and < 300 => StatusCode(result.StatusCode, result.Value),
+            _ => StatusCode(result.StatusCode, result.Error)
+        };
     }
 
     protected Guid JwtSubject()
@@ -37,5 +47,12 @@ public abstract class BaseController : ControllerBase
             throw new BadRequestException("Role claim contains wrong value");
 
         return role;
+    }
+
+    protected string? IpAddress()
+    {
+        if (Request.Headers.ContainsKey("X-Forwarded-For"))
+            return Request.Headers["X-Forwarded-For"];
+        return HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
     }
 }

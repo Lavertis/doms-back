@@ -1,7 +1,7 @@
 ﻿using System.Net;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOfficeApi.Models.Responses;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
@@ -10,7 +10,7 @@ namespace DoctorsOffice.IntegrationTests;
 
 public class AdminControllerTests : IntegrationTest
 {
-    private const string UrlPrefix = "api/admin";
+    private const string UrlPrefix = "api/admins";
 
     public AdminControllerTests(WebApplicationFactory<Program> factory) : base(factory)
     {
@@ -24,7 +24,7 @@ public class AdminControllerTests : IntegrationTest
         var authenticatedAdminId = await AuthenticateAsAdminAsync(client);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -45,7 +45,7 @@ public class AdminControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -58,7 +58,7 @@ public class AdminControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -74,7 +74,7 @@ public class AdminControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -179,7 +179,7 @@ public class AdminControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<List<AdminResponse>>();
 
         foreach (var admin in admins)
-            responseContent.Should().ContainEquivalentOf(new AdminResponse(admin));
+            responseContent.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
     }
 
     [Fact]

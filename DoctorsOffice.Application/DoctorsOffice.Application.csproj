@@ -19,4 +19,19 @@
         <ProjectReference Include="..\DoctorsOffice.Infrastructure\DoctorsOffice.Infrastructure.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="CQRS\Commands\Appointments"/>
+        <Folder Include="CQRS\Commands\Doctors"/>
+        <Folder Include="CQRS\Commands\Patients"/>
+        <Folder Include="CQRS\Commands\Prescriptions"/>
+        <Folder Include="CQRS\Commands\RefreshTokens"/>
+        <Folder Include="CQRS\Queries\Admins"/>
+        <Folder Include="CQRS\Queries\Appointments"/>
+        <Folder Include="CQRS\Queries\Doctors"/>
+        <Folder Include="CQRS\Queries\Patients"/>
+        <Folder Include="CQRS\Queries\Prescriptions"/>
+        <Folder Include="CQRS\Queries\RefreshTokens"/>
+        <Folder Include="CQRS\Queries\Users"/>
+    </ItemGroup>
+
 </Project>

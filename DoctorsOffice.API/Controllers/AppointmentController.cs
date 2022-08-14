@@ -1,8 +1,8 @@
-﻿using DoctorsOffice.Application.CQRS.Commands.CreateAppointment;
-using DoctorsOffice.Application.CQRS.Commands.UpdateAppointment;
-using DoctorsOffice.Application.CQRS.Queries.GetAppointmentById;
-using DoctorsOffice.Application.CQRS.Queries.GetAppointmentsByUser;
-using DoctorsOffice.Application.CQRS.Queries.GetFilteredAppointments;
+﻿using DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
+using DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentsByUser;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
-[Route("api/appointment")]
+[Route("api/appointments")]
 public class AppointmentController : BaseController
 {
     public AppointmentController(IMediator mediator) : base(mediator)
@@ -23,7 +23,7 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Returns all appointments for authenticated user sorted by date. For doctors and patients.
     /// </summary>
-    [HttpGet("auth")]
+    [HttpGet("user/current")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<IList<AppointmentResponse>>> GetAllAppointmentsForAuthenticatedUserAsync()
         => Ok(await Mediator.Send(new GetAppointmentsByUserQuery(userId: JwtSubject(), role: JwtRole())));
@@ -31,7 +31,7 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Returns appointment by id. User can only get owned appointment. For doctors and patients
     /// </summary>
-    [HttpGet("{appointmentId:guid}")]
+    [HttpGet("user/current/{appointmentId:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(Guid appointmentId)
         => Ok(await Mediator.Send(new GetAppointmentByIdQuery(
@@ -41,42 +41,40 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Returns all appointments matching search criteria sorted by date. Only for doctors
     /// </summary>
-    [HttpGet("search")]
+    [HttpGet("doctor/current/search")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<IList<AppointmentResponse>>> GetAppointmentsFilteredAsync(
         DateTime? dateStart, DateTime? dateEnd, Guid? patientId, string? type, string? status)
-        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(
-            new GetAppointmentsFilteredRequest
-            {
-                DateStart = dateStart,
-                DateEnd = dateEnd,
-                Type = type,
-                Status = status,
-                PatientId = patientId,
-                DoctorId = JwtSubject()
-            })));
+        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(new GetAppointmentsFilteredRequest
+        {
+            DateStart = dateStart,
+            DateEnd = dateEnd,
+            Type = type,
+            Status = status,
+            PatientId = patientId,
+            DoctorId = JwtSubject()
+        })));
 
     /// <summary>
-    /// Returns appointments for authenticated user matching search criteria sorted by date. Only for patients
+    /// Returns appointments for authenticated patient matching search criteria sorted by date. Only for patients
     /// </summary>
-    [HttpGet("auth/search")]
+    [HttpGet("patient/current/search")]
     [Authorize(Roles = RoleTypes.Patient)]
-    public async Task<ActionResult<IList<AppointmentResponse>>> GetAppointmentsForAuthenticatedUserFiltered(
+    public async Task<ActionResult<IList<AppointmentResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
         DateTime? dateStart, DateTime? dateEnd, string? type, string? status)
-        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(
-            new GetAppointmentsFilteredRequest
-            {
-                DateStart = dateStart,
-                DateEnd = dateEnd,
-                Type = type,
-                Status = status,
-                PatientId = JwtSubject()
-            })));
+        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(new GetAppointmentsFilteredRequest
+        {
+            DateStart = dateStart,
+            DateEnd = dateEnd,
+            Type = type,
+            Status = status,
+            PatientId = JwtSubject()
+        })));
 
     /// <summary>
     /// Creates new appointment. Only for doctors
     /// </summary>
-    [HttpPost]
+    [HttpPost("doctor/current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentAsync(CreateAppointmentRequest request)
         => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreateAppointmentCommand(
@@ -89,7 +87,7 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Creates appointment request. Only for patients
     /// </summary>
-    [HttpPost("request")]
+    [HttpPost("patient/current/request")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentRequestAsync(CreateAppointmentRequest request)
         => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreateAppointmentCommand(
@@ -102,7 +100,7 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Updates appointment. For patients and doctors
     /// </summary>
-    [HttpPatch("{appointmentId:guid}")]
+    [HttpPatch("user/current/{appointmentId:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> UpdateAppointmentByIdAsync(
         UpdateAppointmentRequest request, Guid appointmentId)

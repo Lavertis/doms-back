@@ -16,7 +16,7 @@ namespace DoctorsOffice.IntegrationTests;
 
 public class PatientControllerTests : IntegrationTest
 {
-    private const string UrlPrefix = "api/patient";
+    private const string UrlPrefix = "api/patients";
 
     public PatientControllerTests(WebApplicationFactory<Program> factory) : base(factory)
     {
@@ -34,7 +34,7 @@ public class PatientControllerTests : IntegrationTest
             .FirstAsync(p => p.Id == authenticatedPatientId))!);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -53,7 +53,7 @@ public class PatientControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleType);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -66,7 +66,7 @@ public class PatientControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -84,7 +84,7 @@ public class PatientControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -384,7 +384,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -440,7 +440,7 @@ public class PatientControllerTests : IntegrationTest
 
         await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             UserName = conflictPatient.AppUser.UserName,
             CurrentPassword = patientPassword
@@ -450,7 +450,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -491,7 +491,7 @@ public class PatientControllerTests : IntegrationTest
 
         await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             Email = conflictPatient.AppUser.Email,
             CurrentPassword = patientPassword
@@ -501,7 +501,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -529,7 +529,7 @@ public class PatientControllerTests : IntegrationTest
 
         await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             FirstName = "testFirstName",
             CurrentPassword = "notMatchingPassword12345#"
@@ -539,7 +539,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -577,7 +577,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -593,7 +593,7 @@ public class PatientControllerTests : IntegrationTest
 
         await AuthenticateAsRoleAsync(client, roleName);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             FirstName = "newFirstName",
             CurrentPassword = "patientPassword"
@@ -603,7 +603,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -615,7 +615,7 @@ public class PatientControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             FirstName = "newFirstName",
             CurrentPassword = "patientPassword"
@@ -625,7 +625,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -665,7 +665,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -725,7 +725,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -812,7 +812,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -879,7 +879,7 @@ public class PatientControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -897,7 +897,7 @@ public class PatientControllerTests : IntegrationTest
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
         // act
-        var response = await client.DeleteAsync($"{UrlPrefix}/auth");
+        var response = await client.DeleteAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -915,7 +915,7 @@ public class PatientControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act  
-        var response = await client.DeleteAsync($"{UrlPrefix}/auth");
+        var response = await client.DeleteAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -928,7 +928,7 @@ public class PatientControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act  
-        var response = await client.DeleteAsync($"{UrlPrefix}/auth");
+        var response = await client.DeleteAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -945,7 +945,7 @@ public class PatientControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.DeleteAsync($"{UrlPrefix}/auth");
+        var response = await client.DeleteAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

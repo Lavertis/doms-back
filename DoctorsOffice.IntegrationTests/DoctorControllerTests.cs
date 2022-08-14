@@ -15,7 +15,7 @@ namespace DoctorsOffice.IntegrationTests;
 
 public class DoctorControllerTests : IntegrationTest
 {
-    private const string UrlPrefix = "api/doctor";
+    private const string UrlPrefix = "api/doctors";
 
     public DoctorControllerTests(WebApplicationFactory<Program> factory) : base(factory)
     {
@@ -31,10 +31,10 @@ public class DoctorControllerTests : IntegrationTest
             .Include(d => d.AppUser)
             .FirstAsync(d => d.Id == authenticatedDoctorId);
 
-        var expectedResponse = new DoctorResponse(authenticatedDoctor!);
+        var expectedResponse = new DoctorResponse(authenticatedDoctor);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -55,7 +55,7 @@ public class DoctorControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -68,7 +68,7 @@ public class DoctorControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -84,7 +84,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -372,7 +372,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -422,7 +422,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -483,7 +483,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -525,7 +525,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -568,7 +568,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
 
         // assert
@@ -602,7 +602,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -634,7 +634,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -655,7 +655,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -679,7 +679,7 @@ public class DoctorControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/auth", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -750,11 +750,11 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
         var patientId = Guid.NewGuid();
-        var patient = new Patient()
+        var patient = new Patient
         {
-            FirstName = "firstName",
-            LastName = "lastName",
-            Address = "address",
+            FirstName = "FirstName",
+            LastName = "LastName",
+            Address = "Address",
             AppUser = new AppUser
             {
                 Id = patientId,

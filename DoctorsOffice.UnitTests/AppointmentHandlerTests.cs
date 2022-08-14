@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
-using DoctorsOffice.Application.CQRS.Commands.CreateAppointment;
-using DoctorsOffice.Application.CQRS.Commands.UpdateAppointment;
-using DoctorsOffice.Application.CQRS.Queries.GetAppointmentById;
-using DoctorsOffice.Application.CQRS.Queries.GetAppointmentsByUser;
-using DoctorsOffice.Application.CQRS.Queries.GetFilteredAppointments;
+using DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
+using DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentsByUser;
+using DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 using DoctorsOffice.Application.Services.Appointment;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;

@@ -21,6 +21,7 @@ public class ExceptionHandlerMiddleware : IMiddleware
         }
         catch (Exception exception)
         {
+            // TODO handle AppExceptions in different catch and use Error property to get message
             var response = context.Response;
             response.ContentType = "application/json";
 
@@ -35,12 +36,12 @@ public class ExceptionHandlerMiddleware : IMiddleware
 
             if (response.StatusCode != StatusCodes.Status500InternalServerError)
             {
-                await response.WriteAsJsonAsync(new {error = exception.Message});
+                await response.WriteAsJsonAsync(new {exception.Message});
             }
             else
             {
                 _logger.LogError(exception, "{p0}", exception.Message);
-                await response.WriteAsJsonAsync(new {error = "Internal server error"});
+                await response.WriteAsJsonAsync(new {Message = "Internal server error"});
             }
         }
     }

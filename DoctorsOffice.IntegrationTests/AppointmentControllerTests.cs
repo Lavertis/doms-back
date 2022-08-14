@@ -15,7 +15,7 @@ namespace DoctorsOffice.IntegrationTests;
 
 public class AppointmentControllerTests : IntegrationTest
 {
-    private const string UrlPrefix = "api/appointment";
+    private const string UrlPrefix = "api/appointments";
 
     public AppointmentControllerTests(WebApplicationFactory<Program> factory) : base(factory)
     {
@@ -28,7 +28,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -42,7 +42,7 @@ public class AppointmentControllerTests : IntegrationTest
         await AuthenticateAsPatientAsync(client);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
         var responseContent = await response.Content.ReadAsAsync<IList<AppointmentResponse>>();
@@ -97,7 +97,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
         RefreshDbContext();
@@ -155,7 +155,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
         RefreshDbContext();
@@ -178,7 +178,7 @@ public class AppointmentControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -193,7 +193,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentId = Guid.NewGuid();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointmentId}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointmentId}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -209,7 +209,7 @@ public class AppointmentControllerTests : IntegrationTest
         const long appointmentId = 999;
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointmentId}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointmentId}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -245,7 +245,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointment.Id}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -277,7 +277,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointment.Id}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -293,7 +293,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentId = Guid.NewGuid();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointmentId}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointmentId}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -323,7 +323,7 @@ public class AppointmentControllerTests : IntegrationTest
         var expectedResponse = new AppointmentResponse(appointment);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointment.Id}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
 
         // assert
         var responseContent = await response.Content.ReadAsAsync<AppointmentResponse>();
@@ -354,7 +354,7 @@ public class AppointmentControllerTests : IntegrationTest
         var expectedResponse = new AppointmentResponse(appointment);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/{appointment.Id}");
+        var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
 
         // assert
         var responseContent = await response.Content.ReadAsAsync<AppointmentResponse>();
@@ -425,7 +425,7 @@ public class AppointmentControllerTests : IntegrationTest
         queryString.Add(filterName, filterValue);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/search?{queryString}");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
 
         // assert
         RefreshDbContext();
@@ -487,7 +487,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/search");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search");
 
         // assert
         RefreshDbContext();
@@ -531,7 +531,7 @@ public class AppointmentControllerTests : IntegrationTest
         queryString.Add(filterName, filterValue);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/search?{queryString}");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -544,7 +544,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/search");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -560,7 +560,7 @@ public class AppointmentControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/search");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -572,7 +572,7 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("type", "Consultation")]
     [InlineData("status", "Pending")]
     public async Task
-        GetAppointmentsForAuthenticatedUserFiltered_SingleFieldProvided_ReturnsAppointmentsMatchingProvidedFilter(
+        GetAppointmentsForAuthenticatedPatientFiltered_SingleFieldProvided_ReturnsAppointmentsMatchingProvidedFilter(
             string filterName, string filterValue)
     {
         // arrange
@@ -619,7 +619,7 @@ public class AppointmentControllerTests : IntegrationTest
         queryString.Add(filterName, filterValue);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth/search?{queryString}");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current/search?{queryString}");
 
         // assert
         RefreshDbContext();
@@ -646,7 +646,7 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_NoFiltersProvided_ReturnsAllAppointmentsForUser()
+    public async Task GetAppointmentsForAuthenticatedPatientFiltered_NoFiltersProvided_ReturnsAllAppointmentsForUser()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -689,7 +689,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth/search");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current/search");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -709,7 +709,7 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData("dateStart", "malformedDate")]
     [InlineData("dateEnd", "malformedDate")]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_SingleInvalidField_ReturnsBadRequest(
+    public async Task GetAppointmentsForAuthenticatedPatientFiltered_SingleInvalidField_ReturnsBadRequest(
         string filterName, string filterValue)
     {
         // arrange
@@ -736,20 +736,20 @@ public class AppointmentControllerTests : IntegrationTest
         queryString.Add(filterName, filterValue);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth/search?{queryString}");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current/search?{queryString}");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_NoAuthenticatedUser_ReturnsUnauthorized()
+    public async Task GetAppointmentsForAuthenticatedPatientFiltered_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth/search");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current/search");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -758,7 +758,7 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData(RoleTypes.Doctor)]
     [InlineData(RoleTypes.Admin)]
-    public async Task GetAppointmentsForAuthenticatedUserFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(
+    public async Task GetAppointmentsForAuthenticatedPatientFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(
         string roleType)
     {
         // arrange
@@ -766,7 +766,7 @@ public class AppointmentControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleType);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/auth/search");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current/search");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -790,7 +790,7 @@ public class AppointmentControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createAppointmentRequest);
 
         // assert
         RefreshDbContext();
@@ -852,7 +852,7 @@ public class AppointmentControllerTests : IntegrationTest
         }
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -867,7 +867,7 @@ public class AppointmentControllerTests : IntegrationTest
         var createAppointmentRequest = new CreateAppointmentRequest();
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -885,7 +885,7 @@ public class AppointmentControllerTests : IntegrationTest
         var createAppointmentRequest = new CreateAppointmentRequest();
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -911,7 +911,7 @@ public class AppointmentControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -935,7 +935,7 @@ public class AppointmentControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/patient/current/request", createAppointmentRequest);
 
         // assert
         RefreshDbContext();
@@ -988,7 +988,7 @@ public class AppointmentControllerTests : IntegrationTest
         }
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/patient/current/request", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -1003,7 +1003,7 @@ public class AppointmentControllerTests : IntegrationTest
         var createAppointmentRequest = new CreateAppointmentRequest();
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/patient/current/request", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -1021,7 +1021,7 @@ public class AppointmentControllerTests : IntegrationTest
         var createAppointmentRequest = new CreateAppointmentRequest();
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/patient/current/request", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -1048,7 +1048,7 @@ public class AppointmentControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/request", createAppointmentRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/patient/current/request", createAppointmentRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -1090,7 +1090,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1158,7 +1158,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -1197,7 +1197,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1263,7 +1263,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -1309,7 +1309,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1375,7 +1375,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -1400,7 +1400,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -1426,7 +1426,7 @@ public class AppointmentControllerTests : IntegrationTest
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{appointmentId}", content);
+        var response = await client.PatchAsync($"{UrlPrefix}/user/current/{appointmentId}", content);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

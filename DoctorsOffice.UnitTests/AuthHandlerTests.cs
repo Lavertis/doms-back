@@ -1,17 +1,17 @@
 ﻿using System.Security.Claims;
 using DoctorsOffice.Application.CQRS.Commands.Authenticate;
-using DoctorsOffice.Application.CQRS.Commands.RefreshToken;
+using DoctorsOffice.Application.CQRS.Commands.RefreshTokens.RefreshToken;
+using DoctorsOffice.Application.CQRS.Commands.RefreshTokens.RevokeRefreshToken;
 using DoctorsOffice.Application.Services.Auth;
 using DoctorsOffice.Application.Services.Jwt;
 using DoctorsOffice.Application.Services.User;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
-using DoctorsOffice.Domain.Exceptions;
-using DoctorsOfficeApi.CQRS.Commands.RevokeRefreshToken;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using MockQueryable.FakeItEasy;
 using Xunit;
@@ -62,8 +62,8 @@ public class AuthHandlerTests
 
         // assert 
         A.CallTo(() => _fakeUserManager.UpdateAsync(A<AppUser>.Ignored)).MustHaveHappened();
-        result.JwtToken.Should().Be(dummyJwtToken);
-        result.RefreshToken.Should().Be(dummyRefreshToken.Token);
+        result.Value.JwtToken.Should().Be(dummyJwtToken);
+        result.Value.RefreshToken.Should().Be(dummyRefreshToken.Token);
     }
 
     [Fact]
@@ -95,8 +95,8 @@ public class AuthHandlerTests
 
         // assert
         A.CallTo(() => _fakeUserManager.UpdateAsync(A<AppUser>.Ignored)).MustHaveHappened();
-        result.JwtToken.Should().Be(dummyJwtToken);
-        result.RefreshToken.Should().Be(newRefreshToken.Token);
+        result.Value.JwtToken.Should().Be(dummyJwtToken);
+        result.Value.RefreshToken.Should().Be(newRefreshToken.Token);
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class AuthHandlerTests
     }
 
     [Fact]
-    public async void RefreshTokenHandler_RevokedToken_ThrowsBadRequestException()
+    public async void RefreshTokenHandler_RevokedToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var oldRefreshToken = new RefreshToken
@@ -145,10 +145,10 @@ public class AuthHandlerTests
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
@@ -213,7 +213,7 @@ public class AuthHandlerTests
     }
 
     [Fact]
-    public async void RefreshTokenHandler_ExpiredToken_ThrowsBadRequestException()
+    public async void RefreshTokenHandler_ExpiredToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var oldRefreshToken = new RefreshToken
@@ -234,10 +234,10 @@ public class AuthHandlerTests
         var handler = new RefreshTokenHandler(_fakeUserManager, _fakeJwtService, _fakeUserService, _fakeAuthService);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
@@ -270,7 +270,7 @@ public class AuthHandlerTests
     }
 
     [Fact]
-    public async void RevokeRefreshTokenHandler_EmptyToken_ThrowsBadRequestException()
+    public async void RevokeRefreshTokenHandler_EmptyToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var request = new RevokeRefreshTokenRequest {RefreshToken = string.Empty};
@@ -278,14 +278,14 @@ public class AuthHandlerTests
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
-    public async void RevokeRefreshTokenHandler_NullToken_ThrowsBadRequestException()
+    public async void RevokeRefreshTokenHandler_NullToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var request = new RevokeRefreshTokenRequest {RefreshToken = null!};
@@ -293,10 +293,10 @@ public class AuthHandlerTests
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
@@ -322,7 +322,7 @@ public class AuthHandlerTests
     }
 
     [Fact]
-    public async void RevokeRefreshTokenHandler_RevokedToken_ThrowsBadRequestException()
+    public async void RevokeRefreshTokenHandler_RevokedToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var refreshTokenToBeRevoked = new RefreshToken
@@ -343,14 +343,14 @@ public class AuthHandlerTests
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
-    public async void RevokeRefreshTokenHandler_ExpiredToken_ThrowsBadRequestException()
+    public async void RevokeRefreshTokenHandler_ExpiredToken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var refreshTokenToBeRevoked = new RefreshToken
@@ -371,9 +371,9 @@ public class AuthHandlerTests
         var handler = new RevokeRefreshTokenHandler(_fakeAuthService, _fakeUserManager);
 
         // act
-        var action = async () => await handler.Handle(command, new CancellationToken());
+        var result = await handler.Handle(command, new CancellationToken());
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 }

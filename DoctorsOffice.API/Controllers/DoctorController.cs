@@ -1,11 +1,11 @@
-﻿using DoctorsOffice.Application.CQRS.Commands.CreateDoctor;
-using DoctorsOffice.Application.CQRS.Commands.UpdateDoctorById;
-using DoctorsOffice.Application.CQRS.Queries.GetAllDoctors;
-using DoctorsOffice.Application.CQRS.Queries.GetDoctorById;
+﻿using DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
+using DoctorsOffice.Application.CQRS.Commands.Doctors.DeleteDoctorById;
+using DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
+using DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
+using DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorById;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOfficeApi.CQRS.Commands.DeleteDoctorById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
-[Route("api/doctor")]
+[Route("api/doctors")]
 public class DoctorController : BaseController
 {
     public DoctorController(IMediator mediator) : base(mediator)
@@ -23,7 +23,7 @@ public class DoctorController : BaseController
     /// <summary>
     /// Returns authenticated doctor. Only for doctors
     /// </summary>
-    [HttpGet("auth")]
+    [HttpGet("current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> GetAuthenticatedDoctorAsync()
         => Ok(await Mediator.Send(new GetDoctorByIdQuery(doctorId: JwtSubject())));
@@ -31,7 +31,7 @@ public class DoctorController : BaseController
     /// <summary>
     /// Returns all doctors. Only for admins
     /// </summary>
-    [HttpGet("")]
+    [HttpGet]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<IList<DoctorResponse>>> GetAllDoctorsAsync()
         => Ok(await Mediator.Send(new GetAllDoctorsQuery()));
@@ -39,7 +39,7 @@ public class DoctorController : BaseController
     /// <summary>
     /// Creates a new doctor. Only for admins
     /// </summary>
-    [HttpPost("")]
+    [HttpPost]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<DoctorResponse>> CreateDoctorAsync(CreateDoctorRequest request)
         => StatusCode(StatusCodes.Status201Created, Ok(await Mediator.Send(new CreateDoctorCommand(request))));
@@ -47,7 +47,7 @@ public class DoctorController : BaseController
     /// <summary>
     /// Updates authenticated doctor. Only for doctors
     /// </summary>
-    [HttpPatch("auth")]
+    [HttpPatch("current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> UpdateAuthenticatedDoctorAsync(
         UpdateAuthenticatedDoctorRequest request)

@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
-using DoctorsOffice.Application.CQRS.Commands.CreatePrescription;
-using DoctorsOffice.Application.CQRS.Commands.UpdatePrescription;
-using DoctorsOffice.Application.CQRS.Queries.GetPrescriptionById;
-using DoctorsOffice.Application.CQRS.Queries.GetPrescriptionsByDoctorId;
-using DoctorsOffice.Application.CQRS.Queries.GetPrescriptionsByPatientId;
+using DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
+using DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionById;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByDoctorId;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
@@ -163,7 +163,7 @@ public class PrescriptionHandlerTests
     public async Task CreatePrescription_ValidRequest_CreatesPrescription()
     {
         // arrange
-        var expectedPrescription = new Prescription()
+        var expectedPrescription = new Prescription
         {
             Title = "Test Prescription",
             Description = "Test Description",

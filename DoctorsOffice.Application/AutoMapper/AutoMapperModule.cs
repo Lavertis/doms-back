@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using DoctorsOffice.Application.AutoMapper.Profiles;
+using DoctorsOffice.Domain.DTO.Requests;
+using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Entities.UserTypes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DoctorsOffice.Application.AutoMapper;
@@ -9,8 +13,9 @@ public static class AutoMapperModule
     {
         var mapperConfiguration = new MapperConfiguration(options =>
         {
-            options.CreateMaps();
-            options.AddProfiles();
+            options.CreateMap<CreateUserRequest, AppUser>();
+            options.CreateMap<AppUser, UserResponse>();
+            options.AddProfile(new AdminResponseMappingProfile());
         });
 
         var mapper = mapperConfiguration.CreateMapper();

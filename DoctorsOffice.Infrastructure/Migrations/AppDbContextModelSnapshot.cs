@@ -63,7 +63,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("Appointments");
+                    b.ToTable("Appointments", (string)null);
                 });
 
             modelBuilder.Entity("DoctorsOfficeApi.Entities.AppointmentStatus", b =>
@@ -84,7 +84,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppointmentStatuses");
+                    b.ToTable("AppointmentStatuses", (string)null);
 
                     b.HasData(
                         new
@@ -142,7 +142,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppointmentTypes");
+                    b.ToTable("AppointmentTypes", (string)null);
 
                     b.HasData(
                         new
@@ -230,7 +230,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasIndex("PrescriptionId");
 
-                    b.ToTable("DrugItems");
+                    b.ToTable("DrugItems", (string)null);
                 });
 
             modelBuilder.Entity("DoctorsOfficeApi.Entities.Prescription", b =>
@@ -265,7 +265,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("Prescriptions");
+                    b.ToTable("Prescriptions", (string)null);
                 });
 
             modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Admin", b =>
@@ -281,7 +281,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Admins");
+                    b.ToTable("Admins", (string)null);
 
                     b.HasData(
                         new
@@ -379,7 +379,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Doctors");
+                    b.ToTable("Doctors", (string)null);
                 });
 
             modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Patient", b =>
@@ -410,7 +410,7 @@ namespace DoctorsOfficeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -597,7 +597,7 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.AppUser", b =>
                 {
-                    b.OwnsMany("DoctorsOfficeApi.Entities.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsMany("DoctorsOfficeApi.Entities.UserTypes.AppUser.RefreshTokens#DoctorsOfficeApi.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
@@ -638,7 +638,7 @@ namespace DoctorsOfficeApi.Migrations
 
                             b1.HasIndex("AppUserId");
 
-                            b1.ToTable("RefreshTokens");
+                            b1.ToTable("RefreshTokens", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("AppUserId");

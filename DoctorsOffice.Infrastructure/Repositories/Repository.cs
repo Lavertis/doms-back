@@ -16,11 +16,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         DbContext = dbContext;
     }
 
-    public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] navigationProperties)
+    public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] includeFields)
     {
         var adminsQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
 
-        return navigationProperties.Aggregate(
+        return includeFields.Aggregate(
             adminsQueryable,
             (current, prop) => current.Include(prop)
         );
@@ -28,11 +28,11 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
 
     public virtual async Task<TEntity?> GetByIdOrDefaultAsync(
         Guid id,
-        params Expression<Func<TEntity, object>>[] navigationProperties)
+        params Expression<Func<TEntity, object>>[] includeFields)
     {
         var adminsQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
 
-        adminsQueryable = navigationProperties.Aggregate(
+        adminsQueryable = includeFields.Aggregate(
             adminsQueryable,
             (current, prop) => current.Include(prop)
         );
@@ -42,9 +42,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
 
     public virtual async Task<TEntity> GetByIdAsync(
         Guid id,
-        params Expression<Func<TEntity, object>>[] navigationProperties)
+        params Expression<Func<TEntity, object>>[] includeFields)
     {
-        var entity = await GetByIdOrDefaultAsync(id, navigationProperties);
+        var entity = await GetByIdOrDefaultAsync(id, includeFields);
         if (entity == null)
             throw new NotFoundException($"{typeof(TEntity).Name} with id {id} not found");
 

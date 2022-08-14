@@ -15,7 +15,7 @@ namespace DoctorsOffice.IntegrationTests;
 
 public class PrescriptionControllerTests : IntegrationTest
 {
-    private const string UrlPrefix = "api/prescription";
+    private const string UrlPrefix = "api/prescriptions";
 
     public PrescriptionControllerTests(WebApplicationFactory<Program> factory) : base(factory)
     {
@@ -190,7 +190,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/patient/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -214,7 +214,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await AuthenticateAsPatientAsync(client);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/patient/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -230,7 +230,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/patient/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -247,7 +247,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/patient/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -285,7 +285,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/doctor/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -307,7 +307,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await AuthenticateAsDoctorAsync(client);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/doctor/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -320,7 +320,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/doctor/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -337,7 +337,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await AuthenticateAsRoleAsync(client, roleName);
 
         // act
-        var response = await client.GetAsync($"{UrlPrefix}/doctor/auth");
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current");
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -359,7 +359,7 @@ public class PrescriptionControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPrescriptionRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createPrescriptionRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -410,7 +410,7 @@ public class PrescriptionControllerTests : IntegrationTest
         }
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPrescriptionRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createPrescriptionRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -432,7 +432,7 @@ public class PrescriptionControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPrescriptionRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createPrescriptionRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -453,7 +453,7 @@ public class PrescriptionControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPrescriptionRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createPrescriptionRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -477,7 +477,7 @@ public class PrescriptionControllerTests : IntegrationTest
         };
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPrescriptionRequest);
+        var response = await client.PostAsJsonAsync($"{UrlPrefix}/doctor/current", createPrescriptionRequest);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

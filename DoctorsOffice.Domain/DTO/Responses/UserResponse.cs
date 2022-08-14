@@ -1,27 +1,10 @@
-﻿using DoctorsOffice.Domain.Entities.UserTypes;
-
-namespace DoctorsOfficeApi.Models.Responses;
+﻿namespace DoctorsOffice.Domain.DTO.Responses;
 
 public class UserResponse
 {
-    public UserResponse(AppUser user)
-    {
-        Id = user.Id;
-        UserName = user.UserName;
-        NormalizedUserName = user.NormalizedUserName;
-        TwoFactorEnabled = user.TwoFactorEnabled;
-        LockoutEnd = user.LockoutEnd;
-        LockoutEnabled = user.LockoutEnabled;
-        AccessFailedCount = user.AccessFailedCount;
-    }
-
-    public UserResponse()
-    {
-    }
-
-    public Guid Id { get; set; } = default!;
-    public string UserName { get; set; } = default!;
-    public string NormalizedUserName { get; set; } = default!;
+    public Guid Id { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string NormalizedUserName { get; set; } = string.Empty;
     public bool TwoFactorEnabled { get; set; }
     public DateTimeOffset? LockoutEnd { get; set; }
     public bool LockoutEnabled { get; set; }

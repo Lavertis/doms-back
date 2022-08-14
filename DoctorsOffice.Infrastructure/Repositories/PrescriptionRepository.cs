@@ -13,24 +13,24 @@ public class PrescriptionRepository : Repository<Prescription>, IPrescriptionRep
     }
 
     public IQueryable<Prescription> GetByPatientId(Guid patientId,
-        params Expression<Func<Prescription, object>>[] navigationProperties)
+        params Expression<Func<Prescription, object>>[] includeFields)
     {
         var prescriptionsQueryable = DbContext.Prescriptions
             .Where(p => p.PatientId == patientId);
 
-        return navigationProperties.Aggregate(
+        return includeFields.Aggregate(
             prescriptionsQueryable,
             (current, prop) => current.Include(prop)
         );
     }
 
     public IQueryable<Prescription> GetByDoctorId(Guid doctorId,
-        params Expression<Func<Prescription, object>>[] navigationProperties)
+        params Expression<Func<Prescription, object>>[] includeFields)
     {
         var prescriptionsQueryable = DbContext.Prescriptions
             .Where(p => p.DoctorId == doctorId);
 
-        return navigationProperties.Aggregate(
+        return includeFields.Aggregate(
             prescriptionsQueryable,
             (current, prop) => current.Include(prop)
         );
