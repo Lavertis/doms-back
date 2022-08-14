@@ -9,7 +9,7 @@ namespace DoctorsOffice.Application.AutoMapper;
 
 public static class AutoMapperModule
 {
-    public static void AddAutoMapper(this IServiceCollection services)
+    public static void AddAutoMapperModule(this IServiceCollection services)
     {
         var mapperConfiguration = new MapperConfiguration(options =>
         {

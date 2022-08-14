@@ -9,12 +9,12 @@ namespace DoctorsOffice.Application.CQRS.Commands.RefreshTokens.RevokeRefreshTok
 
 public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshTokenCommand, HttpResult<Unit>>
 {
-    private readonly IAuthService _authService;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly UserManager<AppUser> _userManager;
 
-    public RevokeRefreshTokenHandler(IAuthService authService, UserManager<AppUser> userManager)
+    public RevokeRefreshTokenHandler(IRefreshTokenService refreshTokenService, UserManager<AppUser> userManager)
     {
-        _authService = authService;
+        _refreshTokenService = refreshTokenService;
         _userManager = userManager;
     }
 
@@ -29,7 +29,7 @@ public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshTokenComma
                 .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 
-        var user = await _authService.GetUserByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        var user = await _refreshTokenService.GetUserByRefreshTokenAsync(request.RefreshToken, cancellationToken);
         var refreshToken = user.RefreshTokens.Single(x => x.Token == request.RefreshToken);
 
         if (!refreshToken.IsActive)
@@ -39,7 +39,7 @@ public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshTokenComma
                 .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 
-        _authService.RevokeRefreshToken(refreshToken, request.IpAddress, "Revoked without replacement");
+        _refreshTokenService.RevokeRefreshToken(refreshToken, request.IpAddress, "Revoked without replacement");
         await _userManager.UpdateAsync(user);
         return result;
     }

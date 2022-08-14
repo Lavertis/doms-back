@@ -5,7 +5,7 @@ namespace DoctorsOffice.Infrastructure.Repositories;
 
 public static class RepositoryModule
 {
-    public static void AddRepositories(this IServiceCollection services)
+    public static void AddRepositoryModule(this IServiceCollection services)
     {
         services.AddScoped<IAdminRepository, AdminRepository>();
         services.AddScoped<IDoctorRepository, DoctorRepository>();

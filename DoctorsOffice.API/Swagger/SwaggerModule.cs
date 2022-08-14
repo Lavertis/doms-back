@@ -6,7 +6,7 @@ namespace DoctorsOffice.API.Swagger;
 
 public static class SwaggerModule
 {
-    public static void AddSwagger(this IServiceCollection services)
+    public static void AddSwaggerModule(this IServiceCollection services)
     {
         services.AddSwaggerGen(options =>
         {

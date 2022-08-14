@@ -3,7 +3,7 @@ using DoctorsOffice.Domain.Entities.UserTypes;
 
 namespace DoctorsOffice.Application.Services.Auth;
 
-public interface IAuthService
+public interface IRefreshTokenService
 {
     public Task<AppUser> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
     public void RemoveOldRefreshTokens(AppUser user);

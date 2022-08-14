@@ -12,12 +12,12 @@ namespace DoctorsOffice.Infrastructure;
 
 public static class IdentityModule
 {
-    public static void AddIdentity(this IServiceCollection services, IConfiguration configuration)
+    public static void AddIdentityModule(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                var key = Encoding.ASCII.GetBytes(configuration.GetSection("AppSettings:JwtSecretKey").Value);
+                var key = Encoding.ASCII.GetBytes(configuration.GetSection("JwtSettings:SecretKey").Value);
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,

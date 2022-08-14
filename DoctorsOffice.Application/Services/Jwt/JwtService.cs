@@ -14,25 +14,25 @@ namespace DoctorsOffice.Application.Services.Jwt;
 
 public class JwtService : IJwtService
 {
-    private readonly AppSettings _appSettings;
+    private readonly JwtSettings _jwtSettings;
     private readonly UserManager<AppUser> _userManager;
 
-    public JwtService(IOptions<AppSettings> appSettings, UserManager<AppUser> userManager)
+    public JwtService(IOptions<JwtSettings> appSettings, UserManager<AppUser> userManager)
     {
-        _appSettings = appSettings.Value;
+        _jwtSettings = appSettings.Value;
         _userManager = userManager;
     }
 
 
     public string GenerateJwtToken(IList<Claim> claims)
     {
-        var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_appSettings.JwtSecretKey));
+        var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.SecretKey));
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(15),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenLifetimeInMinutes),
             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature)
         };
 
@@ -46,7 +46,7 @@ public class JwtService : IJwtService
         var refreshToken = new RefreshToken
         {
             Token = await GetUniqueToken(cancellationToken),
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenLifetimeInDays),
             CreatedAt = DateTime.UtcNow,
             CreatedByIp = ipAddress
         };

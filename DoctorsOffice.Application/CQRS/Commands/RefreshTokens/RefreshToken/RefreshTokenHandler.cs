@@ -14,20 +14,20 @@ using RefreshTokenEntity = Domain.Entities.RefreshToken;
 
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResult<AuthenticateResponse>>
 {
-    private readonly IAuthService _authService;
     private readonly IJwtService _jwtService;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
 
     public RefreshTokenHandler(
         UserManager<AppUser> userManager,
         IJwtService jwtService,
-        IUserService userService, IAuthService authService)
+        IUserService userService, IRefreshTokenService refreshTokenService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
         _userService = userService;
-        _authService = authService;
+        _refreshTokenService = refreshTokenService;
     }
 
     public async Task<HttpResult<AuthenticateResponse>> Handle(
@@ -35,7 +35,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
     {
         var result = new HttpResult<AuthenticateResponse>();
 
-        var user = await _authService.GetUserByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        var user = await _refreshTokenService.GetUserByRefreshTokenAsync(request.RefreshToken, cancellationToken);
         var refreshToken = user.RefreshTokens.Single(x => x.Token == request.RefreshToken);
 
         if (refreshToken.IsRevoked)
@@ -59,7 +59,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
         var newRefreshToken = await RotateRefreshTokenAsync(refreshToken, request.IpAddress, cancellationToken);
         user.RefreshTokens.Add(newRefreshToken);
 
-        _authService.RemoveOldRefreshTokens(user);
+        _refreshTokenService.RemoveOldRefreshTokens(user);
 
         await _userManager.UpdateAsync(user);
 

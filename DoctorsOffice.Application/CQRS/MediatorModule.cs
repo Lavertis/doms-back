@@ -5,7 +5,7 @@ namespace DoctorsOffice.Application.CQRS;
 
 public static class MediatorModule
 {
-    public static void AddMediatR(this IServiceCollection services)
+    public static void AddMediatorModule(this IServiceCollection services)
     {
         services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
     }

@@ -13,17 +13,23 @@ namespace DoctorsOffice.UnitTests;
 
 public class JwtServiceTests
 {
-    private readonly AppSettings _dummyAppSettings;
+    private readonly JwtSettings _fakeJwtSettings;
     private readonly UserManager<AppUser> _fakeUserManager;
     private readonly IJwtService _jwtService;
 
     public JwtServiceTests()
     {
-        _dummyAppSettings = new AppSettings {JwtSecretKey = "12345678901234567890123456789012"};
-        var fakeAppSettingsOptions = A.Fake<IOptions<AppSettings>>();
-        A.CallTo(() => fakeAppSettingsOptions.Value).Returns(_dummyAppSettings);
+        _fakeJwtSettings = new JwtSettings
+        {
+            SecretKey = "12345678901234567890123456789012",
+            TokenLifetimeInMinutes = 15,
+            RefreshTokenLifetimeInDays = 7,
+            RefreshTokenTtlInDays = 3
+        };
+        var fakeJwtSettingsOptions = A.Fake<IOptions<JwtSettings>>();
+        A.CallTo(() => fakeJwtSettingsOptions.Value).Returns(_fakeJwtSettings);
         _fakeUserManager = A.Fake<UserManager<AppUser>>();
-        _jwtService = new JwtService(fakeAppSettingsOptions, _fakeUserManager);
+        _jwtService = new JwtService(fakeJwtSettingsOptions, _fakeUserManager);
     }
 
     [Fact]

@@ -8,12 +8,12 @@ using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.Services.Auth;
 
-public class AuthService : IAuthService
+public class RefreshTokenService : IRefreshTokenService
 {
-    private readonly AppSettings _appSettings;
+    private readonly JwtSettings _appSettings;
     private readonly UserManager<AppUser> _userManager;
 
-    public AuthService(UserManager<AppUser> userManager, IOptions<AppSettings> appSettings)
+    public RefreshTokenService(UserManager<AppUser> userManager, IOptions<JwtSettings> appSettings)
     {
         _userManager = userManager;
         _appSettings = appSettings.Value;

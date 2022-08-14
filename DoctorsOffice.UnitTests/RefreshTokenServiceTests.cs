@@ -13,17 +13,17 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class AuthServiceTests
+public class RefreshTokenServiceTests
 {
-    private readonly AuthService _authService;
-    private readonly IOptions<AppSettings> _fakeAppSettings;
+    private readonly IOptions<JwtSettings> _fakeJwtSettings;
     private readonly UserManager<AppUser> _fakeUserManager;
+    private readonly RefreshTokenService _refreshTokenService;
 
-    public AuthServiceTests()
+    public RefreshTokenServiceTests()
     {
         _fakeUserManager = A.Fake<UserManager<AppUser>>();
-        _fakeAppSettings = A.Fake<IOptions<AppSettings>>();
-        _authService = new AuthService(_fakeUserManager, _fakeAppSettings);
+        _fakeJwtSettings = A.Fake<IOptions<JwtSettings>>();
+        _refreshTokenService = new RefreshTokenService(_fakeUserManager, _fakeJwtSettings);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class AuthServiceTests
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
 
         // act
-        var result = await _authService.GetUserByRefreshTokenAsync(refreshToken);
+        var result = await _refreshTokenService.GetUserByRefreshTokenAsync(refreshToken);
 
         // assert
         result.Should().Be(usersQueryable.First());
@@ -61,7 +61,7 @@ public class AuthServiceTests
         A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
 
         // act
-        var action = async () => await _authService.GetUserByRefreshTokenAsync(refreshToken);
+        var action = async () => await _refreshTokenService.GetUserByRefreshTokenAsync(refreshToken);
 
         // assert
         await action.Should().ThrowAsync<NotFoundException>();
@@ -76,18 +76,18 @@ public class AuthServiceTests
         {
             RefreshTokens = new List<RefreshToken>
             {
-                new RefreshToken
+                new()
                 {
                     Token = refreshToken,
                     ExpiresAt = DateTime.Now.AddDays(1)
                 },
-                new RefreshToken
+                new()
                 {
                     Token = refreshToken,
                     ExpiresAt = DateTime.Now.AddDays(1),
                     RevokedAt = DateTime.Now.Subtract(1.Days())
                 },
-                new RefreshToken
+                new()
                 {
                     Token = refreshToken,
                     ExpiresAt = DateTime.Now.Subtract(1.Days())
@@ -96,7 +96,7 @@ public class AuthServiceTests
         };
 
         // act
-        _authService.RemoveOldRefreshTokens(user);
+        _refreshTokenService.RemoveOldRefreshTokens(user);
 
         // assert
         user.RefreshTokens.Should().NotContain(token => !token.IsActive);
@@ -117,7 +117,7 @@ public class AuthServiceTests
         const string replacedByToken = "replacedByToken";
 
         // act
-        _authService.RevokeRefreshToken(token, ipAddress, reasonRevoked, replacedByToken);
+        _refreshTokenService.RevokeRefreshToken(token, ipAddress, reasonRevoked, replacedByToken);
 
         // assert
         token.RevokedAt.Should().NotBeNull();

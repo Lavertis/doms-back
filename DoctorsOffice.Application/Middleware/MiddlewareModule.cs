@@ -4,7 +4,7 @@ namespace DoctorsOffice.Application.Middleware;
 
 public static class MiddlewareModule
 {
-    public static void AddMiddleware(this IServiceCollection services)
+    public static void AddMiddlewareModule(this IServiceCollection services)
     {
         services.AddScoped<ExceptionHandlerMiddleware>();
     }

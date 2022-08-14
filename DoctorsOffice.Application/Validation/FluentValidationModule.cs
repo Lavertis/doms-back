@@ -7,7 +7,7 @@ namespace DoctorsOffice.Application.Validation;
 
 public static class FluentValidationModule
 {
-    public static void AddFluentValidators(this IServiceCollection services)
+    public static void AddFluentValidationModule(this IServiceCollection services)
     {
         services.AddFluentValidation();
         services.AddScoped<IValidator<AuthenticateRequest>, AuthenticateRequestValidator>();

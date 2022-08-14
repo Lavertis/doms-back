@@ -11,20 +11,20 @@ namespace DoctorsOffice.Application.CQRS.Commands.Authenticate;
 
 public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResult<AuthenticateResponse>>
 {
-    private readonly IAuthService _authService;
     private readonly IJwtService _jwtService;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
 
     public AuthenticateHandler(
         IUserService userService,
         IJwtService jwtService,
-        IAuthService authService,
+        IRefreshTokenService refreshTokenService,
         UserManager<AppUser> userManager)
     {
         _userService = userService;
         _jwtService = jwtService;
-        _authService = authService;
+        _refreshTokenService = refreshTokenService;
         _userManager = userManager;
     }
 
@@ -38,7 +38,7 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
         var jwtToken = _jwtService.GenerateJwtToken(userClaims);
         var refreshToken = await _jwtService.GenerateRefreshTokenAsync(request.IpAddress, cancellationToken);
 
-        _authService.RemoveOldRefreshTokens(user);
+        _refreshTokenService.RemoveOldRefreshTokens(user);
 
         user.RefreshTokens.Add(refreshToken);
         await _userManager.UpdateAsync(user);
