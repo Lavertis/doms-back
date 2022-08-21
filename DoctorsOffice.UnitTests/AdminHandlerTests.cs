@@ -4,10 +4,10 @@ using DoctorsOffice.Application.CQRS.Queries.Admins.GetAdminById;
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAllAdmins;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -50,21 +50,22 @@ public class AdminHandlerTests
     }
 
     [Fact]
-    public async Task GetAdminByIdHandler_AdminDoesntExist_ThrowsNotFoundException()
+    public async Task GetAdminByIdHandler_AdminDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var adminId = Guid.NewGuid();
+        Admin? admin = null;
         A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored))
-            .Throws(new NotFoundException(""));
+            .Returns(admin);
 
         var query = new GetAdminByIdQuery(adminId);
         var handler = new GetAdminByIdHandler(_fakeAdminRepository, _fakeMapper);
 
         // act
-        var action = async () => await handler.Handle(query, default);
+        var result = await handler.Handle(query, default);
 
         // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]

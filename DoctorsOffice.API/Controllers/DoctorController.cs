@@ -26,15 +26,15 @@ public class DoctorController : BaseController
     [HttpGet("current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> GetAuthenticatedDoctorAsync()
-        => Ok(await Mediator.Send(new GetDoctorByIdQuery(doctorId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(doctorId: JwtSubject())));
 
     /// <summary>
     /// Returns all doctors. Only for admins
     /// </summary>
     [HttpGet]
     [Authorize(Roles = RoleTypes.Admin)]
-    public async Task<ActionResult<IList<DoctorResponse>>> GetAllDoctorsAsync()
-        => Ok(await Mediator.Send(new GetAllDoctorsQuery()));
+    public async Task<ActionResult<IEnumerable<DoctorResponse>>> GetAllDoctorsAsync()
+        => CreateResponse(await Mediator.Send(new GetAllDoctorsQuery()));
 
     /// <summary>
     /// Creates a new doctor. Only for admins
@@ -42,7 +42,7 @@ public class DoctorController : BaseController
     [HttpPost]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<DoctorResponse>> CreateDoctorAsync(CreateDoctorRequest request)
-        => StatusCode(StatusCodes.Status201Created, Ok(await Mediator.Send(new CreateDoctorCommand(request))));
+        => CreateResponse(await Mediator.Send(new CreateDoctorCommand(request)));
 
     /// <summary>
     /// Updates authenticated doctor. Only for doctors
@@ -51,7 +51,7 @@ public class DoctorController : BaseController
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> UpdateAuthenticatedDoctorAsync(
         UpdateAuthenticatedDoctorRequest request)
-        => Ok(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: JwtSubject())));
 
     /// <summary>
     /// Updates doctor by id. Only for admins
@@ -59,13 +59,13 @@ public class DoctorController : BaseController
     [HttpPatch("{doctorId:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<DoctorResponse>> UpdateDoctorByIdAsync(Guid doctorId, UpdateDoctorRequest request)
-        => Ok(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: doctorId)));
+        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: doctorId)));
 
     /// <summary>
     /// Deletes doctor by id. Only for admins
     /// </summary>
     [HttpDelete("{doctorId:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
-    public async Task<ActionResult> DeleteDoctorByIdAsync(Guid doctorId)
-        => Ok(await Mediator.Send(new DeleteDoctorByIdCommand(doctorId: doctorId)));
+    public async Task<ActionResult<Unit>> DeleteDoctorByIdAsync(Guid doctorId)
+        => CreateResponse(await Mediator.Send(new DeleteDoctorByIdCommand(doctorId: doctorId)));
 }

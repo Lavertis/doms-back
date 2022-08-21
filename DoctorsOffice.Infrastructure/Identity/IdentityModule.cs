@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DoctorsOffice.Infrastructure;
+namespace DoctorsOffice.Infrastructure.Identity;
 
 public static class IdentityModule
 {
@@ -24,13 +24,7 @@ public static class IdentityModule
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    // Timezone problem workaround
-                    LifetimeValidator = (notBefore, expires, _, _) =>
-                    {
-                        if (notBefore is not null)
-                            return notBefore.Value.AddMinutes(-5) <= DateTime.UtcNow && expires >= DateTime.UtcNow;
-                        return expires >= DateTime.UtcNow;
-                    }
+                    LifetimeValidator = (_, expires, _, _) => expires >= DateTime.UtcNow // Timezone problem workaround
                 };
             });
 
@@ -47,6 +41,8 @@ public static class IdentityModule
                 };
             })
             .AddRoles<AppRole>()
+            .AddRoleManager<AppRoleManager>()
+            .AddUserManager<AppUserManager>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
     }

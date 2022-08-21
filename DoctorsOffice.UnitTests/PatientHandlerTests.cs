@@ -3,15 +3,17 @@ using DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
 using DoctorsOffice.Application.CQRS.Commands.Patients.DeletePatientById;
 using DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 using DoctorsOffice.Application.CQRS.Queries.Patients.GetPatientById;
-using DoctorsOffice.Application.Services.User;
+using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using MockQueryable.FakeItEasy;
 using Xunit;
@@ -20,15 +22,15 @@ namespace DoctorsOffice.UnitTests;
 
 public class PatientHandlerTests
 {
+    private readonly AppUserManager _fakeAppUserManager;
     private readonly IPatientRepository _fakePatientRepository;
-    private readonly UserManager<AppUser> _fakeUserManager;
     private readonly IUserService _fakeUserService;
 
     public PatientHandlerTests()
     {
         _fakePatientRepository = A.Fake<IPatientRepository>();
         _fakeUserService = A.Fake<IUserService>();
-        _fakeUserManager = A.Fake<UserManager<AppUser>>();
+        _fakeAppUserManager = A.Fake<AppUserManager>();
     }
 
     [Fact]
@@ -52,16 +54,17 @@ public class PatientHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().BeEquivalentTo(expectedResult);
+        result.Value.Should().BeEquivalentTo(expectedResult);
     }
 
     [Fact]
-    public async Task GetPatientByIdHandler_PatientDoesntExist_ThrowsNotFoundException()
+    public async Task GetPatientByIdHandler_PatientDoesntExist_ReturnsNotFound404StatusCodes()
     {
         // arrange
+        Patient? patient = null;
         A.CallTo(() =>
                 _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
-            .Throws(new NotFoundException(""));
+            .Returns(patient);
 
         var patientId = Guid.NewGuid();
 
@@ -69,10 +72,10 @@ public class PatientHandlerTests
         var handler = new GetPatientByIdHandler(_fakePatientRepository);
 
         // act
-        var action = async () => await handler.Handle(query, default);
+        var result = await handler.Handle(query, default);
 
         // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -102,7 +105,7 @@ public class PatientHandlerTests
         };
 
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
-            .Returns(newAppUser);
+            .Returns(new HttpResult<AppUser>().WithValue(newAppUser));
 
 
         var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService);
@@ -143,7 +146,7 @@ public class PatientHandlerTests
 
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
-        A.CallTo(() => _fakeUserManager.Users)
+        A.CallTo(() => _fakeAppUserManager.Users)
             .Returns(new List<AppUser> {patientToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var request = new UpdateAuthenticatedPatientRequest
@@ -158,13 +161,13 @@ public class PatientHandlerTests
             NewPassword = "newPassword1234#"
         };
         var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
 
         // assert
-        A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored))
+        A.CallTo(() => _fakeAppUserManager.PasswordHasher.HashPassword(A<AppUser>.Ignored, A<string>.Ignored))
             .MustHaveHappenedOnceExactly();
         A.CallTo(() => _fakePatientRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Patient>.Ignored))
             .MustHaveHappenedOnceExactly();
@@ -205,7 +208,7 @@ public class PatientHandlerTests
 
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(patientToUpdate);
-        A.CallTo(() => _fakeUserManager.Users)
+        A.CallTo(() => _fakeAppUserManager.Users)
             .Returns(new List<AppUser> {patientToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var request = new UpdateAuthenticatedPatientRequest();
@@ -221,7 +224,7 @@ public class PatientHandlerTests
         }
 
         var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
@@ -230,50 +233,50 @@ public class PatientHandlerTests
         switch (fieldName)
         {
             case "UserName":
-                result.UserName.Should().Be(fieldValue);
+                result.Value!.UserName.Should().Be(fieldValue);
                 break;
             case "FirstName":
-                result.FirstName.Should().Be(fieldValue);
+                result.Value!.FirstName.Should().Be(fieldValue);
                 break;
             case "LastName":
-                result.LastName.Should().Be(fieldValue);
+                result.Value!.LastName.Should().Be(fieldValue);
                 break;
             case "Email":
-                result.Email.Should().Be(fieldValue);
+                result.Value!.Email.Should().Be(fieldValue);
                 break;
             case "PhoneNumber":
-                result.PhoneNumber.Should().Be(fieldValue);
+                result.Value!.PhoneNumber.Should().Be(fieldValue);
                 break;
             case "Address":
-                result.Address.Should().Be(fieldValue);
+                result.Value!.Address.Should().Be(fieldValue);
                 break;
             case "DateOfBirth":
-                result.DateOfBirth.Should().Be(DateTime.Parse(fieldValue));
+                result.Value!.DateOfBirth.Should().Be(DateTime.Parse(fieldValue));
                 break;
             case "NewPassword":
-                A.CallTo(() => _fakeUserService.SetUserPassword(A<AppUser>.Ignored, A<string>.Ignored))
+                A.CallTo(() => _fakeAppUserManager.PasswordHasher.HashPassword(A<AppUser>.Ignored, A<string>.Ignored))
                     .MustHaveHappenedOnceExactly();
                 break;
         }
     }
 
     [Fact]
-    public async Task UpdatePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
+    public async Task UpdatePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
-        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored))
-            .Throws(new NotFoundException(""));
+        Patient? patient = null;
+        A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(patient);
 
         var request = new UpdateAuthenticatedPatientRequest();
         var updatePatientCommand = new UpdatePatientByIdCommand(request, Guid.NewGuid());
 
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeUserService, _fakeUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
 
         // act
-        var action = async () => await handler.Handle(updatePatientCommand, default);
+        var result = await handler.Handle(updatePatientCommand, default);
 
         // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -300,10 +303,9 @@ public class PatientHandlerTests
     }
 
     [Fact]
-    public async Task DeletePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
+    public async Task DeletePatientByIdHandler_PatientWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
-        A.CallTo(() => _fakePatientRepository.DeleteByIdAsync(A<Guid>.Ignored))
-            .Throws(new NotFoundException(""));
+        A.CallTo(() => _fakePatientRepository.DeleteByIdAsync(A<Guid>.Ignored)).Returns(false);
 
         var patientId = Guid.NewGuid();
 
@@ -311,9 +313,9 @@ public class PatientHandlerTests
         var handler = new DeletePatientByIdHandler(_fakePatientRepository);
 
         // act
-        var action = async () => await handler.Handle(command, default);
+        var result = await handler.Handle(command, default);
 
         // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 }

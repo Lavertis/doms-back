@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using DoctorsOffice.Application.CQRS.Queries.Users.GetAllUsers;
 using DoctorsOffice.Application.CQRS.Queries.Users.GetUserById;
-using DoctorsOffice.Application.Services.User;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
-using DoctorsOffice.Domain.Exceptions;
+using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -15,15 +15,13 @@ namespace DoctorsOffice.UnitTests;
 
 public class UserHandlerTests
 {
+    private readonly AppUserManager _fakeAppUserManager;
     private readonly IMapper _fakeMapper;
-    private readonly UserManager<AppUser> _fakeUserManager;
-    private readonly IUserService _fakeUserService;
 
     public UserHandlerTests()
     {
         _fakeMapper = A.Fake<IMapper>();
-        _fakeUserManager = A.Fake<UserManager<AppUser>>();
-        _fakeUserService = A.Fake<IUserService>();
+        _fakeAppUserManager = A.Fake<AppUserManager>();
     }
 
     [Fact]
@@ -31,10 +29,10 @@ public class UserHandlerTests
     {
         // arrange
         var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -48,10 +46,10 @@ public class UserHandlerTests
     {
         // arrange
         var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(3).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -65,10 +63,10 @@ public class UserHandlerTests
     {
         // arrange
         var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(1).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(fakeAppUserQueryable);
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -78,19 +76,20 @@ public class UserHandlerTests
     }
 
     [Fact]
-    public async void GetUserByIdHandler_IdDoesntExist_ThrowsNotFoundException()
+    public async void GetUserByIdHandler_IdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
-        A.CallTo(() => _fakeUserService.GetUserByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+        A.CallTo(() => _fakeAppUserManager.FindByIdAsync(A<Guid>.Ignored))
+            .Returns(new CommonResult<AppUser>().WithError(new Error()));
 
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        var handler = new GetUserByIdHandler(_fakeUserService, _fakeMapper);
+        var handler = new GetUserByIdHandler(_fakeMapper, _fakeAppUserManager);
 
         // act
-        var action = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        await action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -98,8 +97,8 @@ public class UserHandlerTests
     {
         // arrange
         var appUser = A.Dummy<AppUser>();
-        // appUser.UserName = appUser.NormalizedUserName = null;
-        A.CallTo(() => _fakeUserService.GetUserByIdAsync(A<Guid>.Ignored)).Returns(appUser);
+        A.CallTo(() => _fakeAppUserManager.FindByIdAsync(A<Guid>.Ignored))
+            .Returns(new CommonResult<AppUser>().WithValue(appUser));
 
         var expectedResponse = new UserResponse
         {
@@ -113,7 +112,7 @@ public class UserHandlerTests
         };
 
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        var handler = new GetUserByIdHandler(_fakeUserService, _fakeMapper);
+        var handler = new GetUserByIdHandler(_fakeMapper, _fakeAppUserManager);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);

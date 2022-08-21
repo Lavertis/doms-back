@@ -22,8 +22,8 @@ public class RefreshTokenController : BaseController
     /// </summary>
     [Authorize(Roles = RoleTypes.Admin)]
     [HttpGet("user/{userId:guid}")]
-    public async Task<ActionResult<IList<RefreshToken>>> GetRefreshTokensByUserId(Guid userId)
-        => Ok(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId: userId)));
+    public async Task<ActionResult<IEnumerable<RefreshToken>>> GetRefreshTokensByUserId(Guid userId)
+        => CreateResponse(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId: userId)));
 
     /// <summary> 
     /// Revokes specified refresh token.

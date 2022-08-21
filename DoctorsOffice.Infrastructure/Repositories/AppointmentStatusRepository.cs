@@ -1,5 +1,4 @@
 using DoctorsOffice.Domain.Entities;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -12,22 +11,13 @@ public class AppointmentStatusRepository : Repository<AppointmentStatus>, IAppoi
     {
     }
 
-    public async Task<AppointmentStatus> GetByNameAsync(string name)
+    public async Task<AppointmentStatus?> GetByNameAsync(string name)
     {
-        var appointmentStatus = await GetByNameOrDefaultAsync(name);
-        if (appointmentStatus is null)
-        {
-            throw new NotFoundException($"AppointmentStatus with name: {name} not found");
-        }
-
-        return appointmentStatus;
-    }
-
-    public async Task<AppointmentStatus?> GetByNameOrDefaultAsync(string name)
-    {
-        return await DbContext.Set<AppointmentStatus>()
+        var appointmentStatus = await DbContext.Set<AppointmentStatus>()
             .AsNoTrackingWithIdentityResolution()
             .FirstOrDefaultAsync(e => e.Name == name);
+
+        return appointmentStatus;
     }
 
     public async Task<bool> ExistsByNameAsync(string name)

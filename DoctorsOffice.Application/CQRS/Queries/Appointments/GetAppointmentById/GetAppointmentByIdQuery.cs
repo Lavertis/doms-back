@@ -1,9 +1,10 @@
 ﻿using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById;
 
-public class GetAppointmentByIdQuery : IRequest<AppointmentResponse>
+public class GetAppointmentByIdQuery : IRequest<HttpResult<AppointmentResponse>>
 {
     public readonly Guid AppointmentId;
     public readonly string RoleName;

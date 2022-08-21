@@ -4,17 +4,18 @@ using DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById;
 using DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentsByUser;
 using DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
-using DoctorsOffice.Application.Services.Appointment;
+using DoctorsOffice.Application.Services.Appointments;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Http;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -62,7 +63,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEquivalentTo(expectedResponse);
+        result.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
@@ -87,7 +88,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -113,7 +114,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEquivalentTo(expectedResponse);
+        result.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
@@ -138,14 +139,14 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
     public async Task GetAppointmentByIdHandler_AppointmentExists_ReturnsAppointment()
     {
         // arrange
-        var appointment = GetAppointments(1)[0];
+        var appointment = GetAppointments(1).First();
         A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
             A<Guid>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored,
@@ -158,7 +159,7 @@ public class AppointmentHandlerTests
             A<string>.Ignored,
             A<Guid>.Ignored,
             A<Guid>.Ignored
-        )).Returns(true);
+        )).Returns(new CommonResult<bool>().WithValue(true));
 
         var expectedResponse = new AppointmentResponse(appointment);
 
@@ -169,31 +170,31 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEquivalentTo(expectedResponse);
+        result.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
-    public void GetAppointmentByIdHandler_AppointmentDoesntExist_ThrowsNotFoundException()
+    public async Task GetAppointmentByIdHandler_AppointmentDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var nonExistingAppointmentId = Guid.NewGuid();
-
+        Appointment? appointment = null;
         A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
             A<Guid>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored
-        )).Throws(new NotFoundException(""));
+        )).Returns(appointment);
 
         var query = new GetAppointmentByIdQuery(nonExistingAppointmentId, Guid.NewGuid(), string.Empty);
         var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository, _fakeAppointmentService);
 
         // act
-        var action = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        action.Should().ThrowAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -219,7 +220,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEquivalentTo(expectedResponse);
+        result.Value.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
@@ -266,7 +267,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -294,7 +295,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -322,7 +323,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -350,7 +351,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -378,7 +379,7 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -428,8 +429,8 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().NotBeEmpty();
-        result.Should().OnlyContain(a => a.Date >= dateStart && a.Date <= dateEnd);
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().OnlyContain(a => a.Date >= dateStart && a.Date <= dateEnd);
     }
 
     [Fact]
@@ -482,8 +483,8 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().NotBeEmpty();
-        result.Should().OnlyContain(a => a.Type == selectedType.Name);
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().OnlyContain(a => a.Type == selectedType.Name);
     }
 
     [Fact]
@@ -536,8 +537,8 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().NotBeEmpty();
-        result.Should().OnlyContain(a => a.Status == selectedStatus.Name);
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().OnlyContain(a => a.Status == selectedStatus.Name);
     }
 
     [Fact]
@@ -591,8 +592,8 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().NotBeEmpty();
-        result.Should().OnlyContain(a => a.PatientId == selectedPatient.Id);
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().OnlyContain(a => a.PatientId == selectedPatient.Id);
     }
 
     [Fact]
@@ -646,8 +647,8 @@ public class AppointmentHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Should().NotBeEmpty();
-        result.Should().OnlyContain(a => a.DoctorId == selectedDoctor.Id);
+        result.Value.Should().NotBeEmpty();
+        result.Value.Should().OnlyContain(a => a.DoctorId == selectedDoctor.Id);
     }
 
     [Fact]
@@ -693,7 +694,7 @@ public class AppointmentHandlerTests
     [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("Status", "NonExistingStatus")]
     [InlineData("Type", "NonExistingType")]
-    public async Task CreateAppointmentHandler_ContainsInvalidField_ThrowsBadRequestException(
+    public async Task CreateAppointmentHandler_ContainsNonExistingFieldValue_ReturnsNotFound404Exception(
         string fieldName, string fieldValue)
     {
         // arrange
@@ -712,24 +713,34 @@ public class AppointmentHandlerTests
         };
 
         if (fieldName == "Status")
-            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
-                .Throws(new NotFoundException(""));
+        {
+            AppointmentStatus? nullStatus = null;
+            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullStatus);
+        }
         else
             A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(status);
 
         if (fieldName == "Type")
-            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored))
-                .Throws(new NotFoundException(""));
+        {
+            AppointmentType? nullType = null;
+            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullType);
+        }
         else
             A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(type);
 
         if (fieldName == "PatientId")
-            A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+        {
+            Patient? nullPatient = null;
+            A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(nullPatient);
+        }
         else
             A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(patient);
 
         if (fieldName == "DoctorId")
-            A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Throws(new NotFoundException(""));
+        {
+            Doctor? nullDoctor = null;
+            A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(nullDoctor);
+        }
         else
             A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
 
@@ -764,10 +775,10 @@ public class AppointmentHandlerTests
         );
 
         // act
-        var action = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -816,14 +827,15 @@ public class AppointmentHandlerTests
     }
 
     [Fact]
-    public void UpdateAppointmentHandler_IdDoesntExist_ThrowsNotFoundException()
+    public async Task UpdateAppointmentHandler_IdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
+        Appointment? appointment = null;
         A.CallTo(() => _fakeAppointmentRepository.GetByIdAsync(
             A<Guid>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored
-        )).Throws(new NotFoundException(""));
+        )).Returns(appointment);
 
         var request = new UpdateAppointmentRequest
         {
@@ -846,10 +858,10 @@ public class AppointmentHandlerTests
         );
 
         // act
-        var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
+        var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        action.Should().ThrowExactlyAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Theory]
@@ -902,7 +914,7 @@ public class AppointmentHandlerTests
     }
 
     [Fact]
-    public async Task UpdateAppointmentHandler_RequestedTypeDoesntExist_ThrowsBadRequestException()
+    public async Task UpdateAppointmentHandler_RequestedTypeDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var appointment = GetAppointments(1)[0];
@@ -927,8 +939,8 @@ public class AppointmentHandlerTests
         )).Returns(appointment);
         A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
             .Returns(new AppointmentStatus());
-        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored))
-            .Throws(new NotFoundException(""));
+        AppointmentType? nullType = null;
+        A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullType);
 
         var handler = new UpdateAppointmentHandler(
             _fakeAppointmentRepository,
@@ -937,15 +949,15 @@ public class AppointmentHandlerTests
         );
 
         // act
-        var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
+        var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
 
     [Fact]
-    public async Task UpdateAppointmentHandler_RequestedStatusDoesntExist_ThrowsBadRequestException()
+    public async Task UpdateAppointmentHandler_RequestedStatusDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var appointment = GetAppointments(1)[0];
@@ -968,8 +980,8 @@ public class AppointmentHandlerTests
             A<Expression<Func<Appointment, object>>>.Ignored,
             A<Expression<Func<Appointment, object>>>.Ignored
         )).Returns(appointment);
-        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
-            .Throws(new NotFoundException(""));
+        AppointmentStatus? nullStatus = null;
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullStatus);
         A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(new AppointmentType());
 
         var handler = new UpdateAppointmentHandler(
@@ -979,10 +991,10 @@ public class AppointmentHandlerTests
         );
 
         // act
-        var action = async () => await handler.Handle(updateAppointmentCommand, CancellationToken.None);
+        var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
-        await action.Should().ThrowExactlyAsync<BadRequestException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     private static IList<Appointment> GetAppointments(

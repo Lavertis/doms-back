@@ -7,10 +7,10 @@ using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPat
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -48,25 +48,26 @@ public class PrescriptionHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().BeEquivalentTo(new PrescriptionResponse(prescription));
+        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(prescription));
     }
 
     [Fact]
-    public async Task GetPrescriptionByIdHandler_PrescriptionDoesntExist_ThrowsNotFoundException()
+    public async Task GetPrescriptionByIdHandler_PrescriptionDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
-        A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Throws(new NotFoundException(""));
+        Prescription? prescription = null;
+        A.CallTo(() =>
+            _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
+                A<Expression<Func<Prescription, object>>>.Ignored)).Returns(prescription);
 
         var query = new GetPrescriptionByIdQuery(Guid.NewGuid());
         var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository);
 
         // act
-        var action = async () => await handler.Handle(query, default);
+        var result = await handler.Handle(query, default);
 
         // assert
-        await action.Should().ThrowAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Fact]
@@ -91,7 +92,7 @@ public class PrescriptionHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().HaveCount(prescriptionsQueryable.Count());
+        result.Value.Should().HaveCount(prescriptionsQueryable.Count());
     }
 
     [Fact]
@@ -111,7 +112,7 @@ public class PrescriptionHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -136,7 +137,7 @@ public class PrescriptionHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().HaveCount(prescriptionsQueryable.Count());
+        result.Value.Should().HaveCount(prescriptionsQueryable.Count());
     }
 
     [Fact]
@@ -156,7 +157,7 @@ public class PrescriptionHandlerTests
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
@@ -191,7 +192,7 @@ public class PrescriptionHandlerTests
         A.CallTo(() => _fakePrescriptionRepository.CreateAsync(A<Prescription>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        result.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
+        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
     }
 
     [Fact]
@@ -230,7 +231,7 @@ public class PrescriptionHandlerTests
             Title = expectedPrescription.Title,
             Description = expectedPrescription.Description,
             PatientId = expectedPrescription.PatientId,
-            DrugsIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
+            DrugIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
         var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
@@ -241,32 +242,32 @@ public class PrescriptionHandlerTests
         // assert
         A.CallTo(() => _fakePrescriptionRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Prescription>.Ignored))
             .MustHaveHappenedOnceExactly();
-        result.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
+        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
     }
 
     [Fact]
-    public async Task UpdatePrescription_PrescriptionWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
+    public async Task UpdatePrescription_PrescriptionWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
+        Prescription? prescription = null;
         A.CallTo(() =>
-                _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
-                    A<Expression<Func<Prescription, object>>>.Ignored))
-            .Throws(new NotFoundException(""));
+            _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
+                A<Expression<Func<Prescription, object>>>.Ignored)).Returns(prescription);
 
         var request = new UpdatePrescriptionRequest
         {
             Title = "New Prescription Title",
             Description = "New Description",
             PatientId = Guid.NewGuid(),
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
         var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
 
         // act
-        var action = async () => await handler.Handle(command, default);
+        var result = await handler.Handle(command, default);
 
         // assert
-        await action.Should().ThrowAsync<NotFoundException>();
+        result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }
 }

@@ -1,14 +1,16 @@
-﻿using DoctorsOffice.Application.Services.User;
+﻿using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 
-public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, DoctorResponse>
+public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResult<DoctorResponse>>
 {
     private readonly IDoctorRepository _doctorRepository;
     private readonly IUserService _userService;
@@ -19,21 +21,37 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, DoctorRe
         _userService = userService;
     }
 
-    public async Task<DoctorResponse> Handle(CreateDoctorCommand request, CancellationToken cancellationToken)
+    public async Task<HttpResult<DoctorResponse>> Handle(CreateDoctorCommand request,
+        CancellationToken cancellationToken)
     {
-        var newDoctor = new Doctor
+        var result = new HttpResult<DoctorResponse>();
+
+        var createUserResult = await _userService.CreateUserAsync(new CreateUserRequest
         {
-            AppUser = await _userService.CreateUserAsync(new CreateUserRequest
+            UserName = request.UserName,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
+            Password = request.Password,
+            RoleName = RoleTypes.Doctor
+        });
+        if (createUserResult.IsFailed || createUserResult.Value is null)
+        {
+            if (createUserResult.ErrorField is not null && createUserResult.Error is not null)
             {
-                UserName = request.UserName,
-                Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
-                Password = request.Password,
-                RoleName = RoleTypes.Doctor
-            })
-        };
+                return result
+                    .WithFieldError(createUserResult.ErrorField, createUserResult.Error)
+                    .WithStatusCode(createUserResult.StatusCode);
+            }
+
+            return result.WithError(createUserResult.Error).WithStatusCode(createUserResult.StatusCode);
+        }
+
+        var newAppUser = createUserResult.Value;
+        var newDoctor = new Doctor {AppUser = newAppUser};
 
         var doctorEntity = await _doctorRepository.CreateAsync(newDoctor);
-        return new DoctorResponse(doctorEntity);
+        return result
+            .WithValue(new DoctorResponse(doctorEntity))
+            .WithStatusCode(StatusCodes.Status201Created);
     }
 }

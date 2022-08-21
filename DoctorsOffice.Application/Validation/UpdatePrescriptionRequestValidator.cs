@@ -25,9 +25,9 @@ public class UpdatePrescriptionRequestValidator : AbstractValidator<UpdatePrescr
             .WithMessage("Patient with specified id does not exist")
             .When(x => x.PatientId is not null);
 
-        RuleFor(x => x.DrugsIds)
+        RuleFor(x => x.DrugIds)
             .NotEmpty()
             .WithMessage("Drugs ids must be specified")
-            .When(x => x.DrugsIds is not null);
+            .When(x => x.DrugIds is not null);
     }
 }

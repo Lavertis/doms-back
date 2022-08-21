@@ -1,21 +1,20 @@
 ﻿using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
-using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Users.GetAllUsers;
 
 public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, HttpResult<IEnumerable<UserResponse>>>
 {
+    private readonly AppUserManager _appUserManager;
     private readonly IMapper _mapper;
-    private readonly UserManager<AppUser> _userManager;
 
-    public GetAllUsersHandler(UserManager<AppUser> userManager, IMapper mapper)
+    public GetAllUsersHandler(AppUserManager appUserManager, IMapper mapper)
     {
-        _userManager = userManager;
+        _appUserManager = appUserManager;
         _mapper = mapper;
     }
 
@@ -23,7 +22,7 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, HttpResult<I
         CancellationToken cancellationToken)
     {
         var result = new HttpResult<IEnumerable<UserResponse>>();
-        var users = await _userManager.Users.ToListAsync(cancellationToken: cancellationToken);
+        var users = await _appUserManager.Users.ToListAsync(cancellationToken: cancellationToken);
         var userResponses = users.Select(user => _mapper.Map<UserResponse>(user));
         return result.WithValue(userResponses);
     }

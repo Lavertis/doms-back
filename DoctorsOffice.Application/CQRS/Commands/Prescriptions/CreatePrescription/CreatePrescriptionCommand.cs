@@ -1,10 +1,11 @@
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
 
-public class CreatePrescriptionCommand : IRequest<PrescriptionResponse>
+public class CreatePrescriptionCommand : IRequest<HttpResult<PrescriptionResponse>>
 {
     public readonly string Description;
     public readonly Guid DoctorId;

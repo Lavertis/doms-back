@@ -1,10 +1,11 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
 
-public class CreatePatientCommand : IRequest<PatientResponse>
+public class CreatePatientCommand : IRequest<HttpResult<PatientResponse>>
 {
     public readonly string Address;
     public readonly DateTime DateOfBirth;

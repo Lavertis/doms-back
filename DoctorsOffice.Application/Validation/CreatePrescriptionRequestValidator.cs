@@ -21,11 +21,11 @@ public class CreatePrescriptionRequestValidator : AbstractValidator<CreatePrescr
         RuleFor(x => x.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
-            .MustAsync(async (id, cancellationToken) => await patientRepository.ExistsByIdAsync(id))
+            .MustAsync(async (id, _) => await patientRepository.ExistsByIdAsync(id))
             .WithMessage("Patient with specified id does not exist");
 
         RuleFor(x => x.DrugsIds)
             .NotEmpty()
-            .WithMessage("DrugsIds is required");
+            .WithMessage("DrugIds is required");
     }
 }

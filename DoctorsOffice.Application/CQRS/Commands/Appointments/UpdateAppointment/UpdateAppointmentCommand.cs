@@ -1,10 +1,11 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 
-public class UpdateAppointmentCommand : IRequest<AppointmentResponse>
+public class UpdateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>>
 {
     public readonly Guid AppointmentId;
     public readonly DateTime? Date;

@@ -1,7 +1,7 @@
-﻿using DoctorsOffice.Application.Services.Appointment;
-using DoctorsOffice.Application.Services.Auth;
+﻿using DoctorsOffice.Application.Services.Appointments;
 using DoctorsOffice.Application.Services.Jwt;
-using DoctorsOffice.Application.Services.User;
+using DoctorsOffice.Application.Services.RefreshTokens;
+using DoctorsOffice.Application.Services.Users;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DoctorsOffice.Application.Services;
@@ -12,7 +12,7 @@ public static class ServiceModule
     {
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IRefreshTokenService, Auth.RefreshTokenService>();
-        services.AddScoped<IAppointmentService, Appointment.AppointmentService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IAppointmentService, AppointmentService>();
     }
 }

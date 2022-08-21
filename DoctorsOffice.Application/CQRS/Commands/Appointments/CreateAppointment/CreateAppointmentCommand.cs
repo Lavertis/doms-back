@@ -1,10 +1,11 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
 
-public class CreateAppointmentCommand : IRequest<AppointmentResponse>
+public class CreateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>>
 {
     public readonly DateTime Date;
     public readonly string Description;

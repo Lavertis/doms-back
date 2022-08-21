@@ -1,12 +1,12 @@
-﻿using DoctorsOffice.Application.Services.User;
-using DoctorsOffice.Domain.DTO.Requests;
+﻿using DoctorsOffice.Domain.DTO.Requests;
+using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
 namespace DoctorsOffice.Application.Validation;
 
 public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
 {
-    public UpdateUserRequestValidator(IUserService userService)
+    public UpdateUserRequestValidator(AppUserManager appUserManager)
     {
         RuleFor(u => u.UserName)
             .MinimumLength(4)
@@ -15,8 +15,8 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
             .MaximumLength(16)
             .WithMessage("Username must be at most 16 characters long")
             .When(u => !string.IsNullOrEmpty(u.UserName))
-            .MustAsync(async (userName, cancellationToken) =>
-                !await userService.UserNameExistsAsync(userName, cancellationToken))
+            .MustAsync(async (userName, _) =>
+                !await appUserManager.ExistsByUserNameAsync(userName))
             .WithMessage("Username already exists")
             .When(u => !string.IsNullOrEmpty(u.UserName));
 
@@ -29,10 +29,10 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
 
         RuleFor(u => u.NewPassword)
             .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters long")
+            .WithMessage("NewPassword must be at least 8 characters long")
             .When(u => !string.IsNullOrEmpty(u.NewPassword))
             .MaximumLength(50)
-            .WithMessage("Password must be at most 50 characters long")
+            .WithMessage("NewPassword must be at most 50 characters long")
             .When(u => !string.IsNullOrEmpty(u.NewPassword))
             .Equal(e => e.ConfirmPassword)
             .WithMessage("Passwords do not match")

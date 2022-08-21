@@ -1,12 +1,14 @@
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
 
 public class
-    GetPrescriptionsByPatientIdHandler : IRequestHandler<GetPrescriptionsByPatientIdQuery, IList<PrescriptionResponse>>
+    GetPrescriptionsByPatientIdHandler
+    : IRequestHandler<GetPrescriptionsByPatientIdQuery, HttpResult<IEnumerable<PrescriptionResponse>>>
 {
     private readonly IPrescriptionRepository _prescriptionRepository;
 
@@ -15,14 +17,16 @@ public class
         _prescriptionRepository = prescriptionRepository;
     }
 
-    public async Task<IList<PrescriptionResponse>> Handle(GetPrescriptionsByPatientIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<HttpResult<IEnumerable<PrescriptionResponse>>> Handle(
+        GetPrescriptionsByPatientIdQuery request, CancellationToken cancellationToken)
     {
+        var result = new HttpResult<IEnumerable<PrescriptionResponse>>();
+
         var prescriptions = _prescriptionRepository.GetByPatientId(request.PatientId, p => p.DrugItems);
         var prescriptionResponses = await prescriptions
             .Select(p => new PrescriptionResponse(p))
             .ToListAsync(cancellationToken: cancellationToken);
 
-        return prescriptionResponses;
+        return result.WithValue(prescriptionResponses);
     }
 }

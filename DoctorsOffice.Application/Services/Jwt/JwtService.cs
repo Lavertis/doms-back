@@ -1,12 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
-using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Infrastructure.Config;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using DoctorsOffice.Infrastructure.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,17 +11,16 @@ namespace DoctorsOffice.Application.Services.Jwt;
 
 public class JwtService : IJwtService
 {
+    private readonly AppUserManager _appUserManager;
     private readonly JwtSettings _jwtSettings;
-    private readonly UserManager<AppUser> _userManager;
 
-    public JwtService(IOptions<JwtSettings> appSettings, UserManager<AppUser> userManager)
+    public JwtService(IOptions<JwtSettings> jwtSettings, AppUserManager appUserManager)
     {
-        _jwtSettings = appSettings.Value;
-        _userManager = userManager;
+        _jwtSettings = jwtSettings.Value;
+        _appUserManager = appUserManager;
     }
 
-
-    public string GenerateJwtToken(IList<Claim> claims)
+    public string GenerateJwtToken(IEnumerable<Claim> claims)
     {
         var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.SecretKey));
 
@@ -40,34 +36,20 @@ public class JwtService : IJwtService
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<RefreshToken> GenerateRefreshTokenAsync(string? ipAddress,
-        CancellationToken cancellationToken = default)
+    public async Task<List<Claim>> GetUserClaimsAsync(AppUser user)
     {
-        var refreshToken = new RefreshToken
+        var claims = new List<Claim>
         {
-            Token = await GetUniqueToken(cancellationToken),
-            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenLifetimeInDays),
-            CreatedAt = DateTime.UtcNow,
-            CreatedByIp = ipAddress
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Name, user.UserName),
         };
 
-        return refreshToken;
-    }
+        if (!string.IsNullOrEmpty(user.Email))
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
 
-    private async Task<string> GetUniqueToken(CancellationToken cancellationToken)
-    {
-        string token;
-        bool tokenIsUnique;
+        var roleNames = await _appUserManager.GetRolesAsync(user);
+        claims.AddRange(roleNames.Select(roleName => new Claim(ClaimTypes.Role, roleName)));
 
-        do
-        {
-            token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            tokenIsUnique = !await _userManager.Users.AnyAsync(
-                u => u.RefreshTokens.Any(t => t.Token == token),
-                cancellationToken: cancellationToken
-            );
-        } while (!tokenIsUnique);
-
-        return token;
+        return claims;
     }
 }

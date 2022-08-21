@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using DoctorsOffice.Domain.Utils;
+using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Patients.DeletePatientById;
 
-public class DeletePatientByIdCommand : IRequest<Unit>
+public class DeletePatientByIdCommand : IRequest<HttpResult<Unit>>
 {
     public readonly Guid PatientId;
 

@@ -1,10 +1,11 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 
-public class GetFilteredAppointmentsQuery : IRequest<IList<AppointmentResponse>>
+public class GetFilteredAppointmentsQuery : IRequest<HttpResult<IEnumerable<AppointmentResponse>>>
 {
     public readonly DateTime? DateEnd;
     public readonly DateTime? DateStart;

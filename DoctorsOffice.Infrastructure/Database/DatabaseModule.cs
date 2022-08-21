@@ -1,5 +1,4 @@
-﻿using DoctorsOffice.Domain.Exceptions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +18,7 @@ public static class DatabaseModule
         {
             "Development" => configuration.GetConnectionString("AppDb"),
             "Staging" => GetHerokuConnectionString()!,
-            _ => throw new AppException("Wrong ASPNETCORE_ENVIRONMENT value")
+            _ => throw new Exception("Wrong ASPNETCORE_ENVIRONMENT value")
         };
     }
 

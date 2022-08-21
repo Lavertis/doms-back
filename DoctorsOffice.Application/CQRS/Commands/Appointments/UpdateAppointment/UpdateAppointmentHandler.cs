@@ -1,12 +1,13 @@
 ﻿using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 
-public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand, AppointmentResponse>
+public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand, HttpResult<AppointmentResponse>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
@@ -22,46 +23,76 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         _appointmentTypeRepository = appointmentTypeRepository;
     }
 
-    public async Task<AppointmentResponse> Handle(UpdateAppointmentCommand request, CancellationToken cancellationToken)
+    public async Task<HttpResult<AppointmentResponse>> Handle(
+        UpdateAppointmentCommand request, CancellationToken cancellationToken)
     {
+        var result = new HttpResult<AppointmentResponse>();
+
         var appointmentToUpdate = await _appointmentRepository.GetByIdAsync(
             request.AppointmentId,
             a => a.Status,
             a => a.Type);
+        if (appointmentToUpdate is null)
+        {
+            return result
+                .WithError(new Error {Message = $"Appointment with id {request.AppointmentId} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
 
         switch (request.Role)
         {
             case RoleTypes.Doctor when appointmentToUpdate.DoctorId != request.UserId:
-                throw new ForbiddenException("Trying to update appointment of another doctor");
+                return result
+                    .WithError(new Error {Message = "Trying to update appointment of another doctor"})
+                    .WithStatusCode(StatusCodes.Status403Forbidden);
             case RoleTypes.Patient when appointmentToUpdate.PatientId != request.UserId:
-                throw new ForbiddenException("Trying to update appointment of another patient");
+                return result
+                    .WithError(new Error {Message = "Trying to update appointment of another patient"})
+                    .WithStatusCode(StatusCodes.Status403Forbidden);
         }
 
         if (!string.IsNullOrEmpty(request.Status) &&
             request.Role == RoleTypes.Doctor &&
             !AppointmentStatuses.AllowedTransitions[appointmentToUpdate.Status.Name].Contains(request.Status))
         {
-            throw new BadRequestException(
-                $"Status change from {appointmentToUpdate.Status.Name} to {request.Status} is not allowed"
-            );
+            return result
+                .WithError(new Error
+                {
+                    Message = $"Status change from {appointmentToUpdate.Status.Name} to {request.Status} is not allowed"
+                })
+                .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 
         appointmentToUpdate.Date = request.Date ?? appointmentToUpdate.Date;
         appointmentToUpdate.Description = request.Description ?? appointmentToUpdate.Description;
-        try
+        if (request.Type is not null)
         {
-            if (request.Type is not null)
-                appointmentToUpdate.Type = await _appointmentTypeRepository.GetByNameAsync(request.Type);
-            if (request.Status is not null)
-                appointmentToUpdate.Status = await _appointmentStatusRepository.GetByNameAsync(request.Status);
+            var appointmentType = await _appointmentTypeRepository.GetByNameAsync(request.Type);
+            if (appointmentType is null)
+            {
+                return result
+                    .WithError(new Error {Message = $"AppointmentType with name {request.Type} not found"})
+                    .WithStatusCode(StatusCodes.Status404NotFound);
+            }
+
+            appointmentToUpdate.Type = appointmentType;
         }
-        catch (NotFoundException e)
+
+        if (request.Status is not null)
         {
-            throw new BadRequestException(e.Message);
+            var appointmentStatus = await _appointmentStatusRepository.GetByNameAsync(request.Status);
+            if (appointmentStatus is null)
+            {
+                return result
+                    .WithError(new Error {Message = $"AppointmentStatus with name {request.Status} not found"})
+                    .WithStatusCode(StatusCodes.Status404NotFound);
+            }
+
+            appointmentToUpdate.Status = appointmentStatus;
         }
 
         var appointmentEntity =
             await _appointmentRepository.UpdateByIdAsync(request.AppointmentId, appointmentToUpdate);
-        return new AppointmentResponse(appointmentEntity);
+        return result.WithValue(new AppointmentResponse(appointmentEntity));
     }
 }

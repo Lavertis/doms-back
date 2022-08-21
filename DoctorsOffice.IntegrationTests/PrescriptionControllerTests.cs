@@ -507,7 +507,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -526,7 +526,7 @@ public class PrescriptionControllerTests : IntegrationTest
         updatedPrescription.Title.Should().Be(updatePrescriptionRequest.Title);
         updatedPrescription.Description.Should().Be(updatePrescriptionRequest.Description);
         updatedPrescription.PatientId.Should().Be(updatePrescriptionRequest.PatientId.Value);
-        foreach (var drugId in updatePrescriptionRequest.DrugsIds)
+        foreach (var drugId in updatePrescriptionRequest.DrugIds)
             updatedPrescription.DrugItems.Should().Contain(d => d.Id == drugId);
     }
 
@@ -641,7 +641,7 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest
         {
-            DrugsIds = Enumerable.Empty<Guid>().ToList()
+            DrugIds = Enumerable.Empty<Guid>().ToList()
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -665,7 +665,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -692,7 +692,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);

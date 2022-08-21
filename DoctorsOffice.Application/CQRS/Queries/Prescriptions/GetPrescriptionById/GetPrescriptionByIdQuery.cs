@@ -1,14 +1,15 @@
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionById;
 
-public class GetPrescriptionByIdQuery : IRequest<PrescriptionResponse>
+public class GetPrescriptionByIdQuery : IRequest<HttpResult<PrescriptionResponse>>
 {
-    public readonly Guid Id;
+    public readonly Guid PrescriptionId;
 
-    public GetPrescriptionByIdQuery(Guid id)
+    public GetPrescriptionByIdQuery(Guid prescriptionId)
     {
-        Id = id;
+        PrescriptionId = prescriptionId;
     }
 }

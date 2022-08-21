@@ -1,12 +1,12 @@
 ﻿namespace DoctorsOffice.Domain.Utils;
 
-public class Result<TResult, TValue> where TResult : Result<TResult, TValue>
+public abstract class Result<TResult, TValue> where TResult : Result<TResult, TValue>
 {
     public Error? Error;
     public TValue? Value;
 
-    public bool IsSuccess => Error is not null;
-    public bool IsFailed => Error is null;
+    public bool IsSuccess => Error is null;
+    public bool IsFailed => Error is not null;
 
     public TResult WithValue(TValue value)
     {

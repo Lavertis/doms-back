@@ -1,14 +1,15 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
 
-public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
+public class UpdateDoctorByIdCommand : IRequest<HttpResult<DoctorResponse>>
 {
     public readonly Guid DoctorId;
     public readonly string? Email;
-    public readonly string? Password;
+    public readonly string? NewPassword;
     public readonly string? PhoneNumber;
     public readonly string? UserName;
 
@@ -18,7 +19,7 @@ public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
         UserName = request.UserName;
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
-        Password = request.NewPassword;
+        NewPassword = request.NewPassword;
     }
 
     public UpdateDoctorByIdCommand(UpdateDoctorRequest request, Guid doctorId)
@@ -27,6 +28,6 @@ public class UpdateDoctorByIdCommand : IRequest<DoctorResponse>
         UserName = request.UserName;
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
-        Password = request.NewPassword;
+        NewPassword = request.NewPassword;
     }
 }

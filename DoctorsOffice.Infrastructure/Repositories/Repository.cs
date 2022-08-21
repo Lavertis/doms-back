@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using DoctorsOffice.Domain.Entities;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -26,28 +25,17 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         );
     }
 
-    public virtual async Task<TEntity?> GetByIdOrDefaultAsync(
-        Guid id,
-        params Expression<Func<TEntity, object>>[] includeFields)
+    public virtual async Task<TEntity?> GetByIdAsync(
+        Guid id, params Expression<Func<TEntity, object>>[] includeFields)
     {
-        var adminsQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
+        var entitiesQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
 
-        adminsQueryable = includeFields.Aggregate(
-            adminsQueryable,
+        entitiesQueryable = includeFields.Aggregate(
+            entitiesQueryable,
             (current, prop) => current.Include(prop)
         );
 
-        return await adminsQueryable.FirstOrDefaultAsync(e => e.Id == id);
-    }
-
-    public virtual async Task<TEntity> GetByIdAsync(
-        Guid id,
-        params Expression<Func<TEntity, object>>[] includeFields)
-    {
-        var entity = await GetByIdOrDefaultAsync(id, includeFields);
-        if (entity == null)
-            throw new NotFoundException($"{typeof(TEntity).Name} with id {id} not found");
-
+        var entity = await entitiesQueryable.FirstOrDefaultAsync(e => e.Id == id);
         return entity;
     }
 
@@ -67,12 +55,14 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return updatedEntity;
     }
 
-    public virtual async Task DeleteByIdAsync(Guid id)
+    public virtual async Task<bool> DeleteByIdAsync(Guid id)
     {
         var entity = await GetByIdAsync(id);
-
+        if (entity is null)
+            return false;
         DbContext.Set<TEntity>().Remove(entity);
         await DbContext.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> ExistsByIdAsync(Guid id)

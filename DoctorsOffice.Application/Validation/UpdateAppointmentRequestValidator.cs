@@ -25,14 +25,14 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
         RuleFor(e => e.Description);
 
         RuleFor(e => e.Type)
-            .MustAsync((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type!))
+            .MustAsync((type, _) => appointmentTypeRepository.ExistsByNameAsync(type!))
             .WithMessage("Type does not exist")
             .Unless(e => string.IsNullOrEmpty(e.Type));
 
         When(req => !string.IsNullOrEmpty(req.Status), () =>
         {
             RuleFor(e => e.Status)
-                .MustAsync((status, cancellationToken) => appointmentStatusRepository.ExistsByNameAsync(status!))
+                .MustAsync((status, _) => appointmentStatusRepository.ExistsByNameAsync(status!))
                 .WithMessage("Status does not exist");
 
             RuleFor(e => e.Status)

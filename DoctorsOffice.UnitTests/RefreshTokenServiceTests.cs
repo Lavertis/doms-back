@@ -1,12 +1,11 @@
-﻿using DoctorsOffice.Application.Services.Auth;
+﻿using DoctorsOffice.Application.Services.RefreshTokens;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Infrastructure.Config;
+using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using MockQueryable.FakeItEasy;
 using Xunit;
@@ -15,56 +14,15 @@ namespace DoctorsOffice.UnitTests;
 
 public class RefreshTokenServiceTests
 {
+    private readonly AppUserManager _fakeAppUserManager;
     private readonly IOptions<JwtSettings> _fakeJwtSettings;
-    private readonly UserManager<AppUser> _fakeUserManager;
     private readonly RefreshTokenService _refreshTokenService;
 
     public RefreshTokenServiceTests()
     {
-        _fakeUserManager = A.Fake<UserManager<AppUser>>();
+        _fakeAppUserManager = A.Fake<AppUserManager>();
         _fakeJwtSettings = A.Fake<IOptions<JwtSettings>>();
-        _refreshTokenService = new RefreshTokenService(_fakeUserManager, _fakeJwtSettings);
-    }
-
-    [Fact]
-    public async Task GetUserByRefreshToken_UserExists_ReturnsUserWhoOwnsSpecifiedToken()
-    {
-        // arrange
-        const string refreshToken = "refreshToken";
-        var usersQueryable = new List<AppUser>
-        {
-            new()
-            {
-                RefreshTokens = new List<RefreshToken>
-                {
-                    new() {Token = refreshToken, ExpiresAt = DateTime.Now.AddDays(1)}
-                }
-            }
-        }.AsQueryable().BuildMock();
-
-        A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
-
-        // act
-        var result = await _refreshTokenService.GetUserByRefreshTokenAsync(refreshToken);
-
-        // assert
-        result.Should().Be(usersQueryable.First());
-    }
-
-    [Fact]
-    public async Task GetUserByRefreshToken_UserDoesntExist_ThrowsNotFoundException()
-    {
-        // arrange
-        const string refreshToken = "refreshToken";
-        var usersQueryable = A.CollectionOfDummy<AppUser>(0).AsQueryable().BuildMock();
-
-        A.CallTo(() => _fakeUserManager.Users).Returns(usersQueryable);
-
-        // act
-        var action = async () => await _refreshTokenService.GetUserByRefreshTokenAsync(refreshToken);
-
-        // assert
-        await action.Should().ThrowAsync<NotFoundException>();
+        _refreshTokenService = new RefreshTokenService(_fakeAppUserManager, _fakeJwtSettings);
     }
 
     [Fact]
@@ -124,5 +82,21 @@ public class RefreshTokenServiceTests
         token.ReasonRevoked.Should().Be(reasonRevoked);
         token.RevokedByIp.Should().Be(ipAddress);
         token.ReplacedByToken.Should().Be(replacedByToken);
+    }
+
+    [Fact]
+    public async Task GenerateRefreshToken_ReturnsRefreshToken()
+    {
+        // arrange
+        const string ipAddress = "dummyIpAddress";
+        var cancellationToken = A.Dummy<CancellationToken>();
+        var dummyUsersQueryable = A.CollectionOfDummy<AppUser>(1).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(dummyUsersQueryable);
+
+        // act
+        var result = await _refreshTokenService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
+
+        // assert
+        result.Should().NotBeNull();
     }
 }

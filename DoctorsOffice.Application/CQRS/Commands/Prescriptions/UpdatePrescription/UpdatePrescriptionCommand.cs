@@ -1,10 +1,11 @@
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
 
-public class UpdatePrescriptionCommand : IRequest<PrescriptionResponse>
+public class UpdatePrescriptionCommand : IRequest<HttpResult<PrescriptionResponse>>
 {
     public readonly string? Description;
     public readonly IList<Guid>? DrugsIds;
@@ -18,6 +19,6 @@ public class UpdatePrescriptionCommand : IRequest<PrescriptionResponse>
         Title = request.Title;
         Description = request.Description;
         PatientId = request.PatientId;
-        DrugsIds = request.DrugsIds;
+        DrugsIds = request.DrugIds;
     }
 }

@@ -25,8 +25,8 @@ public class AppointmentController : BaseController
     /// </summary>
     [HttpGet("user/current")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
-    public async Task<ActionResult<IList<AppointmentResponse>>> GetAllAppointmentsForAuthenticatedUserAsync()
-        => Ok(await Mediator.Send(new GetAppointmentsByUserQuery(userId: JwtSubject(), role: JwtRole())));
+    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAllAppointmentsForAuthenticatedUserAsync()
+        => CreateResponse(await Mediator.Send(new GetAppointmentsByUserQuery(userId: JwtSubject(), role: JwtRole())));
 
     /// <summary>
     /// Returns appointment by id. User can only get owned appointment. For doctors and patients
@@ -34,7 +34,7 @@ public class AppointmentController : BaseController
     [HttpGet("user/current/{appointmentId:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(Guid appointmentId)
-        => Ok(await Mediator.Send(new GetAppointmentByIdQuery(
+        => CreateResponse(await Mediator.Send(new GetAppointmentByIdQuery(
             appointmentId: appointmentId, userId: JwtSubject(), roleName: JwtRole()
         )));
 
@@ -43,33 +43,35 @@ public class AppointmentController : BaseController
     /// </summary>
     [HttpGet("doctor/current/search")]
     [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<IList<AppointmentResponse>>> GetAppointmentsFilteredAsync(
+    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointmentsFilteredAsync(
         DateTime? dateStart, DateTime? dateEnd, Guid? patientId, string? type, string? status)
-        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(new GetAppointmentsFilteredRequest
-        {
-            DateStart = dateStart,
-            DateEnd = dateEnd,
-            Type = type,
-            Status = status,
-            PatientId = patientId,
-            DoctorId = JwtSubject()
-        })));
+        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
+            new GetAppointmentsFilteredRequest
+            {
+                DateStart = dateStart,
+                DateEnd = dateEnd,
+                Type = type,
+                Status = status,
+                PatientId = patientId,
+                DoctorId = JwtSubject()
+            })));
 
     /// <summary>
     /// Returns appointments for authenticated patient matching search criteria sorted by date. Only for patients
     /// </summary>
     [HttpGet("patient/current/search")]
     [Authorize(Roles = RoleTypes.Patient)]
-    public async Task<ActionResult<IList<AppointmentResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
+    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
         DateTime? dateStart, DateTime? dateEnd, string? type, string? status)
-        => Ok(await Mediator.Send(new GetFilteredAppointmentsQuery(new GetAppointmentsFilteredRequest
-        {
-            DateStart = dateStart,
-            DateEnd = dateEnd,
-            Type = type,
-            Status = status,
-            PatientId = JwtSubject()
-        })));
+        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
+            new GetAppointmentsFilteredRequest
+            {
+                DateStart = dateStart,
+                DateEnd = dateEnd,
+                Type = type,
+                Status = status,
+                PatientId = JwtSubject()
+            })));
 
     /// <summary>
     /// Creates new appointment. Only for doctors
@@ -77,7 +79,7 @@ public class AppointmentController : BaseController
     [HttpPost("doctor/current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentAsync(CreateAppointmentRequest request)
-        => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreateAppointmentCommand(
+        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(
             request: request,
             status: AppointmentStatuses.Accepted,
             role: RoleTypes.Doctor,
@@ -90,7 +92,7 @@ public class AppointmentController : BaseController
     [HttpPost("patient/current/request")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentRequestAsync(CreateAppointmentRequest request)
-        => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreateAppointmentCommand(
+        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(
             request: request,
             status: AppointmentStatuses.Pending,
             role: RoleTypes.Patient,
@@ -104,7 +106,7 @@ public class AppointmentController : BaseController
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> UpdateAppointmentByIdAsync(
         UpdateAppointmentRequest request, Guid appointmentId)
-        => Ok(await Mediator.Send(new UpdateAppointmentCommand(
+        => CreateResponse(await Mediator.Send(new UpdateAppointmentCommand(
             request: request, appointmentId: appointmentId, userId: JwtSubject(), role: JwtRole()
         )));
 }

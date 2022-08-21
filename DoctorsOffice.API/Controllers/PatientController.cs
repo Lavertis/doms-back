@@ -25,7 +25,7 @@ public class PatientController : BaseController
     /// </summary>
     [HttpGet("current")]
     public async Task<ActionResult<PatientResponse>> GetAuthenticatedPatientAsync()
-        => Ok(await Mediator.Send(new GetPatientByIdQuery(patientId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new GetPatientByIdQuery(patientId: JwtSubject())));
 
     /// <summary>
     /// Creates new patient.
@@ -33,7 +33,7 @@ public class PatientController : BaseController
     [HttpPost]
     [AllowAnonymous]
     public async Task<ActionResult<PatientResponse>> CreatePatientAsync(CreatePatientRequest request)
-        => StatusCode(StatusCodes.Status201Created, await Mediator.Send(new CreatePatientCommand(request)));
+        => CreateResponse(await Mediator.Send(new CreatePatientCommand(request)));
 
     /// <summary>
     /// Updates account of the authenticated patient. Only for patients
@@ -41,12 +41,12 @@ public class PatientController : BaseController
     [HttpPatch("current")]
     public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(
         UpdateAuthenticatedPatientRequest request)
-        => Ok(await Mediator.Send(new UpdatePatientByIdCommand(request: request, patientId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new UpdatePatientByIdCommand(request: request, patientId: JwtSubject())));
 
     /// <summary>
     /// Deletes account of the authenticated patient. Only for patients
     /// </summary>
     [HttpDelete("current")]
-    public async Task<ActionResult> DeleteAuthenticatedPatientAsync()
-        => Ok(await Mediator.Send(new DeletePatientByIdCommand(patientId: JwtSubject())));
+    public async Task<ActionResult<Unit>> DeleteAuthenticatedPatientAsync()
+        => CreateResponse(await Mediator.Send(new DeletePatientByIdCommand(patientId: JwtSubject())));
 }

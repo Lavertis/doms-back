@@ -1,13 +1,14 @@
 ﻿using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
 
-public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand, AppointmentResponse>
+public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand, HttpResult<AppointmentResponse>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
@@ -29,39 +30,73 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         _appointmentTypeRepository = appointmentTypeRepository;
     }
 
-    public async Task<AppointmentResponse> Handle(CreateAppointmentCommand request, CancellationToken cancellationToken)
+    public async Task<HttpResult<AppointmentResponse>> Handle(
+        CreateAppointmentCommand request, CancellationToken cancellationToken)
     {
+        var result = new HttpResult<AppointmentResponse>();
+
         switch (request.Role)
         {
             case RoleTypes.Doctor when request.DoctorId != request.UserId:
-                throw new BadRequestException("Cannot create appointment for another doctor");
+                return result
+                    .WithError(new Error {Message = "Cannot create appointment for another doctor"})
+                    .WithStatusCode(StatusCodes.Status403Forbidden);
             case RoleTypes.Patient when request.PatientId != request.UserId:
-                throw new BadRequestException("Cannot create appointment request for another patient");
+                return result
+                    .WithError(new Error {Message = "Cannot create appointment request for another patient"})
+                    .WithStatusCode(StatusCodes.Status403Forbidden);
         }
 
-        Appointment newAppointment;
-        try
+        var patient = await _patientRepository.GetByIdAsync(request.PatientId);
+        if (patient is null)
         {
-            newAppointment = new Appointment
-            {
-                Date = request.Date,
-                Description = request.Description,
-                PatientId = (await _patientRepository.GetByIdAsync(request.PatientId)).Id,
-                DoctorId = (await _doctorRepository.GetByIdAsync(request.DoctorId)).Id,
-                StatusId = (await _appointmentStatusRepository.GetByNameAsync(request.Status)).Id,
-                TypeId = (await _appointmentTypeRepository.GetByNameAsync(request.Type)).Id,
-            };
+            return result
+                .WithError(new Error {Message = $"Patient with id {request.PatientId} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
         }
-        catch (NotFoundException e)
+
+        var doctor = await _doctorRepository.GetByIdAsync(request.DoctorId);
+        if (doctor is null)
         {
-            throw new BadRequestException(e.Message);
+            return result
+                .WithError(new Error {Message = $"Doctor with id {request.DoctorId} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
         }
+
+        var appointmentStatus = await _appointmentStatusRepository.GetByNameAsync(request.Status);
+        if (appointmentStatus is null)
+        {
+            return result
+                .WithError(new Error {Message = $"AppointmentStatus with name {request.Status} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var appointmentType = await _appointmentTypeRepository.GetByNameAsync(request.Type);
+        if (appointmentType is null)
+        {
+            return result
+                .WithError(new Error {Message = $"AppointmentType with name {request.Type} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var newAppointment = new Appointment
+        {
+            Date = request.Date,
+            Description = request.Description,
+            PatientId = patient.Id,
+            DoctorId = doctor.Id,
+            StatusId = appointmentStatus.Id,
+            TypeId = appointmentType.Id,
+        };
 
         var createdAppointmentId = (await _appointmentRepository.CreateAsync(newAppointment)).Id;
         var createdAppointment = await _appointmentRepository.GetByIdAsync(
             createdAppointmentId,
             a => a.Status,
             a => a.Type);
-        return new AppointmentResponse(createdAppointment);
+
+        return result
+            .WithValue(new AppointmentResponse(createdAppointment!))
+            .WithStatusCode(StatusCodes.Status201Created);
     }
 }

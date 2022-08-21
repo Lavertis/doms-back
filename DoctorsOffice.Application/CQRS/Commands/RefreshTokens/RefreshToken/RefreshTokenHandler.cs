@@ -1,12 +1,12 @@
-﻿using DoctorsOffice.Application.Services.Auth;
-using DoctorsOffice.Application.Services.Jwt;
-using DoctorsOffice.Application.Services.User;
+﻿using DoctorsOffice.Application.Services.Jwt;
+using DoctorsOffice.Application.Services.RefreshTokens;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Commands.RefreshTokens.RefreshToken;
 
@@ -14,19 +14,17 @@ using RefreshTokenEntity = Domain.Entities.RefreshToken;
 
 public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResult<AuthenticateResponse>>
 {
+    private readonly AppUserManager _appUserManager;
     private readonly IJwtService _jwtService;
     private readonly IRefreshTokenService _refreshTokenService;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IUserService _userService;
 
     public RefreshTokenHandler(
-        UserManager<AppUser> userManager,
+        AppUserManager appUserManager,
         IJwtService jwtService,
-        IUserService userService, IRefreshTokenService refreshTokenService)
+        IRefreshTokenService refreshTokenService)
     {
-        _userManager = userManager;
+        _appUserManager = appUserManager;
         _jwtService = jwtService;
-        _userService = userService;
         _refreshTokenService = refreshTokenService;
     }
 
@@ -35,7 +33,19 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
     {
         var result = new HttpResult<AuthenticateResponse>();
 
-        var user = await _refreshTokenService.GetUserByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        var user = await _appUserManager.Users
+            .Include(user => user.RefreshTokens)
+            .SingleOrDefaultAsync(
+                user => user.RefreshTokens.Any(refreshToken => refreshToken.Token == request.RefreshToken),
+                cancellationToken: cancellationToken
+            );
+        if (user is null)
+        {
+            return result
+                .WithError(new Error {Message = "User with specified RefreshToken not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
         var refreshToken = user.RefreshTokens.Single(x => x.Token == request.RefreshToken);
 
         if (refreshToken.IsRevoked)
@@ -46,7 +56,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
                 request.IpAddress,
                 $"Attempted reuse of revoked ancestor token: {request.RefreshToken}"
             );
-            await _userManager.UpdateAsync(user);
+            await _appUserManager.UpdateAsync(user);
         }
 
         if (!refreshToken.IsActive)
@@ -61,9 +71,9 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
 
         _refreshTokenService.RemoveOldRefreshTokens(user);
 
-        await _userManager.UpdateAsync(user);
+        await _appUserManager.UpdateAsync(user);
 
-        var claims = await _userService.GetUserRolesAsClaimsAsync(user);
+        var claims = await _jwtService.GetUserClaimsAsync(user);
         var jwtToken = _jwtService.GenerateJwtToken(claims);
 
         return result.WithValue(new AuthenticateResponse
@@ -99,7 +109,7 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
     private async Task<RefreshTokenEntity> RotateRefreshTokenAsync(
         RefreshTokenEntity refreshToken, string? ipAddress, CancellationToken cancellationToken = default)
     {
-        var newRefreshToken = await _jwtService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
+        var newRefreshToken = await _refreshTokenService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
         RevokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);
         return newRefreshToken;
     }

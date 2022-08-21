@@ -1,46 +1,54 @@
-﻿using DoctorsOffice.Application.Services.User;
-using DoctorsOffice.Domain.DTO.Responses;
-using DoctorsOffice.Domain.Entities.UserTypes;
+﻿using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 
-public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand, PatientResponse>
+public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand, HttpResult<PatientResponse>>
 {
+    private readonly AppUserManager _appUserManager;
     private readonly IPatientRepository _patientRepository;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IUserService _userService;
 
-    public UpdatePatientByIdHandler(IPatientRepository patientRepository, IUserService userService,
-        UserManager<AppUser> userManager)
+    public UpdatePatientByIdHandler(IPatientRepository patientRepository, AppUserManager appUserManager)
     {
         _patientRepository = patientRepository;
-        _userService = userService;
-        _userManager = userManager;
+        _appUserManager = appUserManager;
     }
 
-    public async Task<PatientResponse> Handle(UpdatePatientByIdCommand request, CancellationToken cancellationToken)
+    public async Task<HttpResult<PatientResponse>> Handle(UpdatePatientByIdCommand request,
+        CancellationToken cancellationToken)
     {
+        var result = new HttpResult<PatientResponse>();
+
         var patient = await _patientRepository.GetByIdAsync(request.PatientId);
-        var appUser = _userManager.Users.First(x => x.Id == patient.Id);
+        if (patient is null)
+        {
+            return result
+                .WithError(new Error {Message = $"Patient with id {request.PatientId} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var appUser = await _appUserManager.Users.FirstAsync(x => x.Id == patient.Id, cancellationToken);
 
         appUser.UserName = request.UserName ?? appUser.UserName;
         appUser.Email = request.Email ?? appUser.Email;
         appUser.PhoneNumber = request.PhoneNumber ?? appUser.PhoneNumber;
         if (!string.IsNullOrEmpty(request.NewPassword))
-            _userService.SetUserPassword(appUser, request.NewPassword!);
+            appUser.PasswordHash = _appUserManager.PasswordHasher.HashPassword(appUser, request.NewPassword);
 
         patient.FirstName = request.FirstName ?? patient.FirstName;
         patient.LastName = request.LastName ?? patient.LastName;
         patient.Address = request.Address ?? patient.Address;
         patient.DateOfBirth = request.DateOfBirth ?? patient.DateOfBirth;
 
-        await _userManager.UpdateAsync(appUser);
+        await _appUserManager.UpdateAsync(appUser);
         await _patientRepository.UpdateByIdAsync(request.PatientId, patient);
 
         patient.AppUser = appUser;
-        return new PatientResponse(patient);
+        return result.WithValue(new PatientResponse(patient));
     }
 }

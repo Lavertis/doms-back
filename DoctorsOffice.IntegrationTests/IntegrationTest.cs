@@ -3,9 +3,8 @@ using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
-using DoctorsOffice.Domain.Exceptions;
 using DoctorsOffice.Infrastructure.Database;
-using Microsoft.AspNetCore.Identity;
+using DoctorsOffice.Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +25,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     private const string TestPatientPassword = "PatientPassword123!";
 
     private readonly WebApplicationFactory<Program> _factory;
-    private UserManager<AppUser> _userManager = null!;
+    private AppUserManager _appUserManager = null!;
     protected AppDbContext DbContext = null!;
 
     protected IntegrationTest(WebApplicationFactory<Program> factory)
@@ -48,7 +47,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
                 services.AddDbContext<AppDbContext>(options => { options.UseInMemoryDatabase(inMemoryDbName); });
 
                 DbContext = services.BuildServiceProvider().GetService<AppDbContext>()!;
-                _userManager = services.BuildServiceProvider().GetService<UserManager<AppUser>>()!;
+                _appUserManager = services.BuildServiceProvider().GetService<AppUserManager>()!;
             });
         });
     }
@@ -107,12 +106,12 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
     private async Task CreateUserAsync(AppUser appUser, string password, string roleName)
     {
-        var createUserIdentityResult = await _userManager.CreateAsync(appUser, password);
+        var createUserIdentityResult = await _appUserManager.CreateAsync(appUser, password);
         if (!createUserIdentityResult.Succeeded)
-            throw new AppException("UserManager could not create user");
-        var addToRoleIdentityResult = await _userManager.AddToRoleAsync(appUser, roleName);
+            throw new Exception("UserManager could not create user");
+        var addToRoleIdentityResult = await _appUserManager.AddToRoleAsync(appUser, roleName);
         if (!addToRoleIdentityResult.Succeeded)
-            throw new AppException("UserManager could not add user to role");
+            throw new Exception("UserManager could not add user to role");
     }
 
     protected static async Task<Guid> AuthenticateAsRoleAsync(HttpClient client, string roleName)
@@ -151,7 +150,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         if (!result.IsSuccessStatusCode)
         {
-            throw new AppException("Failed to authenticate as user");
+            throw new Exception("Failed to authenticate as user");
         }
 
         var jwtToken = (await result.Content.ReadAsAsync<AuthenticateResponse>()).JwtToken;

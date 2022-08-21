@@ -5,9 +5,9 @@ using DoctorsOffice.Application.CQRS;
 using DoctorsOffice.Application.Middleware;
 using DoctorsOffice.Application.Services;
 using DoctorsOffice.Application.Validation;
-using DoctorsOffice.Infrastructure;
 using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Database;
+using DoctorsOffice.Infrastructure.Identity;
 using DoctorsOffice.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);

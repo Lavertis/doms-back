@@ -2,19 +2,19 @@ using System.Security.Claims;
 using DoctorsOffice.Application.Services.Jwt;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Infrastructure.Config;
+using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using MockQueryable.FakeItEasy;
 using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
 public class JwtServiceTests
 {
+    private readonly AppRoleManager _fakeAppRoleManager;
+    private readonly AppUserManager _fakeAppUserManager;
     private readonly JwtSettings _fakeJwtSettings;
-    private readonly UserManager<AppUser> _fakeUserManager;
     private readonly IJwtService _jwtService;
 
     public JwtServiceTests()
@@ -28,8 +28,9 @@ public class JwtServiceTests
         };
         var fakeJwtSettingsOptions = A.Fake<IOptions<JwtSettings>>();
         A.CallTo(() => fakeJwtSettingsOptions.Value).Returns(_fakeJwtSettings);
-        _fakeUserManager = A.Fake<UserManager<AppUser>>();
-        _jwtService = new JwtService(fakeJwtSettingsOptions, _fakeUserManager);
+        _fakeAppRoleManager = A.Fake<AppRoleManager>();
+        _fakeAppUserManager = A.Fake<AppUserManager>();
+        _jwtService = new JwtService(fakeJwtSettingsOptions, _fakeAppUserManager);
     }
 
     [Fact]
@@ -46,18 +47,32 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task GenerateRefreshToken_ReturnsRefreshToken()
+    public async void GetUserClaimsAsync_UserDoesntHaveRoles_DoesntReturnAnyRoleClaim()
     {
         // arrange
-        const string ipAddress = "dummyIpAddress";
-        var cancellationToken = A.Dummy<CancellationToken>();
-        var dummyUsersQueryable = A.CollectionOfDummy<AppUser>(1).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeUserManager.Users).Returns(dummyUsersQueryable);
+        var appUser = A.Dummy<AppUser>();
+        A.CallTo(() => _fakeAppUserManager.GetRolesAsync(A<AppUser>.Ignored)).Returns(new List<string>());
 
         // act
-        var result = await _jwtService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
+        var result = await _jwtService.GetUserClaimsAsync(appUser);
 
         // assert
-        result.Should().NotBeNull();
+        result.Should().NotContain(claim => claim.Type == ClaimTypes.Role);
+    }
+
+    [Fact]
+    public async void GetUserClaimsAsync_UserHasRoles_ReturnsRoleClaims()
+    {
+        // arrange
+        var appUser = A.Dummy<AppUser>();
+        var roles = new List<string> {"role1", "role2"};
+        A.CallTo(() => _fakeAppUserManager.GetRolesAsync(A<AppUser>.Ignored)).Returns(roles);
+
+        // act
+        var result = await _jwtService.GetUserClaimsAsync(appUser);
+
+        // assert
+        result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role1");
+        result.Should().Contain(claim => claim.Type == ClaimTypes.Role && claim.Value == "role2");
     }
 }

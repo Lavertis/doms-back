@@ -1,11 +1,13 @@
 ﻿using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 
-public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppointmentsQuery, IList<AppointmentResponse>>
+public class GetFilteredAppointmentsHandler
+    : IRequestHandler<GetFilteredAppointmentsQuery, HttpResult<IEnumerable<AppointmentResponse>>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
 
@@ -14,9 +16,11 @@ public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppoint
         _appointmentRepository = appointmentRepository;
     }
 
-    public async Task<IList<AppointmentResponse>> Handle(GetFilteredAppointmentsQuery request,
-        CancellationToken cancellationToken)
+    public async Task<HttpResult<IEnumerable<AppointmentResponse>>> Handle(
+        GetFilteredAppointmentsQuery request, CancellationToken cancellationToken)
     {
+        var result = new HttpResult<IEnumerable<AppointmentResponse>>();
+
         var appointmentsQueryable = _appointmentRepository.GetAll(
             a => a.Doctor,
             a => a.Patient,
@@ -41,6 +45,6 @@ public class GetFilteredAppointmentsHandler : IRequestHandler<GetFilteredAppoint
             .Select(a => new AppointmentResponse(a))
             .ToListAsync(cancellationToken: cancellationToken);
 
-        return appointmentResponses;
+        return result.WithValue(appointmentResponses);
     }
 }

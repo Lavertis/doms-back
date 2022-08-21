@@ -229,7 +229,7 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task CreateDoctor_UserNameAlreadyExists_ReturnsConflict()
+    public async Task CreateDoctor_UserNameAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -258,11 +258,11 @@ public class DoctorControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", request);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task CreateDoctor_EmailAlreadyExists_ReturnsConflict()
+    public async Task CreateDoctor_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -292,7 +292,7 @@ public class DoctorControllerTests : IntegrationTest
 
         var str = response.Content.ReadAsStringAsync().Result;
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -490,7 +490,7 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdateAuthenticatedDoctor_UserNameAlreadyExists_ReturnsConflict()
+    public async Task UpdateAuthenticatedDoctor_UserNameAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -528,11 +528,11 @@ public class DoctorControllerTests : IntegrationTest
         var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task UpdateAuthenticatedDoctor_EmailAlreadyExists_ReturnsConflict()
+    public async Task UpdateAuthenticatedDoctor_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -558,7 +558,6 @@ public class DoctorControllerTests : IntegrationTest
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
-
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
             Email = conflictingEmail,
@@ -572,7 +571,7 @@ public class DoctorControllerTests : IntegrationTest
 
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -927,7 +926,7 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdateDoctorById_UserNameAlreadyExists_ReturnsConflict()
+    public async Task UpdateDoctorById_UserNameAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -974,11 +973,11 @@ public class DoctorControllerTests : IntegrationTest
         var response = await client.PatchAsync($"{UrlPrefix}/{doctorId}", content);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task UpdateDoctorById_EmailAlreadyExists_ReturnsConflict()
+    public async Task UpdateDoctorById_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -1025,7 +1024,7 @@ public class DoctorControllerTests : IntegrationTest
         var response = await client.PatchAsync($"{UrlPrefix}/{doctorId}", content);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

@@ -1,13 +1,12 @@
-﻿using DoctorsOffice.Application.Services.User;
-using DoctorsOffice.Domain.DTO.Requests;
-using DoctorsOffice.Domain.Exceptions;
+﻿using DoctorsOffice.Domain.DTO.Requests;
+using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
 namespace DoctorsOffice.Application.Validation;
 
 public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequest>
 {
-    public CreatePatientRequestValidator(IUserService userService)
+    public CreatePatientRequestValidator(AppUserManager appUserManager)
     {
         CascadeMode = CascadeMode.Stop;
 
@@ -18,9 +17,7 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
             .WithMessage("Username must be at least 4 characters long")
             .MaximumLength(16)
             .WithMessage("Username must be at most 16 characters long")
-            .MustAsync(async (userName, cancellationToken) =>
-                !await userService.UserNameExistsAsync(userName, cancellationToken))
-            .OnFailure(request => throw new ConflictException("Username already exists"))
+            .MustAsync(async (userName, _) => !await appUserManager.ExistsByUserNameAsync(userName))
             .WithMessage("Username already exists");
 
         RuleFor(e => e.FirstName)
@@ -40,9 +37,7 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
             .WithMessage("Email is required")
             .EmailAddress()
             .WithMessage("Email must be a valid email address")
-            .MustAsync(async (email, cancellationToken) =>
-                !await userService.EmailExistsAsync(email, cancellationToken))
-            .OnFailure(request => throw new ConflictException("Email already exists"))
+            .MustAsync(async (email, _) => !await appUserManager.ExistsByEmailAsync(email))
             .WithMessage("Email already exists");
 
         RuleFor(e => e.PhoneNumber)
@@ -63,11 +58,11 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
 
         RuleFor(e => e.Password)
             .NotEmpty()
-            .WithMessage("Password is required")
+            .WithMessage("NewPassword is required")
             .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters long")
+            .WithMessage("NewPassword must be at least 8 characters long")
             .MaximumLength(50)
-            .WithMessage("Password must be at most 50 characters long")
+            .WithMessage("NewPassword must be at most 50 characters long")
             .Equal(e => e.ConfirmPassword)
             .WithMessage("Passwords do not match");
     }

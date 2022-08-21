@@ -1,9 +1,10 @@
 ﻿using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorById;
 
-public class GetDoctorByIdQuery : IRequest<DoctorResponse>
+public class GetDoctorByIdQuery : IRequest<HttpResult<DoctorResponse>>
 {
     public readonly Guid DoctorId;
 

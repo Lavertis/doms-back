@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
-using DoctorsOffice.Domain.Enums;
-using DoctorsOffice.Domain.Exceptions;
+﻿using System.Collections.ObjectModel;
+using System.Security.Claims;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,33 +18,36 @@ public abstract class BaseController : ControllerBase
 
     protected ActionResult<TValue> CreateResponse<TValue>(HttpResult<TValue> result)
     {
-        return result.StatusCode switch
+        switch (result.StatusCode)
         {
-            >= 200 and < 300 => StatusCode(result.StatusCode, result.Value),
-            _ => StatusCode(result.StatusCode, result.Error)
-        };
+            case >= 200 and < 300:
+                return StatusCode(result.StatusCode, result.Value);
+            default:
+            {
+                if (!string.IsNullOrEmpty(result.ErrorField))
+                    return StatusCode(result.StatusCode, CreateFieldError(result.ErrorField, result.Error));
+                return StatusCode(result.StatusCode, result.Error);
+            }
+        }
+    }
+
+    private static object CreateFieldError(string fieldName, Error? error)
+    {
+        var errors = new Dictionary<string, Collection<string?>>();
+        errors.Add(fieldName, new Collection<string?> {error?.Message});
+        return new {errors};
     }
 
     protected Guid JwtSubject()
     {
         var subject = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (subject is null)
-            throw new BadRequestException("Could not get subject from Jwt token");
-
-        if (!Guid.TryParse(subject, out var subjectAsGuid))
-            throw new BadRequestException("Jwt subject is not a valid Guid");
-
+        var subjectAsGuid = Guid.Parse(subject);
         return subjectAsGuid;
     }
 
     protected string JwtRole()
     {
         var role = User.FindFirstValue(ClaimTypes.Role);
-        if (role is null)
-            throw new BadRequestException("Jwt does not have the Role claim");
-        if (role is not (RoleTypes.Patient or RoleTypes.Doctor or RoleTypes.Admin))
-            throw new BadRequestException("Role claim contains wrong value");
-
         return role;
     }
 

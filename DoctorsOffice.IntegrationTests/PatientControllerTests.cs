@@ -171,7 +171,7 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task CreatePatient_UserNameAlreadyExists_ReturnsConflict()
+    public async Task CreatePatient_UserNameAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -209,11 +209,11 @@ public class PatientControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPatientRequest);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task CreatePatient_EmailAlreadyExists_ReturnsConflict()
+    public async Task CreatePatient_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -252,7 +252,7 @@ public class PatientControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPatientRequest);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -406,7 +406,7 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdateAuthenticatedPatient_UserNameAlreadyExists_ReturnsConflict()
+    public async Task UpdateAuthenticatedPatient_UserNameAlreadyExists_ReturnsBadRequest()
     {
         var client = await GetHttpClientAsync();
 
@@ -453,11 +453,11 @@ public class PatientControllerTests : IntegrationTest
         var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task UpdateAuthenticatedPatient_EmailAlreadyExists_ReturnsConflict()
+    public async Task UpdateAuthenticatedPatient_EmailAlreadyExists_ReturnsBadRequest()
     {
         var client = await GetHttpClientAsync();
 
@@ -504,7 +504,7 @@ public class PatientControllerTests : IntegrationTest
         var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]

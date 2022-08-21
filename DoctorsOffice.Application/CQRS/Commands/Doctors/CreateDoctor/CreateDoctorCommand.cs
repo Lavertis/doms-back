@@ -1,10 +1,11 @@
 ﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Utils;
 using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 
-public class CreateDoctorCommand : IRequest<DoctorResponse>
+public class CreateDoctorCommand : IRequest<HttpResult<DoctorResponse>>
 {
     public readonly string Email;
     public readonly string Password;

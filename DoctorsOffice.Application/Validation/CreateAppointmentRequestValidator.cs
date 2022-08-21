@@ -1,6 +1,6 @@
-﻿using DoctorsOffice.Application.Services.User;
-using DoctorsOffice.Domain.DTO.Requests;
+﻿using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.Repositories;
+using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
 namespace DoctorsOffice.Application.Validation;
@@ -8,7 +8,7 @@ namespace DoctorsOffice.Application.Validation;
 public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppointmentRequest>
 {
     public CreateAppointmentRequestValidator(
-        IUserService userService,
+        AppUserManager appUserManager,
         IAppointmentTypeRepository appointmentTypeRepository)
     {
         CascadeMode = CascadeMode.Stop;
@@ -26,19 +26,19 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
         RuleFor(e => e.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
-            .MustAsync((patientId, cancellationToken) => userService.UserExistsByIdAsync(patientId))
+            .MustAsync((patientId, _) => appUserManager.ExistsByIdAsync(patientId))
             .WithMessage("Patient does not exist");
 
         RuleFor(e => e.DoctorId)
             .NotEmpty()
             .WithMessage("DoctorId is required")
-            .MustAsync((doctorId, cancellationToken) => userService.UserExistsByIdAsync(doctorId))
+            .MustAsync((doctorId, _) => appUserManager.ExistsByIdAsync(doctorId))
             .WithMessage("Doctor does not exist");
 
         RuleFor(e => e.Type)
             .NotEmpty()
             .WithMessage("Type is required")
-            .MustAsync((type, cancellationToken) => appointmentTypeRepository.ExistsByNameAsync(type))
+            .MustAsync((type, _) => appointmentTypeRepository.ExistsByNameAsync(type))
             .WithMessage("Type does not exist");
     }
 }
