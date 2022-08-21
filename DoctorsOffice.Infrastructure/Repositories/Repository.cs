@@ -17,10 +17,10 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
 
     public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] includeFields)
     {
-        var adminsQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
+        var entitiesQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
 
         return includeFields.Aggregate(
-            adminsQueryable,
+            entitiesQueryable,
             (current, prop) => current.Include(prop)
         );
     }

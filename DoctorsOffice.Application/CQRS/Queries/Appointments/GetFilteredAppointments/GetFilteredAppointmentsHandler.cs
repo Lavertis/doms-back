@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 
 public class GetFilteredAppointmentsHandler
-    : IRequestHandler<GetFilteredAppointmentsQuery, HttpResult<IEnumerable<AppointmentResponse>>>
+    : IRequestHandler<GetFilteredAppointmentsQuery, HttpResult<IEnumerable<AppointmentSearchResponse>>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
 
@@ -16,17 +16,17 @@ public class GetFilteredAppointmentsHandler
         _appointmentRepository = appointmentRepository;
     }
 
-    public async Task<HttpResult<IEnumerable<AppointmentResponse>>> Handle(
+    public async Task<HttpResult<IEnumerable<AppointmentSearchResponse>>> Handle(
         GetFilteredAppointmentsQuery request, CancellationToken cancellationToken)
     {
-        var result = new HttpResult<IEnumerable<AppointmentResponse>>();
+        var result = new HttpResult<IEnumerable<AppointmentSearchResponse>>();
 
-        var appointmentsQueryable = _appointmentRepository.GetAll(
-            a => a.Doctor,
-            a => a.Patient,
-            a => a.Type,
-            a => a.Status
-        );
+        var appointmentsQueryable = _appointmentRepository.GetAll()
+            .Include(a => a.Type)
+            .Include(a => a.Status)
+            .Include(a => a.Patient).ThenInclude(p => p.AppUser)
+            .AsQueryable();
+
         if (request.DateStart is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Date >= request.DateStart);
         if (request.DateEnd is not null)
@@ -42,7 +42,7 @@ public class GetFilteredAppointmentsHandler
 
         var appointmentResponses = await appointmentsQueryable
             .OrderBy(a => a.Date)
-            .Select(a => new AppointmentResponse(a))
+            .Select(a => new AppointmentSearchResponse(a))
             .ToListAsync(cancellationToken: cancellationToken);
 
         return result.WithValue(appointmentResponses);

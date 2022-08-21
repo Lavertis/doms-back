@@ -88,7 +88,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         var testPatientUser = new AppUser
         {
-            UserName = TestPatientUserName
+            UserName = TestPatientUserName,
+            Email = "testPatientEmail@mail.com",
+            PhoneNumber = "1234567890",
         };
         await CreateUserAsync(testPatientUser, TestPatientPassword, RoleTypes.Patient);
         var testPatient = new Patient

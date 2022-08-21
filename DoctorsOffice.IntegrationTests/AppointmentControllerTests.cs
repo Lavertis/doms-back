@@ -417,7 +417,8 @@ public class AppointmentControllerTests : IntegrationTest
             };
             appointments.Add(appointment);
         }
-
+        
+        var doctorAppointments = appointments.Where(a => a.Doctor == doctor1).ToList();
 
         DbContext.Appointments.AddRange(appointments);
         await DbContext.SaveChangesAsync();
@@ -429,10 +430,10 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
 
         responseContent.Should().NotBeEmpty();
-        responseContent.Should().OnlyContain(a => a.DoctorId == authenticatedUserId);
+        responseContent.Should().OnlyContain(appointmentSearchResponse => doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
         responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
         switch (filterName)
         {
@@ -482,6 +483,8 @@ public class AppointmentControllerTests : IntegrationTest
             };
             appointments.Add(appointment);
         }
+        
+        var doctorAppointments = appointments.Where(a => a.Doctor == doctor).ToList();
 
         DbContext.Appointments.AddRange(appointments);
         await DbContext.SaveChangesAsync();
@@ -490,9 +493,10 @@ public class AppointmentControllerTests : IntegrationTest
         var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search");
 
         // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
-        responseContent.Should().OnlyContain(a => a.DoctorId == authenticatedUserId);
+        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
+        responseContent.Should().OnlyContain(appointmentSearchResponse => doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
         var allAuthenticatedDoctorAppointments =
             DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList();
         allAuthenticatedDoctorAppointments.Should().OnlyContain(
@@ -623,7 +627,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
 
         responseContent.Should().NotBeEmpty();
         responseContent.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
@@ -695,15 +699,17 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
 
         responseContent.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
         var allAuthenticatedPatientAppointments = DbContext.Appointments
             .Include(a => a.Status)
             .Include(a => a.Type)
+            .Include(a => a.Patient)
+            .ThenInclude(p => p.AppUser)
             .Where(a => a.PatientId == authenticatedUserId).ToList();
         responseContent.Should()
-            .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentResponse(a)));
+            .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentSearchResponse(a)));
     }
 
     [Theory]

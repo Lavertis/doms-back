@@ -5,7 +5,7 @@ using MediatR;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
 
-public class GetFilteredAppointmentsQuery : IRequest<HttpResult<IEnumerable<AppointmentResponse>>>
+public class GetFilteredAppointmentsQuery : IRequest<HttpResult<IEnumerable<AppointmentSearchResponse>>>
 {
     public readonly DateTime? DateEnd;
     public readonly DateTime? DateStart;

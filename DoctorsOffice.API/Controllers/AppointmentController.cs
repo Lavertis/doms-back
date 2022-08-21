@@ -43,7 +43,7 @@ public class AppointmentController : BaseController
     /// </summary>
     [HttpGet("doctor/current/search")]
     [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointmentsFilteredAsync(
+    public async Task<ActionResult<IEnumerable<AppointmentSearchResponse>>> GetAppointmentsFilteredAsync(
         DateTime? dateStart, DateTime? dateEnd, Guid? patientId, string? type, string? status)
         => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
             new GetAppointmentsFilteredRequest
@@ -61,7 +61,7 @@ public class AppointmentController : BaseController
     /// </summary>
     [HttpGet("patient/current/search")]
     [Authorize(Roles = RoleTypes.Patient)]
-    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
+    public async Task<ActionResult<IEnumerable<AppointmentSearchResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
         DateTime? dateStart, DateTime? dateEnd, string? type, string? status)
         => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
             new GetAppointmentsFilteredRequest
