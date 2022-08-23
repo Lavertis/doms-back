@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Infrastructure.Identity;
@@ -11,12 +12,14 @@ namespace DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand, HttpResult<PatientResponse>>
 {
     private readonly AppUserManager _appUserManager;
+    private readonly IMapper _mapper;
     private readonly IPatientRepository _patientRepository;
 
-    public UpdatePatientByIdHandler(IPatientRepository patientRepository, AppUserManager appUserManager)
+    public UpdatePatientByIdHandler(IPatientRepository patientRepository, AppUserManager appUserManager, IMapper mapper)
     {
         _patientRepository = patientRepository;
         _appUserManager = appUserManager;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<PatientResponse>> Handle(UpdatePatientByIdCommand request,
@@ -47,8 +50,9 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
 
         await _appUserManager.UpdateAsync(appUser);
         await _patientRepository.UpdateByIdAsync(request.PatientId, patient);
-
         patient.AppUser = appUser;
-        return result.WithValue(new PatientResponse(patient));
+
+        var patientResponse = _mapper.Map<PatientResponse>(patient);
+        return result.WithValue(patientResponse);
     }
 }

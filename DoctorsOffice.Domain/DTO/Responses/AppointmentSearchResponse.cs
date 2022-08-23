@@ -1,6 +1,4 @@
-﻿using DoctorsOffice.Domain.Entities;
-
-namespace DoctorsOffice.Domain.DTO.Responses;
+﻿namespace DoctorsOffice.Domain.DTO.Responses;
 
 public class AppointmentSearchResponse
 {
@@ -14,22 +12,4 @@ public class AppointmentSearchResponse
     public string PatientPhoneNumber { get; set; } = null!;
     public string Status { get; set; } = null!;
     public string Type { get; set; } = null!;
-
-    public AppointmentSearchResponse()
-    {
-    }
-    
-    public AppointmentSearchResponse(Appointment appointment)
-    {
-        Id = appointment.Id;
-        Date = appointment.Date;
-        Description = appointment.Description;
-        PatientId = appointment.PatientId;
-        PatientFirstName = appointment.Patient.FirstName;
-        PatientLastName = appointment.Patient.LastName;
-        PatientEmail = appointment.Patient.AppUser.Email;
-        PatientPhoneNumber = appointment.Patient.AppUser.PhoneNumber;
-        Status = appointment.Status.Name;
-        Type = appointment.Type.Name;
-    }
 }

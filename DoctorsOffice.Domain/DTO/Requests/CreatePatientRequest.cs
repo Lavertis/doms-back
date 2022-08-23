@@ -2,13 +2,13 @@
 
 public class CreatePatientRequest
 {
-    public string UserName { get; set; } = default!;
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Address { get; set; } = default!;
+    public string UserName { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string PhoneNumber { get; set; } = null!;
+    public string Address { get; set; } = null!;
     public DateTime DateOfBirth { get; set; }
-    public string Password { get; set; } = default!;
-    public string ConfirmPassword { get; set; } = default!;
+    public string Password { get; set; } = null!;
+    public string ConfirmPassword { get; set; } = null!;
 }

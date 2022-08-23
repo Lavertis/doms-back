@@ -2,5 +2,5 @@
 
 public class RevokeRefreshTokenRequest
 {
-    public string RefreshToken { get; set; } = default!;
+    public string RefreshToken { get; set; } = null!;
 }

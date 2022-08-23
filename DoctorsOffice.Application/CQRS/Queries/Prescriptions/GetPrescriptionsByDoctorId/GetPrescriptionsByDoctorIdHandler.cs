@@ -1,3 +1,4 @@
+using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
@@ -10,11 +11,13 @@ public class
     GetPrescriptionsByDoctorIdHandler
     : IRequestHandler<GetPrescriptionsByDoctorIdQuery, HttpResult<IEnumerable<PrescriptionResponse>>>
 {
+    private readonly IMapper _mapper;
     private readonly IPrescriptionRepository _prescriptionRepository;
 
-    public GetPrescriptionsByDoctorIdHandler(IPrescriptionRepository prescriptionRepository)
+    public GetPrescriptionsByDoctorIdHandler(IPrescriptionRepository prescriptionRepository, IMapper mapper)
     {
         _prescriptionRepository = prescriptionRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<IEnumerable<PrescriptionResponse>>> Handle(
@@ -24,7 +27,7 @@ public class
 
         var prescriptions = _prescriptionRepository.GetByDoctorId(request.DoctorId, p => p.DrugItems);
         var prescriptionResponses = await prescriptions
-            .Select(p => new PrescriptionResponse(p))
+            .Select(p => _mapper.Map<PrescriptionResponse>(p))
             .ToListAsync(cancellationToken: cancellationToken);
 
         return result.WithValue(prescriptionResponses);

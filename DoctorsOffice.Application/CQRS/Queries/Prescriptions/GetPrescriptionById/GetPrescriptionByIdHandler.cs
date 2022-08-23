@@ -1,3 +1,4 @@
+using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
@@ -8,11 +9,13 @@ namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionBy
 
 public class GetPrescriptionByIdHandler : IRequestHandler<GetPrescriptionByIdQuery, HttpResult<PrescriptionResponse>>
 {
+    private readonly IMapper _mapper;
     private readonly IPrescriptionRepository _prescriptionRepository;
 
-    public GetPrescriptionByIdHandler(IPrescriptionRepository prescriptionRepository)
+    public GetPrescriptionByIdHandler(IPrescriptionRepository prescriptionRepository, IMapper mapper)
     {
         _prescriptionRepository = prescriptionRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<PrescriptionResponse>> Handle(GetPrescriptionByIdQuery request,
@@ -28,6 +31,7 @@ public class GetPrescriptionByIdHandler : IRequestHandler<GetPrescriptionByIdQue
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        return result.WithValue(new PrescriptionResponse(prescription));
+        var prescriptionResponse = _mapper.Map<PrescriptionResponse>(prescription);
+        return result.WithValue(prescriptionResponse);
     }
 }

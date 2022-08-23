@@ -2,6 +2,6 @@
 
 public class AuthenticateResponse
 {
-    public string JwtToken { get; set; } = string.Empty;
-    public string RefreshToken { get; set; } = string.Empty;
+    public string JwtToken { get; set; } = null!;
+    public string RefreshToken { get; set; } = null!;
 }

@@ -1,3 +1,4 @@
+using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Repositories;
@@ -9,11 +10,13 @@ namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescripti
 
 public class CreatePrescriptionHandler : IRequestHandler<CreatePrescriptionCommand, HttpResult<PrescriptionResponse>>
 {
+    private readonly IMapper _mapper;
     private readonly IPrescriptionRepository _prescriptionRepository;
 
-    public CreatePrescriptionHandler(IPrescriptionRepository prescriptionRepository)
+    public CreatePrescriptionHandler(IPrescriptionRepository prescriptionRepository, IMapper mapper)
     {
         _prescriptionRepository = prescriptionRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<PrescriptionResponse>> Handle(
@@ -30,8 +33,9 @@ public class CreatePrescriptionHandler : IRequestHandler<CreatePrescriptionComma
             DrugItems = request.DrugsIds.Select(id => new DrugItem {Id = id}).ToList()
         };
         var prescriptionEntity = await _prescriptionRepository.CreateAsync(newPrescription);
+        var prescriptionResponse = _mapper.Map<PrescriptionResponse>(prescriptionEntity);
         return result
-            .WithValue(new PrescriptionResponse(prescriptionEntity))
+            .WithValue(prescriptionResponse)
             .WithStatusCode(StatusCodes.Status201Created);
     }
 }

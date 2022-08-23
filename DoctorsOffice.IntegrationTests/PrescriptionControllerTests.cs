@@ -72,7 +72,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
         var expectedPrescriptions = prescriptions
             .Where(p => p.PatientId == patientId)
-            .Select(p => new PrescriptionResponse(p));
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
             responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
@@ -198,7 +198,7 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var expectedPrescriptions = prescriptions
             .Where(p => p.PatientId == authenticatedPatientId)
-            .Select(p => new PrescriptionResponse(p));
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
             responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
@@ -292,7 +292,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
         var expectedPrescriptions = prescriptions
             .Where(p => p.DoctorId == authenticatedDoctorId)
-            .Select(p => new PrescriptionResponse(p));
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
             responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);

@@ -19,7 +19,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class DoctorHandlerTests
+public class DoctorHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IDoctorRepository _fakeDoctorRepository;
@@ -45,13 +45,13 @@ public class DoctorHandlerTests
             });
         }
 
-        var doctorResponses = doctors.Select(d => new DoctorResponse(d));
+        var doctorResponses = doctors.Select(d => Mapper.Map<DoctorResponse>(d));
 
         A.CallTo(() => _fakeDoctorRepository.GetAll(A<Expression<Func<Doctor, object>>>.Ignored))
             .Returns(doctors.AsQueryable().BuildMock());
 
         var query = new GetAllDoctorsQuery();
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository);
+        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -69,7 +69,7 @@ public class DoctorHandlerTests
             .Returns(A.CollectionOfDummy<Doctor>(0).AsQueryable().BuildMock());
 
         var query = new GetAllDoctorsQuery();
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository);
+        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -93,13 +93,13 @@ public class DoctorHandlerTests
             .Returns(doctor);
 
         var query = new GetDoctorByIdQuery(doctorId);
-        var handler = new GetDoctorByIdHandler(_fakeDoctorRepository);
+        var handler = new GetDoctorByIdHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = handler.Handle(query, default).Result;
 
         // assert
-        result.Value.Should().BeEquivalentTo(new DoctorResponse(doctor));
+        result.Value.Should().BeEquivalentTo(Mapper.Map<DoctorResponse>(doctor));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class DoctorHandlerTests
             .Returns(doctor);
 
         var query = new GetDoctorByIdQuery(doctorId);
-        var handler = new GetDoctorByIdHandler(_fakeDoctorRepository);
+        var handler = new GetDoctorByIdHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -145,7 +145,7 @@ public class DoctorHandlerTests
             PasswordHash = command.Password
         };
 
-        var handler = new CreateDoctorHandler(_fakeDoctorRepository, _fakeUserService);
+        var handler = new CreateDoctorHandler(_fakeDoctorRepository, _fakeUserService, Mapper);
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
             .Returns(new HttpResult<AppUser>().WithValue(appUser));
 
@@ -189,7 +189,7 @@ public class DoctorHandlerTests
         A.CallTo(() => _fakeAppUserManager.Users)
             .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
-        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager);
+        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
@@ -216,7 +216,7 @@ public class DoctorHandlerTests
         Doctor? doctor = null;
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
 
-        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager);
+        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
@@ -256,7 +256,7 @@ public class DoctorHandlerTests
         A.CallTo(() => _fakeAppUserManager.Users)
             .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
-        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager);
+        var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(command, default);

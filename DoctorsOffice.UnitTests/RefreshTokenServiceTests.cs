@@ -12,7 +12,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class RefreshTokenServiceTests
+public class RefreshTokenServiceTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IOptions<JwtSettings> _fakeJwtSettings;

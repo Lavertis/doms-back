@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
@@ -12,15 +13,18 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
+    private readonly IMapper _mapper;
 
     public UpdateAppointmentHandler(
         IAppointmentRepository appointmentRepository,
         IAppointmentStatusRepository appointmentStatusRepository,
-        IAppointmentTypeRepository appointmentTypeRepository)
+        IAppointmentTypeRepository appointmentTypeRepository,
+        IMapper mapper)
     {
         _appointmentRepository = appointmentRepository;
         _appointmentStatusRepository = appointmentStatusRepository;
         _appointmentTypeRepository = appointmentTypeRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<AppointmentResponse>> Handle(
@@ -93,6 +97,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
 
         var appointmentEntity =
             await _appointmentRepository.UpdateByIdAsync(request.AppointmentId, appointmentToUpdate);
-        return result.WithValue(new AppointmentResponse(appointmentEntity));
+        var appointmentResponse = _mapper.Map<AppointmentResponse>(appointmentEntity);
+        return result.WithValue(appointmentResponse);
     }
 }

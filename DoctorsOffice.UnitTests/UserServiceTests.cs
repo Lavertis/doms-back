@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using DoctorsOffice.Application.Services.Users;
+﻿using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Utils;
@@ -13,19 +12,17 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class UserServiceTests
+public class UserServiceTests : UnitTest
 {
     private readonly AppRoleManager _fakeAppRoleManager;
     private readonly AppUserManager _fakeAppUserManager;
-    private readonly IMapper _fakeMapper;
     private readonly UserService _userService;
 
     public UserServiceTests()
     {
         _fakeAppRoleManager = A.Fake<AppRoleManager>();
         _fakeAppUserManager = A.Fake<AppUserManager>();
-        _fakeMapper = A.Fake<IMapper>();
-        _userService = new UserService(_fakeAppUserManager, _fakeAppRoleManager, _fakeMapper);
+        _userService = new UserService(_fakeAppUserManager, _fakeAppRoleManager, Mapper);
     }
 
     [Fact]
@@ -49,14 +46,6 @@ public class UserServiceTests
             Password = "testPassword1235%",
             RoleName = "testRole"
         };
-        A.CallTo(() => _fakeMapper.Map<AppUser>(A<CreateUserRequest>.Ignored)).Returns(
-            new AppUser
-            {
-                UserName = createUserRequest.UserName,
-                Email = createUserRequest.Email,
-                PhoneNumber = createUserRequest.PhoneNumber
-            }
-        );
 
         // act
         var result = await _userService.CreateUserAsync(createUserRequest);

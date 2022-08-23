@@ -9,11 +9,9 @@ public class AdminResponseMappingProfile : Profile
     public AdminResponseMappingProfile()
     {
         CreateMap<Admin, AdminResponse>()
-            .ForMember(adminResponse => adminResponse.UserName, options =>
-                options.MapFrom(admin => admin.AppUser.UserName)
-            )
-            .ForMember(adminResponse => adminResponse.Email, options =>
-                options.MapFrom(admin => admin.AppUser.Email)
-            );
+            .ForMember(d => d.UserName, opt =>
+                opt.MapFrom(admin => admin.AppUser.UserName))
+            .ForMember(d => d.Email, opt =>
+                opt.MapFrom(admin => admin.AppUser.Email));
     }
 }

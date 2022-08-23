@@ -10,7 +10,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class JwtServiceTests
+public class JwtServiceTests : UnitTest
 {
     private readonly AppRoleManager _fakeAppRoleManager;
     private readonly AppUserManager _fakeAppUserManager;

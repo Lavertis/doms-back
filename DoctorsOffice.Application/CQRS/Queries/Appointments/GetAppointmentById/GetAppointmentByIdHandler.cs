@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Application.Services.Appointments;
+﻿using AutoMapper;
+using DoctorsOffice.Application.Services.Appointments;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
@@ -11,13 +12,16 @@ public class GetAppointmentByIdHandler : IRequestHandler<GetAppointmentByIdQuery
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IAppointmentService _appointmentService;
+    private readonly IMapper _mapper;
 
     public GetAppointmentByIdHandler(
         IAppointmentRepository appointmentRepository,
-        IAppointmentService appointmentService)
+        IAppointmentService appointmentService,
+        IMapper mapper)
     {
         _appointmentRepository = appointmentRepository;
         _appointmentService = appointmentService;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<AppointmentResponse>> Handle(
@@ -51,7 +55,10 @@ public class GetAppointmentByIdHandler : IRequestHandler<GetAppointmentByIdQuery
                 .WithStatusCode(StatusCodes.Status403Forbidden);
 
         if (userCanAccessAppointment.IsSuccess && userCanAccessAppointment.Value)
-            return result.WithValue(new AppointmentResponse(appointment));
+        {
+            var appointmentResponse = _mapper.Map<AppointmentResponse>(appointment);
+            return result.WithValue(appointmentResponse);
+        }
 
         return result
             .WithError(new Error {Message = "Something went wrong"})

@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Application.Services.Users;
+﻿using AutoMapper;
+using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
@@ -13,12 +14,14 @@ namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResult<DoctorResponse>>
 {
     private readonly IDoctorRepository _doctorRepository;
+    private readonly IMapper _mapper;
     private readonly IUserService _userService;
 
-    public CreateDoctorHandler(IDoctorRepository doctorRepository, IUserService userService)
+    public CreateDoctorHandler(IDoctorRepository doctorRepository, IUserService userService, IMapper mapper)
     {
         _doctorRepository = doctorRepository;
         _userService = userService;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<DoctorResponse>> Handle(CreateDoctorCommand request,
@@ -50,8 +53,9 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
         var newDoctor = new Doctor {AppUser = newAppUser};
 
         var doctorEntity = await _doctorRepository.CreateAsync(newDoctor);
+        var doctorResponse = _mapper.Map<DoctorResponse>(doctorEntity);
         return result
-            .WithValue(new DoctorResponse(doctorEntity))
+            .WithValue(doctorResponse)
             .WithStatusCode(StatusCodes.Status201Created);
     }
 }

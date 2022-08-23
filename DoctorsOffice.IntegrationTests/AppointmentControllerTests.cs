@@ -320,7 +320,7 @@ public class AppointmentControllerTests : IntegrationTest
         DbContext.Appointments.Add(appointment);
         await DbContext.SaveChangesAsync();
 
-        var expectedResponse = new AppointmentResponse(appointment);
+        var expectedResponse = Mapper.Map<AppointmentResponse>(appointment);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
@@ -351,7 +351,7 @@ public class AppointmentControllerTests : IntegrationTest
         DbContext.Appointments.Add(appointment);
         await DbContext.SaveChangesAsync();
 
-        var expectedResponse = new AppointmentResponse(appointment);
+        var expectedResponse = Mapper.Map<AppointmentResponse>(appointment);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/user/current/{appointment.Id}");
@@ -417,7 +417,7 @@ public class AppointmentControllerTests : IntegrationTest
             };
             appointments.Add(appointment);
         }
-        
+
         var doctorAppointments = appointments.Where(a => a.Doctor == doctor1).ToList();
 
         DbContext.Appointments.AddRange(appointments);
@@ -433,7 +433,8 @@ public class AppointmentControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
 
         responseContent.Should().NotBeEmpty();
-        responseContent.Should().OnlyContain(appointmentSearchResponse => doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
+        responseContent.Should().OnlyContain(appointmentSearchResponse =>
+            doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
         responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
         switch (filterName)
         {
@@ -483,7 +484,7 @@ public class AppointmentControllerTests : IntegrationTest
             };
             appointments.Add(appointment);
         }
-        
+
         var doctorAppointments = appointments.Where(a => a.Doctor == doctor).ToList();
 
         DbContext.Appointments.AddRange(appointments);
@@ -496,7 +497,8 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
         var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
-        responseContent.Should().OnlyContain(appointmentSearchResponse => doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
+        responseContent.Should().OnlyContain(appointmentSearchResponse =>
+            doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
         var allAuthenticatedDoctorAppointments =
             DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList();
         allAuthenticatedDoctorAppointments.Should().OnlyContain(
@@ -709,7 +711,7 @@ public class AppointmentControllerTests : IntegrationTest
             .ThenInclude(p => p.AppUser)
             .Where(a => a.PatientId == authenticatedUserId).ToList();
         responseContent.Should()
-            .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => new AppointmentSearchResponse(a)));
+            .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a)));
     }
 
     [Theory]

@@ -1,3 +1,4 @@
+using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Repositories;
@@ -9,11 +10,13 @@ namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescripti
 
 public class UpdatePrescriptionHandler : IRequestHandler<UpdatePrescriptionCommand, HttpResult<PrescriptionResponse>>
 {
+    private readonly IMapper _mapper;
     private readonly IPrescriptionRepository _prescriptionRepository;
 
-    public UpdatePrescriptionHandler(IPrescriptionRepository prescriptionRepository)
+    public UpdatePrescriptionHandler(IPrescriptionRepository prescriptionRepository, IMapper mapper)
     {
         _prescriptionRepository = prescriptionRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<PrescriptionResponse>> Handle(
@@ -39,7 +42,7 @@ public class UpdatePrescriptionHandler : IRequestHandler<UpdatePrescriptionComma
                 request.DrugsIds!.Select(id => new DrugItem {Id = id}).ToList());
 
         var updatedPrescription = await _prescriptionRepository.GetByIdAsync(request.PrescriptionId, p => p.DrugItems);
-
-        return result.WithValue(new PrescriptionResponse(updatedPrescription!));
+        var prescriptionResponse = _mapper.Map<PrescriptionResponse>(updatedPrescription);
+        return result.WithValue(prescriptionResponse);
     }
 }

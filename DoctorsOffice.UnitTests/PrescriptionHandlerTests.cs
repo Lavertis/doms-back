@@ -16,7 +16,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class PrescriptionHandlerTests
+public class PrescriptionHandlerTests : UnitTest
 {
     private readonly IPrescriptionRepository _fakePrescriptionRepository;
 
@@ -42,13 +42,13 @@ public class PrescriptionHandlerTests
         )).Returns(prescription);
 
         var query = new GetPrescriptionByIdQuery(prescriptionId);
-        var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(prescription));
+        result.Value.Should().BeEquivalentTo(Mapper.Map<PrescriptionResponse>(prescription));
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class PrescriptionHandlerTests
                 A<Expression<Func<Prescription, object>>>.Ignored)).Returns(prescription);
 
         var query = new GetPrescriptionByIdQuery(Guid.NewGuid());
-        var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -86,7 +86,7 @@ public class PrescriptionHandlerTests
         )).Returns(prescriptionsQueryable);
 
         var query = new GetPrescriptionsByPatientIdQuery(Guid.NewGuid());
-        var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -106,7 +106,7 @@ public class PrescriptionHandlerTests
         )).Returns(dummyPrescriptionQueryable);
 
         var query = new GetPrescriptionsByPatientIdQuery(Guid.NewGuid());
-        var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -131,7 +131,7 @@ public class PrescriptionHandlerTests
         )).Returns(prescriptionsQueryable);
 
         var query = new GetPrescriptionsByDoctorIdQuery(Guid.NewGuid());
-        var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -151,7 +151,7 @@ public class PrescriptionHandlerTests
         )).Returns(dummyPrescriptionQueryable);
 
         var query = new GetPrescriptionsByDoctorIdQuery(Guid.NewGuid());
-        var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository);
+        var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -183,7 +183,7 @@ public class PrescriptionHandlerTests
             DrugsIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
         var command = new CreatePrescriptionCommand(request, expectedPrescription.DoctorId);
-        var handler = new CreatePrescriptionHandler(_fakePrescriptionRepository);
+        var handler = new CreatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
@@ -192,7 +192,7 @@ public class PrescriptionHandlerTests
         A.CallTo(() => _fakePrescriptionRepository.CreateAsync(A<Prescription>.Ignored))
             .MustHaveHappenedOnceExactly();
 
-        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
+        result.Value.Should().BeEquivalentTo(Mapper.Map<PrescriptionResponse>(expectedPrescription));
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class PrescriptionHandlerTests
             DrugIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
         var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
-        var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
+        var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
@@ -242,7 +242,7 @@ public class PrescriptionHandlerTests
         // assert
         A.CallTo(() => _fakePrescriptionRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Prescription>.Ignored))
             .MustHaveHappenedOnceExactly();
-        result.Value.Should().BeEquivalentTo(new PrescriptionResponse(expectedPrescription));
+        result.Value.Should().BeEquivalentTo(Mapper.Map<PrescriptionResponse>(expectedPrescription));
     }
 
     [Fact]
@@ -262,7 +262,7 @@ public class PrescriptionHandlerTests
             DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
         };
         var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
-        var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository);
+        var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(command, default);

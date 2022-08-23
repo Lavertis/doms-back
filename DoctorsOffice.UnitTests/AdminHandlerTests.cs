@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using AutoMapper;
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAdminById;
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAllAdmins;
 using DoctorsOffice.Domain.DTO.Responses;
@@ -13,14 +12,12 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class AdminHandlerTests
+public class AdminHandlerTests : UnitTest
 {
     private readonly IAdminRepository _fakeAdminRepository;
-    private readonly IMapper _fakeMapper;
 
     public AdminHandlerTests()
     {
-        _fakeMapper = A.Fake<IMapper>();
         _fakeAdminRepository = A.Fake<IAdminRepository>();
     }
 
@@ -31,16 +28,16 @@ public class AdminHandlerTests
         var adminId = Guid.NewGuid();
         var admin = new Admin
         {
+            Id = adminId,
             AppUser = new AppUser {Id = adminId}
         };
         A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored))
             .Returns(admin);
 
         var expectedResponse = new AdminResponse {Id = adminId};
-        A.CallTo(() => _fakeMapper.Map<AdminResponse>(A<Admin>.Ignored)).Returns(expectedResponse);
 
         var query = new GetAdminByIdQuery(adminId);
-        var handler = new GetAdminByIdHandler(_fakeAdminRepository, _fakeMapper);
+        var handler = new GetAdminByIdHandler(_fakeAdminRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -59,7 +56,7 @@ public class AdminHandlerTests
             .Returns(admin);
 
         var query = new GetAdminByIdQuery(adminId);
-        var handler = new GetAdminByIdHandler(_fakeAdminRepository, _fakeMapper);
+        var handler = new GetAdminByIdHandler(_fakeAdminRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -83,7 +80,7 @@ public class AdminHandlerTests
             .Returns(adminsQueryable);
 
         var query = new GetAllAdminsQuery();
-        var handler = new GetAllAdminsHandler(_fakeAdminRepository, _fakeMapper);
+        var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -102,7 +99,7 @@ public class AdminHandlerTests
             .Returns(dummyAdminsQueryable);
 
         var query = new GetAllAdminsQuery();
-        var handler = new GetAllAdminsHandler(_fakeAdminRepository, _fakeMapper);
+        var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class AppUserManagerTests
+public class AppUserManagerTests : UnitTest
 {
     private readonly AppUserManager _appUserManager;
     private readonly IPasswordHasher<AppUser> _fakePasswordHasher;

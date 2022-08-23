@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
@@ -12,10 +13,12 @@ public class GetAppointmentsByUserHandler
     : IRequestHandler<GetAppointmentsByUserQuery, HttpResult<IEnumerable<AppointmentResponse>>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IMapper _mapper;
 
-    public GetAppointmentsByUserHandler(IAppointmentRepository appointmentRepository)
+    public GetAppointmentsByUserHandler(IAppointmentRepository appointmentRepository, IMapper mapper)
     {
         _appointmentRepository = appointmentRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<IEnumerable<AppointmentResponse>>> Handle(
@@ -42,8 +45,10 @@ public class GetAppointmentsByUserHandler
             .Where(a => a.Doctor.Id == doctorId)
             .OrderBy(a => a.Date);
 
-        return await appointments.Select(appointment => new AppointmentResponse(appointment))
+        var appointmentResponses = await appointments
+            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment))
             .ToListAsync(cancellationToken: cancellationToken);
+        return appointmentResponses;
     }
 
     private async Task<IList<AppointmentResponse>> GetPatientAppointments(
@@ -57,7 +62,9 @@ public class GetAppointmentsByUserHandler
             .Where(a => a.Patient.Id == patientId)
             .OrderBy(a => a.Date);
 
-        return await appointments.Select(appointment => new AppointmentResponse(appointment))
+        var appointmentResponses = await appointments
+            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment))
             .ToListAsync(cancellationToken: cancellationToken);
+        return appointmentResponses;
     }
 }

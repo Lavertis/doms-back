@@ -20,7 +20,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class PatientHandlerTests
+public class PatientHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IPatientRepository _fakePatientRepository;
@@ -45,10 +45,10 @@ public class PatientHandlerTests
                 _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
             .Returns(patient);
 
-        var expectedResult = new PatientResponse(patient);
+        var expectedResult = Mapper.Map<PatientResponse>(patient);
 
         var query = new GetPatientByIdQuery(patient.Id);
-        var handler = new GetPatientByIdHandler(_fakePatientRepository);
+        var handler = new GetPatientByIdHandler(_fakePatientRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -69,7 +69,7 @@ public class PatientHandlerTests
         var patientId = Guid.NewGuid();
 
         var query = new GetPatientByIdQuery(patientId);
-        var handler = new GetPatientByIdHandler(_fakePatientRepository);
+        var handler = new GetPatientByIdHandler(_fakePatientRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -108,7 +108,7 @@ public class PatientHandlerTests
             .Returns(new HttpResult<AppUser>().WithValue(newAppUser));
 
 
-        var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService);
+        var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
@@ -161,7 +161,7 @@ public class PatientHandlerTests
             NewPassword = "newPassword1234#"
         };
         var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
@@ -224,7 +224,7 @@ public class PatientHandlerTests
         }
 
         var updatePatientCommand = new UpdatePatientByIdCommand(request, patientId);
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);
@@ -270,7 +270,7 @@ public class PatientHandlerTests
         var request = new UpdateAuthenticatedPatientRequest();
         var updatePatientCommand = new UpdatePatientByIdCommand(request, Guid.NewGuid());
 
-        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager);
+        var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(updatePatientCommand, default);

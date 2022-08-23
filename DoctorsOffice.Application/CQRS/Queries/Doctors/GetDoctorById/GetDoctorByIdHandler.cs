@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
@@ -9,10 +10,12 @@ namespace DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorById;
 public class GetDoctorByIdHandler : IRequestHandler<GetDoctorByIdQuery, HttpResult<DoctorResponse>>
 {
     private readonly IDoctorRepository _doctorRepository;
+    private readonly IMapper _mapper;
 
-    public GetDoctorByIdHandler(IDoctorRepository doctorRepository)
+    public GetDoctorByIdHandler(IDoctorRepository doctorRepository, IMapper mapper)
     {
         _doctorRepository = doctorRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<DoctorResponse>> Handle(GetDoctorByIdQuery request,
@@ -27,6 +30,7 @@ public class GetDoctorByIdHandler : IRequestHandler<GetDoctorByIdQuery, HttpResu
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        return result.WithValue(new DoctorResponse(doctor));
+        var doctorResponse = _mapper.Map<DoctorResponse>(doctor);
+        return result.WithValue(doctorResponse);
     }
 }

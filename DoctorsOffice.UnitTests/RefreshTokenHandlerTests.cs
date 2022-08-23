@@ -10,7 +10,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class RefreshTokenHandlerTests
+public class RefreshTokenHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
 

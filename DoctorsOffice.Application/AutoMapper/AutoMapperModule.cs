@@ -11,14 +11,25 @@ public static class AutoMapperModule
 {
     public static void AddAutoMapperModule(this IServiceCollection services)
     {
+        var mapper = CreateAutoMapper();
+        services.AddSingleton(mapper);
+    }
+
+    public static IMapper CreateAutoMapper()
+    {
         var mapperConfiguration = new MapperConfiguration(options =>
         {
             options.CreateMap<CreateUserRequest, AppUser>();
             options.CreateMap<AppUser, UserResponse>();
             options.AddProfile(new AdminResponseMappingProfile());
+            options.AddProfile(new DoctorResponseMappingProfile());
+            options.AddProfile(new PatientResponseMappingProfile());
+            options.AddProfile(new AppointmentResponseMappingProfile());
+            options.AddProfile(new AppointmentSearchResponseMappingProfile());
+            options.AddProfile(new PrescriptionResponseMappingProfile());
         });
 
         var mapper = mapperConfiguration.CreateMapper();
-        services.AddSingleton(mapper);
+        return mapper;
     }
 }

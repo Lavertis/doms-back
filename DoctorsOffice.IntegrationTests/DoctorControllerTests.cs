@@ -31,7 +31,7 @@ public class DoctorControllerTests : IntegrationTest
             .Include(d => d.AppUser)
             .FirstAsync(d => d.Id == authenticatedDoctorId);
 
-        var expectedResponse = new DoctorResponse(authenticatedDoctor);
+        var expectedResponse = Mapper.Map<DoctorResponse>(authenticatedDoctor);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/current");
@@ -113,7 +113,7 @@ public class DoctorControllerTests : IntegrationTest
         responseContent.Should().BeEquivalentTo(
             DbContext.Doctors
                 .Include(a => a.AppUser)
-                .Select(d => new DoctorResponse(d))
+                .Select(d => Mapper.Map<DoctorResponse>(d))
         );
     }
 

@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
@@ -14,6 +15,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
     private readonly IDoctorRepository _doctorRepository;
+    private readonly IMapper _mapper;
     private readonly IPatientRepository _patientRepository;
 
     public CreateAppointmentHandler(
@@ -21,13 +23,15 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         IDoctorRepository doctorRepository,
         IPatientRepository patientRepository,
         IAppointmentStatusRepository appointmentStatusRepository,
-        IAppointmentTypeRepository appointmentTypeRepository)
+        IAppointmentTypeRepository appointmentTypeRepository,
+        IMapper mapper)
     {
         _appointmentRepository = appointmentRepository;
         _doctorRepository = doctorRepository;
         _patientRepository = patientRepository;
         _appointmentStatusRepository = appointmentStatusRepository;
         _appointmentTypeRepository = appointmentTypeRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<AppointmentResponse>> Handle(
@@ -95,8 +99,9 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
             a => a.Status,
             a => a.Type);
 
+        var appointmentResponse = _mapper.Map<AppointmentResponse>(createdAppointment);
         return result
-            .WithValue(new AppointmentResponse(createdAppointment!))
+            .WithValue(appointmentResponse)
             .WithStatusCode(StatusCodes.Status201Created);
     }
 }

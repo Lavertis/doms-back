@@ -10,5 +10,5 @@ public class UpdateAuthenticatedPatientRequest
     public string? Address { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? NewPassword { get; set; }
-    public string CurrentPassword { get; set; } = string.Empty;
+    public string CurrentPassword { get; set; } = null!;
 }

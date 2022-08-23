@@ -1,4 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using AutoMapper;
+using DoctorsOffice.Application.AutoMapper;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
@@ -27,6 +29,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     private readonly WebApplicationFactory<Program> _factory;
     private AppUserManager _appUserManager = null!;
     protected AppDbContext DbContext = null!;
+    protected IMapper Mapper = AutoMapperModule.CreateAutoMapper();
 
     protected IntegrationTest(WebApplicationFactory<Program> factory)
     {

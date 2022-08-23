@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
@@ -9,10 +10,12 @@ namespace DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
 public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResult<IEnumerable<DoctorResponse>>>
 {
     private readonly IDoctorRepository _doctorRepository;
+    private readonly IMapper _mapper;
 
-    public GetAllDoctorsHandler(IDoctorRepository doctorRepository)
+    public GetAllDoctorsHandler(IDoctorRepository doctorRepository, IMapper mapper)
     {
         _doctorRepository = doctorRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<IEnumerable<DoctorResponse>>> Handle(GetAllDoctorsQuery request,
@@ -21,7 +24,7 @@ public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResu
         var result = new HttpResult<IEnumerable<DoctorResponse>>();
 
         var doctorResponses = await _doctorRepository.GetAll(a => a.AppUser)
-            .Select(doctor => new DoctorResponse(doctor))
+            .Select(doctor => _mapper.Map<DoctorResponse>(doctor))
             .ToListAsync(cancellationToken: cancellationToken);
 
         return result.WithValue(doctorResponses);

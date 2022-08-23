@@ -29,9 +29,11 @@ public class PatientControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
-        var expectedResponse = new PatientResponse((await DbContext.Patients
-            .Include(p => p.AppUser)
-            .FirstAsync(p => p.Id == authenticatedPatientId))!);
+        var expectedResponse = Mapper.Map<PatientResponse>(
+            await DbContext.Patients
+                .Include(p => p.AppUser)
+                .FirstAsync(p => p.Id == authenticatedPatientId)
+        );
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/current");

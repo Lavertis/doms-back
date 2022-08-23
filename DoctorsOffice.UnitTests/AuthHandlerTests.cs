@@ -18,7 +18,7 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class AuthHandlerTests
+public class AuthHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IJwtService _fakeJwtService;

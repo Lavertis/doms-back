@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
@@ -10,10 +11,12 @@ public class GetFilteredAppointmentsHandler
     : IRequestHandler<GetFilteredAppointmentsQuery, HttpResult<IEnumerable<AppointmentSearchResponse>>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
+    private readonly IMapper _mapper;
 
-    public GetFilteredAppointmentsHandler(IAppointmentRepository appointmentRepository)
+    public GetFilteredAppointmentsHandler(IAppointmentRepository appointmentRepository, IMapper mapper)
     {
         _appointmentRepository = appointmentRepository;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<IEnumerable<AppointmentSearchResponse>>> Handle(
@@ -41,8 +44,8 @@ public class GetFilteredAppointmentsHandler
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Doctor.Id == request.DoctorId);
 
         var appointmentResponses = await appointmentsQueryable
-            .OrderBy(a => a.Date)
-            .Select(a => new AppointmentSearchResponse(a))
+            .OrderBy(appointment => appointment.Date)
+            .Select(appointment => _mapper.Map<AppointmentSearchResponse>(appointment))
             .ToListAsync(cancellationToken: cancellationToken);
 
         return result.WithValue(appointmentResponses);

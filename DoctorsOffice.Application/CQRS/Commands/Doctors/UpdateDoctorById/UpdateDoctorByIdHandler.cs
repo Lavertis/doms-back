@@ -1,4 +1,5 @@
-﻿using DoctorsOffice.Domain.DTO.Responses;
+﻿using AutoMapper;
+using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Infrastructure.Identity;
@@ -12,11 +13,13 @@ public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, 
 {
     private readonly AppUserManager _appUserManager;
     private readonly IDoctorRepository _doctorRepository;
+    private readonly IMapper _mapper;
 
-    public UpdateDoctorByIdHandler(IDoctorRepository doctorRepository, AppUserManager appUserManager)
+    public UpdateDoctorByIdHandler(IDoctorRepository doctorRepository, AppUserManager appUserManager, IMapper mapper)
     {
         _doctorRepository = doctorRepository;
         _appUserManager = appUserManager;
+        _mapper = mapper;
     }
 
     public async Task<HttpResult<DoctorResponse>> Handle(
@@ -41,8 +44,9 @@ public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, 
             appUser.PasswordHash = _appUserManager.PasswordHasher.HashPassword(appUser, request.NewPassword);
 
         await _appUserManager.UpdateAsync(appUser);
-
         doctor.AppUser = appUser;
-        return result.WithValue(new DoctorResponse(doctor));
+
+        var doctorResponse = _mapper.Map<DoctorResponse>(doctor);
+        return result.WithValue(doctorResponse);
     }
 }

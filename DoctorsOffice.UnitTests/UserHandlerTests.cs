@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using DoctorsOffice.Application.CQRS.Queries.Users.GetAllUsers;
+﻿using DoctorsOffice.Application.CQRS.Queries.Users.GetAllUsers;
 using DoctorsOffice.Application.CQRS.Queries.Users.GetUserById;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
@@ -13,14 +12,12 @@ using Xunit;
 
 namespace DoctorsOffice.UnitTests;
 
-public class UserHandlerTests
+public class UserHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
-    private readonly IMapper _fakeMapper;
 
     public UserHandlerTests()
     {
-        _fakeMapper = A.Fake<IMapper>();
         _fakeAppUserManager = A.Fake<AppUserManager>();
     }
 
@@ -32,7 +29,7 @@ public class UserHandlerTests
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -49,7 +46,7 @@ public class UserHandlerTests
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -66,7 +63,7 @@ public class UserHandlerTests
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var query = new GetAllUsersQuery();
-        var handler = new GetAllUsersHandler(_fakeAppUserManager, _fakeMapper);
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -83,7 +80,7 @@ public class UserHandlerTests
             .Returns(new CommonResult<AppUser>().WithError(new Error()));
 
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        var handler = new GetUserByIdHandler(_fakeMapper, _fakeAppUserManager);
+        var handler = new GetUserByIdHandler(Mapper, _fakeAppUserManager);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -112,7 +109,7 @@ public class UserHandlerTests
         };
 
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        var handler = new GetUserByIdHandler(_fakeMapper, _fakeAppUserManager);
+        var handler = new GetUserByIdHandler(Mapper, _fakeAppUserManager);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
