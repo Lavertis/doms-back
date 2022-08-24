@@ -6,6 +6,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
 
@@ -94,10 +95,10 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         };
 
         var createdAppointmentId = (await _appointmentRepository.CreateAsync(newAppointment)).Id;
-        var createdAppointment = await _appointmentRepository.GetByIdAsync(
-            createdAppointmentId,
-            a => a.Status,
-            a => a.Type);
+        var createdAppointment = await _appointmentRepository.GetAll()
+            .Include(appointment => appointment.Status)
+            .Include(appointment => appointment.Type)
+            .FirstOrDefaultAsync(appointment => appointment.Id == createdAppointmentId, cancellationToken);
 
         var appointmentResponse = _mapper.Map<AppointmentResponse>(createdAppointment);
         return result

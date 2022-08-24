@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 
@@ -32,10 +33,11 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
     {
         var result = new HttpResult<AppointmentResponse>();
 
-        var appointmentToUpdate = await _appointmentRepository.GetByIdAsync(
-            request.AppointmentId,
-            a => a.Status,
-            a => a.Type);
+        var appointmentToUpdate = await _appointmentRepository.GetAll()
+            .Include(appointment => appointment.Status)
+            .Include(appointment => appointment.Type)
+            .FirstOrDefaultAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
+
         if (appointmentToUpdate is null)
         {
             return result
@@ -96,7 +98,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         }
 
         var appointmentEntity =
-            await _appointmentRepository.UpdateByIdAsync(request.AppointmentId, appointmentToUpdate);
+            await _appointmentRepository.UpdateAsync(appointmentToUpdate);
         var appointmentResponse = _mapper.Map<AppointmentResponse>(appointmentEntity);
         return result.WithValue(appointmentResponse);
     }

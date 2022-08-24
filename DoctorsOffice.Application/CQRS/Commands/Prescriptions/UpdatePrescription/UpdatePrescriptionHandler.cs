@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
 
@@ -24,7 +25,10 @@ public class UpdatePrescriptionHandler : IRequestHandler<UpdatePrescriptionComma
     {
         var result = new HttpResult<PrescriptionResponse>();
 
-        var prescriptionToUpdate = await _prescriptionRepository.GetByIdAsync(request.PrescriptionId, p => p.DrugItems);
+        var prescriptionToUpdate = await _prescriptionRepository.GetAll()
+            .Include(prescription => prescription.DrugItems)
+            .FirstOrDefaultAsync(prescription => prescription.Id == request.PrescriptionId, cancellationToken);
+
         if (prescriptionToUpdate is null)
         {
             return result
@@ -36,12 +40,15 @@ public class UpdatePrescriptionHandler : IRequestHandler<UpdatePrescriptionComma
         prescriptionToUpdate.Description = request.Description ?? prescriptionToUpdate.Description;
         prescriptionToUpdate.PatientId = request.PatientId ?? prescriptionToUpdate.PatientId;
 
-        await _prescriptionRepository.UpdateByIdAsync(request.PrescriptionId, prescriptionToUpdate);
+        await _prescriptionRepository.UpdateAsync(prescriptionToUpdate);
         if (request.DrugsIds is not null)
             await _prescriptionRepository.UpdateDrugItemsAsync(prescriptionToUpdate,
                 request.DrugsIds!.Select(id => new DrugItem {Id = id}).ToList());
 
-        var updatedPrescription = await _prescriptionRepository.GetByIdAsync(request.PrescriptionId, p => p.DrugItems);
+        var updatedPrescription = await _prescriptionRepository.GetAll()
+            .Include(prescription => prescription.DrugItems)
+            .FirstOrDefaultAsync(prescription => prescription.Id == request.PrescriptionId, cancellationToken);
+
         var prescriptionResponse = _mapper.Map<PrescriptionResponse>(updatedPrescription);
         return result.WithValue(prescriptionResponse);
     }

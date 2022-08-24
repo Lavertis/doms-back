@@ -37,11 +37,11 @@ public class GetAppointmentsByUserHandler
     private async Task<IList<AppointmentResponse>> GetDoctorAppointments(
         Guid doctorId, CancellationToken cancellationToken)
     {
-        var appointments = _appointmentRepository.GetAll(
-                a => a.Doctor,
-                a => a.Patient,
-                a => a.Type,
-                a => a.Status)
+        var appointments = _appointmentRepository.GetAll()
+            .Include(appointment => appointment.Doctor)
+            .Include(appointment => appointment.Patient)
+            .Include(appointment => appointment.Type)
+            .Include(appointment => appointment.Status)
             .Where(a => a.Doctor.Id == doctorId)
             .OrderBy(a => a.Date);
 
@@ -54,11 +54,11 @@ public class GetAppointmentsByUserHandler
     private async Task<IList<AppointmentResponse>> GetPatientAppointments(
         Guid patientId, CancellationToken cancellationToken)
     {
-        var appointments = _appointmentRepository.GetAll(
-                a => a.Doctor,
-                a => a.Patient,
-                a => a.Type,
-                a => a.Status)
+        var appointments = _appointmentRepository.GetAll()
+            .Include(appointment => appointment.Doctor)
+            .Include(appointment => appointment.Patient)
+            .Include(appointment => appointment.Type)
+            .Include(appointment => appointment.Status)
             .Where(a => a.Patient.Id == patientId)
             .OrderBy(a => a.Date);
 

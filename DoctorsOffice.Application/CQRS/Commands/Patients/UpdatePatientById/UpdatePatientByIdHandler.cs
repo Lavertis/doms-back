@@ -49,7 +49,7 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
         patient.DateOfBirth = request.DateOfBirth ?? patient.DateOfBirth;
 
         await _appUserManager.UpdateAsync(appUser);
-        await _patientRepository.UpdateByIdAsync(request.PatientId, patient);
+        await _patientRepository.UpdateAsync(patient);
         patient.AppUser = appUser;
 
         var patientResponse = _mapper.Map<PatientResponse>(patient);

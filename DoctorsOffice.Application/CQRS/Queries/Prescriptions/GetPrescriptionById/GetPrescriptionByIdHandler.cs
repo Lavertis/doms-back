@@ -4,6 +4,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionById;
 
@@ -23,7 +24,11 @@ public class GetPrescriptionByIdHandler : IRequestHandler<GetPrescriptionByIdQue
     {
         var result = new HttpResult<PrescriptionResponse>();
 
-        var prescription = await _prescriptionRepository.GetByIdAsync(request.PrescriptionId, p => p.DrugItems);
+        var prescription = await _prescriptionRepository
+            .GetAll()
+            .Include(prescription => prescription.DrugItems)
+            .FirstOrDefaultAsync(prescription => prescription.Id == request.PrescriptionId, cancellationToken);
+
         if (prescription is null)
         {
             return result

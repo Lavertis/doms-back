@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Infrastructure.Database;
@@ -15,28 +14,16 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         DbContext = dbContext;
     }
 
-    public virtual IQueryable<TEntity> GetAll(params Expression<Func<TEntity, object>>[] includeFields)
+    public virtual IQueryable<TEntity> GetAll()
     {
-        var entitiesQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
-
-        return includeFields.Aggregate(
-            entitiesQueryable,
-            (current, prop) => current.Include(prop)
-        );
+        return DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
     }
 
-    public virtual async Task<TEntity?> GetByIdAsync(
-        Guid id, params Expression<Func<TEntity, object>>[] includeFields)
+    public virtual async Task<TEntity?> GetByIdAsync(Guid id)
     {
-        var entitiesQueryable = DbContext.Set<TEntity>().AsNoTrackingWithIdentityResolution();
-
-        entitiesQueryable = includeFields.Aggregate(
-            entitiesQueryable,
-            (current, prop) => current.Include(prop)
-        );
-
-        var entity = await entitiesQueryable.FirstOrDefaultAsync(e => e.Id == id);
-        return entity;
+        return await DbContext.Set<TEntity>()
+            .AsNoTrackingWithIdentityResolution()
+            .FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public virtual async Task<TEntity> CreateAsync(TEntity entity)
@@ -46,11 +33,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return createdEntity;
     }
 
-    public virtual async Task<TEntity> UpdateByIdAsync(Guid id, TEntity entity)
+    public virtual async Task<TEntity> UpdateAsync(TEntity entity)
     {
-        entity.Id = id;
         var updatedEntity = DbContext.Set<TEntity>().Update(entity).Entity;
-
         await DbContext.SaveChangesAsync();
         return updatedEntity;
     }

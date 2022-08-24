@@ -4,6 +4,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Admins.GetAdminById;
 
@@ -21,7 +22,10 @@ public class GetAdminByIdHandler : IRequestHandler<GetAdminByIdQuery, HttpResult
     public async Task<HttpResult<AdminResponse>> Handle(GetAdminByIdQuery request, CancellationToken cancellationToken)
     {
         var result = new HttpResult<AdminResponse>();
-        var admin = await _adminRepository.GetByIdAsync(request.AdminId, admin => admin.AppUser);
+        var admin = await _adminRepository.GetAll()
+            .Include(admin => admin.AppUser)
+            .FirstOrDefaultAsync(admin => admin.Id == request.AdminId, cancellationToken);
+
         if (admin is null)
         {
             return result

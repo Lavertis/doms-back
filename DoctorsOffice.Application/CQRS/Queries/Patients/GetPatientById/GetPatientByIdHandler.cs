@@ -4,6 +4,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Patients.GetPatientById;
 
@@ -22,7 +23,11 @@ public class GetPatientByIdHandler : IRequestHandler<GetPatientByIdQuery, HttpRe
         CancellationToken cancellationToken)
     {
         var result = new HttpResult<PatientResponse>();
-        var patient = await _patientRepository.GetByIdAsync(request.PatientId, p => p.AppUser);
+        var patient = await _patientRepository
+            .GetAll()
+            .Include(patient => patient.AppUser)
+            .FirstOrDefaultAsync(patient => patient.Id == request.PatientId, cancellationToken);
+
         if (patient is null)
         {
             return result

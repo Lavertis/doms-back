@@ -22,8 +22,8 @@ public class GetAllAdminsHandler : IRequestHandler<GetAllAdminsQuery, HttpResult
         GetAllAdminsQuery request, CancellationToken cancellationToken)
     {
         var result = new HttpResult<IEnumerable<AdminResponse>>();
-        var adminResponses = await _adminRepository
-            .GetAll(admin => admin.AppUser)
+        var adminResponses = await _adminRepository.GetAll()
+            .Include(admin => admin.AppUser)
             .Select(admin => _mapper.Map<AdminResponse>(admin))
             .ToListAsync(cancellationToken: cancellationToken);
         return result.WithValue(adminResponses);

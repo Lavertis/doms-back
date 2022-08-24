@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
+﻿using DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
 using DoctorsOffice.Application.CQRS.Commands.Patients.DeletePatientById;
 using DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 using DoctorsOffice.Application.CQRS.Queries.Patients.GetPatientById;
@@ -41,9 +40,8 @@ public class PatientHandlerTests : UnitTest
         {
             AppUser = new AppUser {Id = Guid.NewGuid()}
         };
-        A.CallTo(() =>
-                _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
-            .Returns(patient);
+        var patientsQueryable = new List<Patient> {patient}.AsQueryable().BuildMock();
+        A.CallTo(() => _fakePatientRepository.GetAll()).Returns(patientsQueryable);
 
         var expectedResult = Mapper.Map<PatientResponse>(patient);
 
@@ -61,10 +59,8 @@ public class PatientHandlerTests : UnitTest
     public async Task GetPatientByIdHandler_PatientDoesntExist_ReturnsNotFound404StatusCodes()
     {
         // arrange
-        Patient? patient = null;
-        A.CallTo(() =>
-                _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored, A<Expression<Func<Patient, object>>>.Ignored))
-            .Returns(patient);
+        var patientsQueryable = A.CollectionOfDummy<Patient>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakePatientRepository.GetAll()).Returns(patientsQueryable);
 
         var patientId = Guid.NewGuid();
 
@@ -169,8 +165,7 @@ public class PatientHandlerTests : UnitTest
         // assert
         A.CallTo(() => _fakeAppUserManager.PasswordHasher.HashPassword(A<AppUser>.Ignored, A<string>.Ignored))
             .MustHaveHappenedOnceExactly();
-        A.CallTo(() => _fakePatientRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Patient>.Ignored))
-            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _fakePatientRepository.UpdateAsync(A<Patient>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Theory]

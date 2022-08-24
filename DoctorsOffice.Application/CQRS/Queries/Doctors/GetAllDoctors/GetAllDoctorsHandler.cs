@@ -23,7 +23,8 @@ public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResu
     {
         var result = new HttpResult<IEnumerable<DoctorResponse>>();
 
-        var doctorResponses = await _doctorRepository.GetAll(a => a.AppUser)
+        var doctorResponses = await _doctorRepository.GetAll()
+            .Include(doctor => doctor.AppUser)
             .Select(doctor => _mapper.Map<DoctorResponse>(doctor))
             .ToListAsync(cancellationToken: cancellationToken);
 

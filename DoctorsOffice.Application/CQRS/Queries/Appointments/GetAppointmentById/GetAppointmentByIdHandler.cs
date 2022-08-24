@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById;
 
@@ -29,12 +30,14 @@ public class GetAppointmentByIdHandler : IRequestHandler<GetAppointmentByIdQuery
     {
         var result = new HttpResult<AppointmentResponse>();
 
-        var appointment = await _appointmentRepository.GetByIdAsync(
-            request.AppointmentId,
-            a => a.Doctor,
-            a => a.Patient,
-            a => a.Type,
-            a => a.Status);
+        var appointment = await _appointmentRepository
+            .GetAll()
+            .Include(appointment => appointment.Doctor)
+            .Include(appointment => appointment.Patient)
+            .Include(appointment => appointment.Type)
+            .Include(appointment => appointment.Status)
+            .FirstOrDefaultAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
+
         if (appointment is null)
         {
             return result

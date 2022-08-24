@@ -25,7 +25,10 @@ public class
     {
         var result = new HttpResult<IEnumerable<PrescriptionResponse>>();
 
-        var prescriptions = _prescriptionRepository.GetByDoctorId(request.DoctorId, p => p.DrugItems);
+        var prescriptions = _prescriptionRepository.GetAll()
+            .Include(prescription => prescription.DrugItems)
+            .Where(prescription => prescription.DoctorId == request.DoctorId);
+
         var prescriptionResponses = await prescriptions
             .Select(p => _mapper.Map<PrescriptionResponse>(p))
             .ToListAsync(cancellationToken: cancellationToken);

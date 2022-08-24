@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionById;
@@ -36,10 +35,8 @@ public class PrescriptionHandlerTests : UnitTest
             Id = prescriptionId,
             DrugItems = new List<DrugItem> {new()}
         };
-
-        A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Returns(prescription);
+        var prescriptionsQueryable = new List<Prescription> {prescription}.AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
         var query = new GetPrescriptionByIdQuery(prescriptionId);
         var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository, Mapper);
@@ -55,10 +52,8 @@ public class PrescriptionHandlerTests : UnitTest
     public async Task GetPrescriptionByIdHandler_PrescriptionDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
-        Prescription? prescription = null;
-        A.CallTo(() =>
-            _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
-                A<Expression<Func<Prescription, object>>>.Ignored)).Returns(prescription);
+        var prescriptionsQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
         var query = new GetPrescriptionByIdQuery(Guid.NewGuid());
         var handler = new GetPrescriptionByIdHandler(_fakePrescriptionRepository, Mapper);
@@ -74,18 +69,16 @@ public class PrescriptionHandlerTests : UnitTest
     public async Task GetPrescriptionsByPatientIdHandler_PatientExists_ReturnsPrescriptionsBelongingToPatient()
     {
         // arrange
+        var patientId = Guid.NewGuid();
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() {DrugItems = new List<DrugItem> {new()}},
-            new() {DrugItems = new List<DrugItem> {new()}},
-            new() {DrugItems = new List<DrugItem> {new()}}
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
-        A.CallTo(() => _fakePrescriptionRepository.GetByPatientId(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Returns(prescriptionsQueryable);
-
-        var query = new GetPrescriptionsByPatientIdQuery(Guid.NewGuid());
+        var query = new GetPrescriptionsByPatientIdQuery(patientId);
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -100,10 +93,7 @@ public class PrescriptionHandlerTests : UnitTest
     {
         // arrange
         var dummyPrescriptionQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
-
-        A.CallTo(() => _fakePrescriptionRepository.GetByPatientId(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Returns(dummyPrescriptionQueryable);
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(dummyPrescriptionQueryable);
 
         var query = new GetPrescriptionsByPatientIdQuery(Guid.NewGuid());
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
@@ -119,18 +109,16 @@ public class PrescriptionHandlerTests : UnitTest
     public async Task GetPrescriptionsByDoctorIdHandler_DoctorExists_ReturnsPrescriptionsBelongingToDoctor()
     {
         // arrange
+        var doctorId = Guid.NewGuid();
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() {DrugItems = new List<DrugItem> {new()}},
-            new() {DrugItems = new List<DrugItem> {new()}},
-            new() {DrugItems = new List<DrugItem> {new()}}
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}},
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}},
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
-        A.CallTo(() => _fakePrescriptionRepository.GetByDoctorId(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Returns(prescriptionsQueryable);
-
-        var query = new GetPrescriptionsByDoctorIdQuery(Guid.NewGuid());
+        var query = new GetPrescriptionsByDoctorIdQuery(doctorId);
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -145,10 +133,7 @@ public class PrescriptionHandlerTests : UnitTest
     {
         // arrange
         var dummyPrescriptionQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
-
-        A.CallTo(() => _fakePrescriptionRepository.GetByDoctorId(
-            A<Guid>.Ignored, A<Expression<Func<Prescription, object>>>.Ignored
-        )).Returns(dummyPrescriptionQueryable);
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(dummyPrescriptionQueryable);
 
         var query = new GetPrescriptionsByDoctorIdQuery(Guid.NewGuid());
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
@@ -199,8 +184,10 @@ public class PrescriptionHandlerTests : UnitTest
     public async Task UpdatePrescription_ValidRequest_UpdatesPrescription()
     {
         // arrange
+        var prescriptionId = Guid.NewGuid();
         var oldPrescription = new Prescription
         {
+            Id = prescriptionId,
             Title = "Old Prescription Title",
             Description = "Old Description",
             PatientId = Guid.NewGuid(),
@@ -210,20 +197,19 @@ public class PrescriptionHandlerTests : UnitTest
 
         var expectedPrescription = new Prescription
         {
+            Id = prescriptionId,
             Title = "New Prescription Title",
             Description = "New Description",
             PatientId = Guid.NewGuid(),
-            DoctorId = Guid.NewGuid(),
+            DoctorId = oldPrescription.DoctorId,
             DrugItems = new List<DrugItem> {new(), new()}
         };
 
         A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(oldPrescription);
-        A.CallTo(() =>
-                _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
-                    A<Expression<Func<Prescription, object>>>.Ignored))
-            .Returns(expectedPrescription);
-        A.CallTo(() => _fakePrescriptionRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Prescription>.Ignored))
+        var prescriptionsQueryable = new List<Prescription> {oldPrescription}.AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
+        A.CallTo(() => _fakePrescriptionRepository.UpdateAsync(A<Prescription>.Ignored))
             .Returns(oldPrescription);
 
         var request = new UpdatePrescriptionRequest
@@ -233,14 +219,14 @@ public class PrescriptionHandlerTests : UnitTest
             PatientId = expectedPrescription.PatientId,
             DrugIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
         };
-        var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
+        var command = new UpdatePrescriptionCommand(request, prescriptionId);
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
 
         // act
         var result = await handler.Handle(command, default);
 
         // assert
-        A.CallTo(() => _fakePrescriptionRepository.UpdateByIdAsync(A<Guid>.Ignored, A<Prescription>.Ignored))
+        A.CallTo(() => _fakePrescriptionRepository.UpdateAsync(A<Prescription>.Ignored))
             .MustHaveHappenedOnceExactly();
         result.Value.Should().BeEquivalentTo(Mapper.Map<PrescriptionResponse>(expectedPrescription));
     }
@@ -249,10 +235,8 @@ public class PrescriptionHandlerTests : UnitTest
     public async Task UpdatePrescription_PrescriptionWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
-        Prescription? prescription = null;
-        A.CallTo(() =>
-            _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored,
-                A<Expression<Func<Prescription, object>>>.Ignored)).Returns(prescription);
+        var prescriptionsQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
         var request = new UpdatePrescriptionRequest
         {

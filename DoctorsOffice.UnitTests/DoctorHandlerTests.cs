@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
+﻿using DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.DeleteDoctorById;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
 using DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
@@ -46,9 +45,7 @@ public class DoctorHandlerTests : UnitTest
         }
 
         var doctorResponses = doctors.Select(d => Mapper.Map<DoctorResponse>(d));
-
-        A.CallTo(() => _fakeDoctorRepository.GetAll(A<Expression<Func<Doctor, object>>>.Ignored))
-            .Returns(doctors.AsQueryable().BuildMock());
+        A.CallTo(() => _fakeDoctorRepository.GetAll()).Returns(doctors.AsQueryable().BuildMock());
 
         var query = new GetAllDoctorsQuery();
         var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
@@ -65,7 +62,7 @@ public class DoctorHandlerTests : UnitTest
     public async Task GetAllDoctorsHandler_ThereAreNoDoctors_ReturnsEmptyList()
     {
         // arrange
-        A.CallTo(() => _fakeDoctorRepository.GetAll(A<Expression<Func<Doctor, object>>>.Ignored))
+        A.CallTo(() => _fakeDoctorRepository.GetAll())
             .Returns(A.CollectionOfDummy<Doctor>(0).AsQueryable().BuildMock());
 
         var query = new GetAllDoctorsQuery();
@@ -83,14 +80,13 @@ public class DoctorHandlerTests : UnitTest
     {
         // arrange
         var doctorId = Guid.NewGuid();
-
         var doctor = new Doctor
         {
+            Id = doctorId,
             AppUser = new AppUser {Id = doctorId}
         };
-
-        A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(doctorId, A<Expression<Func<Doctor, object>>>.Ignored))
-            .Returns(doctor);
+        var doctorsQueryable = new List<Doctor> {doctor}.AsQueryable().BuildMock();
+        A.CallTo(() => _fakeDoctorRepository.GetAll()).Returns(doctorsQueryable);
 
         var query = new GetDoctorByIdQuery(doctorId);
         var handler = new GetDoctorByIdHandler(_fakeDoctorRepository, Mapper);
@@ -107,10 +103,8 @@ public class DoctorHandlerTests : UnitTest
     {
         // arrange
         var doctorId = Guid.NewGuid();
-        Doctor? doctor = null;
-
-        A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(doctorId, A<Expression<Func<Doctor, object>>>.Ignored))
-            .Returns(doctor);
+        var doctorsQueryable = A.CollectionOfDummy<Doctor>(0).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeDoctorRepository.GetAll()).Returns(doctorsQueryable);
 
         var query = new GetDoctorByIdQuery(doctorId);
         var handler = new GetDoctorByIdHandler(_fakeDoctorRepository, Mapper);

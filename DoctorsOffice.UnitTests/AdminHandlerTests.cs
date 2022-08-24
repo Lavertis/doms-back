@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using DoctorsOffice.Application.CQRS.Queries.Admins.GetAdminById;
+﻿using DoctorsOffice.Application.CQRS.Queries.Admins.GetAdminById;
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAllAdmins;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
@@ -26,13 +25,16 @@ public class AdminHandlerTests : UnitTest
     {
         // arrange
         var adminId = Guid.NewGuid();
-        var admin = new Admin
+        var adminsQueryable = new List<Admin>
         {
-            Id = adminId,
-            AppUser = new AppUser {Id = adminId}
-        };
-        A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored))
-            .Returns(admin);
+            new()
+            {
+                Id = adminId,
+                AppUser = new AppUser {Id = adminId}
+            }
+        }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAdminRepository.GetAll())
+            .Returns(adminsQueryable);
 
         var expectedResponse = new AdminResponse {Id = adminId};
 
@@ -51,9 +53,8 @@ public class AdminHandlerTests : UnitTest
     {
         // arrange
         var adminId = Guid.NewGuid();
-        Admin? admin = null;
-        A.CallTo(() => _fakeAdminRepository.GetByIdAsync(adminId, A<Expression<Func<Admin, object>>>.Ignored))
-            .Returns(admin);
+        var adminsQueryable = new List<Admin>().AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
 
         var query = new GetAdminByIdQuery(adminId);
         var handler = new GetAdminByIdHandler(_fakeAdminRepository, Mapper);
@@ -76,8 +77,7 @@ public class AdminHandlerTests : UnitTest
             new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         }.AsQueryable().BuildMock();
 
-        A.CallTo(() => _fakeAdminRepository.GetAll(A<Expression<Func<Admin, object>>>.Ignored))
-            .Returns(adminsQueryable);
+        A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
 
         var query = new GetAllAdminsQuery();
         var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
@@ -95,8 +95,7 @@ public class AdminHandlerTests : UnitTest
     {
         // arrange
         var dummyAdminsQueryable = A.CollectionOfDummy<Admin>(0).AsQueryable().BuildMock();
-        A.CallTo(() => _fakeAdminRepository.GetAll(A<Expression<Func<Admin, object>>>.Ignored))
-            .Returns(dummyAdminsQueryable);
+        A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(dummyAdminsQueryable);
 
         var query = new GetAllAdminsQuery();
         var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
