@@ -6,6 +6,8 @@ using DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointment
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Filters;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,8 +45,13 @@ public class AppointmentController : BaseController
     /// </summary>
     [HttpGet("doctor/current/search")]
     [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<IEnumerable<AppointmentSearchResponse>>> GetAppointmentsFilteredAsync(
-        DateTime? dateStart, DateTime? dateEnd, Guid? patientId, string? type, string? status)
+    public async Task<ActionResult<PagedResponse<AppointmentSearchResponse>>> GetAppointmentsFilteredAsync(
+        DateTime? dateStart,
+        DateTime? dateEnd,
+        Guid? patientId,
+        string? type,
+        string? status,
+        [FromQuery] PaginationFilter paginationFilter)
         => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
             new GetAppointmentsFilteredRequest
             {
@@ -54,15 +61,20 @@ public class AppointmentController : BaseController
                 Status = status,
                 PatientId = patientId,
                 DoctorId = JwtSubject()
-            })));
+            }, paginationFilter)));
 
     /// <summary>
     /// Returns appointments for authenticated patient matching search criteria sorted by date. Only for patients
     /// </summary>
     [HttpGet("patient/current/search")]
     [Authorize(Roles = RoleTypes.Patient)]
-    public async Task<ActionResult<IEnumerable<AppointmentSearchResponse>>> GetAppointmentsForAuthenticatedPatientFiltered(
-        DateTime? dateStart, DateTime? dateEnd, string? type, string? status)
+    public async Task<ActionResult<PagedResponse<AppointmentSearchResponse>>>
+        GetAppointmentsForAuthenticatedPatientFiltered(
+            DateTime? dateStart,
+            DateTime? dateEnd,
+            string? type,
+            string? status,
+            [FromQuery] PaginationFilter paginationFilter)
         => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
             new GetAppointmentsFilteredRequest
             {
@@ -71,7 +83,7 @@ public class AppointmentController : BaseController
                 Type = type,
                 Status = status,
                 PatientId = JwtSubject()
-            })));
+            }, paginationFilter)));
 
     /// <summary>
     /// Creates new appointment. Only for doctors

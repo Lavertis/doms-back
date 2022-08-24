@@ -1,4 +1,4 @@
-﻿namespace DoctorsOffice.Domain.DTO.Responses;
+namespace DoctorsOffice.Domain.DTO.Responses;
 
 public class AppointmentSearchResponse
 {

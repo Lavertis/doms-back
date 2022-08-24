@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Wrappers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -221,7 +222,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
-        var authenticatedUser = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
+        await DbContext.Patients.FindAsync(authenticatedUserId);
         var otherPatient = new Patient
         {
             AppUser = new AppUser(),
@@ -256,7 +257,7 @@ public class AppointmentControllerTests : IntegrationTest
     {
         // arrange
         var client = await GetHttpClientAsync();
-        var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
+        await AuthenticateAsDoctorAsync(client);
         var otherDoctor = new Doctor
         {
             AppUser = new AppUser()
@@ -375,20 +376,20 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
 
         var doctor1 = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
-        var doctor2 = new Doctor {AppUser = new AppUser()};
+        var doctor2 = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(doctor2);
-        var doctors = new List<Doctor> {doctor1, doctor2};
+        var doctors = new List<Doctor> { doctor1, doctor2 };
 
         var patient1 = DbContext.Patients.First();
         var patient2 = new Patient
         {
-            AppUser = new AppUser {Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e")},
+            AppUser = new AppUser { Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e") },
             FirstName = "",
             LastName = "",
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var appointmentTypes = DbContext.AppointmentTypes.ToList();
         var appointmentStatuses = DbContext.AppointmentStatuses.ToList();
@@ -430,28 +431,28 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
 
-        responseContent.Should().NotBeEmpty();
-        responseContent.Should().OnlyContain(appointmentSearchResponse =>
+        responseContent.Records.Should().NotBeEmpty();
+        responseContent.Records.Should().OnlyContain(appointmentSearchResponse =>
             doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
-        responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
         switch (filterName)
         {
             case "dateStart":
-                responseContent.Should().OnlyContain(a => a.Date >= DateTime.Parse(filterValue));
+                responseContent.Records.Should().OnlyContain(a => a.Date >= DateTime.Parse(filterValue));
                 break;
             case "dateEnd":
-                responseContent.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
+                responseContent.Records.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
                 break;
             case "patientId":
-                responseContent.Should().OnlyContain(a => a.PatientId.ToString() == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.PatientId.ToString() == filterValue);
                 break;
             case "type":
-                responseContent.Should().OnlyContain(a => a.Type == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.Type == filterValue);
                 break;
             case "status":
-                responseContent.Should().OnlyContain(a => a.Status == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.Status == filterValue);
                 break;
         }
     }
@@ -464,9 +465,9 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
-        var otherDoctor = new Doctor {AppUser = new AppUser()};
+        var otherDoctor = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(otherDoctor);
-        var doctors = new List<Doctor> {doctor, otherDoctor};
+        var doctors = new List<Doctor> { doctor, otherDoctor };
 
         var patient = DbContext.Patients.First();
 
@@ -496,14 +497,14 @@ public class AppointmentControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
-        responseContent.Should().OnlyContain(appointmentSearchResponse =>
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
+        responseContent.Records.Should().OnlyContain(appointmentSearchResponse =>
             doctorAppointments.Any(a => a.Id == appointmentSearchResponse.Id));
         var allAuthenticatedDoctorAppointments =
             DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList();
         allAuthenticatedDoctorAppointments.Should().OnlyContain(
             doctorAppointment =>
-                responseContent.Any(responseAppointment => responseAppointment.Id == doctorAppointment.Id)
+                responseContent.Records.Any(responseAppointment => responseAppointment.Id == doctorAppointment.Id)
         );
     }
 
@@ -572,6 +573,314 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Fact]
+    public async Task GetAppointmentsFiltered_NoPageSizeAndPageNumberProvided_ReturnsAllAppointments()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.First();
+
+        const int expectedPageNumber = 1;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < 10; i++)
+        {
+            var appointment = new Appointment
+            {
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
+        responseContent.Records.Count().Should().Be(appointments.Count);
+        responseContent.PageSize.Should().Be(appointments.Count);
+        responseContent.PageNumber.Should().Be(expectedPageNumber);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsFiltered_OnlyPageSizeIsProvided_ReturnsBadRequest()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.Include(p => p.AppUser).First();
+
+        const int pageSize = 5;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < 20; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsFiltered_OnlyPageNumberIsProvided_ReturnsBadRequest()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.First();
+
+        const int pageNumber = 2;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < 20; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsFiltered_PageSizeIsNegative_ResultPageSizeIsOne()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.Include(p => p.AppUser).First();
+
+        const int pageSize = -5;
+        const int pageNumber = 3;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < 20; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsFiltered_PageNumberIsNegative_ReturnsBadRequest()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.Include(p => p.AppUser).First();
+
+        const int pageSize = 3;
+        const int pageNumber = -2;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < 20; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task
+        GetAppointmentsFiltered_PageSizeIsHigherThanNumberOfRecords_ResultPageSizeIsEqualToNumberOfRecords()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.Include(p => p.AppUser).First();
+
+        const int pageSize = 10;
+        const int pageNumber = 1;
+        const int expectedPageNumber = 1;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < pageSize - 5; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var expectedRecords = appointments
+            .Select(a => Mapper.Map<AppointmentSearchResponse>(a))
+            .Skip((expectedPageNumber - 1) * appointments.Count)
+            .Take(appointments.Count)
+            .ToList();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedRecords);
+        responseContent.Records.Count().Should().Be(appointments.Count);
+        responseContent.PageSize.Should().Be(appointments.Count);
+        responseContent.PageNumber.Should().Be(expectedPageNumber);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsFiltered_PageNumberIsHigherThanNumberOfRecords_ReturnsBadRequest()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedUserId = AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
+        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var patient = DbContext.Patients.Include(p => p.AppUser).First();
+
+        const int pageSize = 3;
+        const int pageNumber = 25;
+
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < pageNumber - 5; i++)
+        {
+            var appointment = new Appointment
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTime.UtcNow.AddDays(i),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = patient,
+                PatientId = patient.Id,
+                Status = DbContext.AppointmentStatuses.First(),
+                Type = DbContext.AppointmentTypes.First()
+            };
+            appointments.Add(appointment);
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
     [Theory]
     [InlineData("dateStart", "2022-07-04T15:12:52Z")]
     [InlineData("dateEnd", "2022-07-04T15:12:52Z")]
@@ -594,7 +903,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var doctor = DbContext.Doctors.First();
 
@@ -629,24 +938,24 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
 
-        responseContent.Should().NotBeEmpty();
-        responseContent.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
-        responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
+        responseContent.Records.Should().NotBeEmpty();
+        responseContent.Records.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
         switch (filterName)
         {
             case "dateStart":
-                responseContent.Should().OnlyContain(a => a.Date >= DateTime.Parse(filterValue));
+                responseContent.Records.Should().OnlyContain(a => a.Date >= DateTime.Parse(filterValue));
                 break;
             case "dateEnd":
-                responseContent.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
+                responseContent.Records.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
                 break;
             case "type":
-                responseContent.Should().OnlyContain(a => a.Type == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.Type == filterValue);
                 break;
             case "status":
-                responseContent.Should().OnlyContain(a => a.Status == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.Status == filterValue);
                 break;
         }
     }
@@ -667,7 +976,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var doctor = DbContext.Doctors.First();
 
@@ -701,16 +1010,16 @@ public class AppointmentControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentSearchResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentSearchResponse>>();
 
-        responseContent.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
+        responseContent.Records.Should().OnlyContain(a => a.PatientId == authenticatedUserId);
         var allAuthenticatedPatientAppointments = DbContext.Appointments
             .Include(a => a.Status)
             .Include(a => a.Type)
             .Include(a => a.Patient)
             .ThenInclude(p => p.AppUser)
             .Where(a => a.PatientId == authenticatedUserId).ToList();
-        responseContent.Should()
+        responseContent.Records.Should()
             .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a)));
     }
 
@@ -905,7 +1214,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         AuthenticateAsDoctorAsync(client).GetAwaiter().GetResult();
-        var otherDoctor = new Doctor {AppUser = new AppUser()};
+        var otherDoctor = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(otherDoctor);
         var patient = DbContext.Patients.First();
 
@@ -1042,7 +1351,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         AuthenticateAsPatientAsync(client).GetAwaiter().GetResult();
-        var otherPatient = new Patient {AppUser = new AppUser()};
+        var otherPatient = new Patient { AppUser = new AppUser() };
         DbContext.Patients.Add(otherPatient);
         var doctor = DbContext.Doctors.First();
 
@@ -1225,19 +1534,16 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData(AppointmentStatuses.Accepted, AppointmentStatuses.Rejected)]
     [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Pending)]
     [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Accepted)]
-    [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Rejected)]
     [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Cancelled)]
     [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Completed)]
     [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Pending)]
     [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Accepted)]
     [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Rejected)]
-    [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Cancelled)]
     [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Completed)]
     [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Pending)]
     [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Accepted)]
     [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Rejected)]
     [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Cancelled)]
-    [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Completed)]
     public async Task UpdateAppointmentById_AuthenticatedUserIsDoctorAndStatusTransitionIsInvalid_ReturnsBadRequest(
         string initialStatus, string newStatus)
     {
