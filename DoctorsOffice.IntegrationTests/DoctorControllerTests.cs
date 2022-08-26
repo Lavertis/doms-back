@@ -290,7 +290,6 @@ public class DoctorControllerTests : IntegrationTest
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", request);
 
-        var str = response.Content.ReadAsStringAsync().Result;
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -506,7 +505,7 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorRequest
+        await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = conflictingUserName,
             Email = "mail@mail.com",
@@ -548,7 +547,7 @@ public class DoctorControllerTests : IntegrationTest
             Password = oldDoctorPassword
         });
 
-        var conflictingDoctor = await CreateDoctorAsync(new CreateDoctorRequest
+        await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "userName",
             Email = conflictingEmail,

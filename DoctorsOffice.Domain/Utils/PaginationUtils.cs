@@ -23,21 +23,21 @@ public static class PaginationUtils
         switch (paginationFilter.PageNumber)
         {
             case null:
-                return result.WithError(new Error { Message = "No page number provided" });
+                return result.WithError(new Error {Message = "No page number provided"});
             case < 1:
-                return result.WithError(new Error { Message = "Invalid page number" });
+                return result.WithError(new Error {Message = "Invalid page number"});
         }
 
         switch (paginationFilter.PageSize)
         {
             case null:
-                return result.WithError(new Error { Message = "No page size provided" });
+                return result.WithError(new Error {Message = "No page size provided"});
             case < 1:
-                return result.WithError(new Error { Message = "Invalid page size" });
+                return result.WithError(new Error {Message = "Invalid page size"});
         }
 
-        if (paginationFilter.PageNumber > (int)Math.Ceiling((double)totalRecords / paginationFilter.PageSize.Value))
-            return result.WithError(new Error { Message = "Range not satisfiable" });
+        if (paginationFilter.PageNumber > (int) Math.Ceiling((double) totalRecords / paginationFilter.PageSize.Value))
+            return result.WithError(new Error {Message = "Range not satisfiable"});
 
         var pageNumber = paginationFilter.PageNumber.Value;
         var pageSize = paginationFilter.PageSize.Value;

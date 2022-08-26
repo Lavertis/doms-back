@@ -14,7 +14,6 @@ public class AppUserManagerTests : UnitTest
     private readonly IPasswordHasher<AppUser> _fakePasswordHasher;
     private readonly IUserStore<AppUser> _fakeUserStore;
 
-    // TODO check names of test methods, because some changed their name
     public AppUserManagerTests()
     {
         _fakeUserStore = A.Fake<IUserStore<AppUser>>(options => options
@@ -142,7 +141,6 @@ public class AppUserManagerTests : UnitTest
         A.CallTo(() => _fakeUserStore.DeleteAsync(A<AppUser>.Ignored, A<CancellationToken>.Ignored))
             .MustNotHaveHappened();
     }
-
 
     [Fact]
     public async void ExistsByUserNameAsync_UserNameDoesntExist_ReturnsFalse()

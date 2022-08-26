@@ -28,13 +28,13 @@ public class AdminControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<AdminResponse>();
+        var adminResponse = await response.Content.ReadAsAsync<AdminResponse>();
 
-        responseContent.Id.Should().Be(authenticatedAdminId);
+        adminResponse.Id.Should().Be(authenticatedAdminId);
     }
 
     [Fact]
-    public async Task GetAuthenticatedAdmin_AuthenticatedUserDoesntExist_ReturnsNotFoundException()
+    public async Task GetAuthenticatedAdmin_AuthenticatedUserDoesntExist_ReturnsNotFound()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -155,7 +155,7 @@ public class AdminControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetAllAdmins_ThereAreAdmins_ReturnsAllAdmins()
+    public async Task GetAllAdmins_AdminsExist_ReturnsAllAdmins()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -183,7 +183,7 @@ public class AdminControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetAllAdmins_ThereAreNoAdmins_ReturnsEmptyList()
+    public async Task GetAllAdmins_NoAdmins_ReturnsEmptyList()
     {
         // arrange
         var client = await GetHttpClientAsync();

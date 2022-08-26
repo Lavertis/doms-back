@@ -22,7 +22,7 @@ public class RefreshTokenController : BaseController
     /// </summary>
     [Authorize(Roles = RoleTypes.Admin)]
     [HttpGet("user/{userId:guid}")]
-    public async Task<ActionResult<IEnumerable<RefreshToken>>> GetRefreshTokensByUserId(Guid userId)
+    public async Task<ActionResult<IEnumerable<RefreshToken>>> GetRefreshTokensByUserIdAsync(Guid userId)
         => CreateResponse(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId: userId)));
 
     /// <summary> 

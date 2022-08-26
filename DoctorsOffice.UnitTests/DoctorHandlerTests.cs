@@ -186,7 +186,7 @@ public class DoctorHandlerTests : UnitTest
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
         // act
-        var result = await handler.Handle(command, default);
+        await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakeAppUserManager.PasswordHasher.HashPassword(A<AppUser>.Ignored, A<string>.Ignored))
@@ -253,7 +253,7 @@ public class DoctorHandlerTests : UnitTest
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
         // act
-        var result = await handler.Handle(command, default);
+        await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakeAppUserManager.UpdateAsync(A<AppUser>.Ignored))
@@ -273,14 +273,14 @@ public class DoctorHandlerTests : UnitTest
         var handler = new DeleteDoctorByIdHandler(_fakeDoctorRepository);
 
         // act
-        var result = await handler.Handle(command, default);
+        await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakeDoctorRepository.DeleteByIdAsync(A<Guid>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
-    public async Task DeleteDoctorById_DoctorWithSpecifiedIdDoesntExist_ThrowsNotFoundException()
+    public async Task DeleteDoctorById_DoctorWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var doctorId = Guid.NewGuid();

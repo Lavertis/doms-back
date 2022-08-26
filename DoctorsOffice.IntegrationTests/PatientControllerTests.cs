@@ -121,7 +121,7 @@ public class PatientControllerTests : IntegrationTest
         var createdPatient = DbContext.Patients
             .Include(p => p.AppUser)
             .ToList()
-            .First(p => p.AppUser.UserName == createPatientRequest.UserName)!;
+            .First(p => p.AppUser.UserName == createPatientRequest.UserName);
 
         createdPatient.AppUser.UserName.Should().Be(createPatientRequest.UserName);
         createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientRequest.UserName.ToUpper());
@@ -139,8 +139,8 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("UserName", "aa")]
     [InlineData("FirstName", "")]
     [InlineData("LastName", "")]
-    [InlineData("Email", "")]
-    [InlineData("Email", "aaaaaaa")]
+    [InlineData("Email", "not_correct_email")]
+    [InlineData("Email", "word")]
     [InlineData("PhoneNumber", "")]
     [InlineData("Password", "")]
     [InlineData("ConfirmPassword", "")]
@@ -414,7 +414,7 @@ public class PatientControllerTests : IntegrationTest
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
-        var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
+        hasher.HashPassword(new AppUser(), patientPassword);
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
@@ -465,7 +465,7 @@ public class PatientControllerTests : IntegrationTest
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
-        var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
+        hasher.HashPassword(new AppUser(), patientPassword);
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
@@ -669,8 +669,6 @@ public class PatientControllerTests : IntegrationTest
         // act
         var response = await client.PatchAsync($"{UrlPrefix}/current", content);
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -690,7 +688,7 @@ public class PatientControllerTests : IntegrationTest
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
-        var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
+        hasher.HashPassword(new AppUser(), patientPassword);
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
@@ -783,7 +781,7 @@ public class PatientControllerTests : IntegrationTest
 
         var hasher = new PasswordHasher<AppUser>();
         const string patientPassword = "oldPassword12345#";
-        var oldPasswordHash = hasher.HashPassword(new AppUser(), patientPassword);
+        hasher.HashPassword(new AppUser(), patientPassword);
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
@@ -871,7 +869,7 @@ public class PatientControllerTests : IntegrationTest
         var authenticatedPatientId =
             await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             DateOfBirth = DateTime.Parse("2000-07-10T04:12:34Z"),
             CurrentPassword = patientPassword

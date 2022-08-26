@@ -107,7 +107,7 @@ public class PatientHandlerTests : UnitTest
         var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService, Mapper);
 
         // act
-        var result = await handler.Handle(command, default);
+        await handler.Handle(command, default);
 
         // assert
         A.CallTo(() => _fakePatientRepository.CreateAsync(A<Patient>.Ignored))
@@ -160,7 +160,7 @@ public class PatientHandlerTests : UnitTest
         var handler = new UpdatePatientByIdHandler(_fakePatientRepository, _fakeAppUserManager, Mapper);
 
         // act
-        var result = await handler.Handle(updatePatientCommand, default);
+        await handler.Handle(updatePatientCommand, default);
 
         // assert
         A.CallTo(() => _fakeAppUserManager.PasswordHasher.HashPassword(A<AppUser>.Ignored, A<string>.Ignored))

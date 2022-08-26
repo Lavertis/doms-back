@@ -109,16 +109,17 @@ public class UserServiceTests : UnitTest
     }
 
     [Fact]
-    public async void UpdateUserById_RequestIsValid_UpdatesUser()
+    public async void UpdateUserByIdAsync_RequestIsValid_UpdatesUser()
     {
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
+        const string testUserName = "testUserName";
         var appUser = new AppUser
         {
             Id = Guid.NewGuid(),
-            UserName = "testUserName",
-            NormalizedUserName = "TESTUSERNAME",
+            UserName = testUserName,
+            NormalizedUserName = testUserName.ToUpper(),
             Email = "mail@mail.com",
             NormalizedEmail = "MAIL@MAIL.COM",
             EmailConfirmed = true,
@@ -163,16 +164,18 @@ public class UserServiceTests : UnitTest
     [InlineData("Email", "mail@mail.com")]
     [InlineData("PhoneNumber", "newPhoneNumber")]
     [InlineData("NewPassword", "newPassword")]
-    public async void UpdateUserById_SingleFieldInRequest_UpdatesRequestedField(string fieldName, string fieldValue)
+    public async void UpdateUserByIdAsync_SingleFieldInRequest_UpdatesRequestedField(string fieldName,
+        string fieldValue)
     {
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
+        const string testUserName = "testUserName";
         var appUser = new AppUser
         {
             Id = Guid.NewGuid(),
-            UserName = "testUserName",
-            NormalizedUserName = "TESTUSERNAME",
+            UserName = testUserName,
+            NormalizedUserName = testUserName.ToUpper(),
             Email = "mail@mail.com",
             NormalizedEmail = "MAIL@MAIL.COM",
             EmailConfirmed = true,
@@ -214,18 +217,19 @@ public class UserServiceTests : UnitTest
 
     [Theory]
     [InlineData("UserName", "a")]
-    [InlineData("Email", "mailmail.com")]
-    public async void UpdateUserById_SingleInvalidField_ReturnsBadRequest400StatusCode(string fieldName,
+    [InlineData("Email", "mail_mail.com")]
+    public async void UpdateUserByIdAsync_SingleInvalidField_ReturnsBadRequest400StatusCode(string fieldName,
         string fieldValue)
     {
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
+        const string testUserName = "testUserName";
         var appUser = new AppUser
         {
             Id = Guid.NewGuid(),
-            UserName = "testUserName",
-            NormalizedUserName = "TESTUSERNAME",
+            UserName = testUserName,
+            NormalizedUserName = testUserName.ToUpper(),
             Email = "mail@mail.com",
             NormalizedEmail = "MAIL@MAIL.COM",
             EmailConfirmed = true,
@@ -255,7 +259,7 @@ public class UserServiceTests : UnitTest
     }
 
     [Fact]
-    public async void UpdateUserById_IdDoesntExist_ReturnsNotFound404StatusCode()
+    public async void UpdateUserByIdAsync_IdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         AppUser appUser = null!;
@@ -273,7 +277,7 @@ public class UserServiceTests : UnitTest
     }
 
     [Fact]
-    public async void UpdateUserById_RequestedUserNameIsAlreadyTaken_ReturnsBadRequest400StatusCode()
+    public async void UpdateUserByIdAsync_RequestedUserNameIsAlreadyTaken_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var hasher = new PasswordHasher<AppUser>();
@@ -295,14 +299,15 @@ public class UserServiceTests : UnitTest
     }
 
     [Fact]
-    public async void UpdateUserById_NewPasswordAndConfirmPasswordDontMatch_ReturnsBadRequest400StatusCode()
+    public async void UpdateUserByIdAsync_NewPasswordAndConfirmPasswordDontMatch_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
+        const string testUserName = "testUserName";
         var appUser = new AppUser
         {
-            Id = Guid.NewGuid(), UserName = "testUserName", NormalizedUserName = "TESTUSERSNAME",
+            Id = Guid.NewGuid(), UserName = testUserName, NormalizedUserName = testUserName.ToUpper(),
             PasswordHash = oldPasswordHash
         };
         var usersQueryable = new List<AppUser> {appUser}.AsQueryable().BuildMock();

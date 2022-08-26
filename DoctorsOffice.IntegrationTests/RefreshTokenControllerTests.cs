@@ -159,7 +159,7 @@ public class RefreshTokenControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task RevokeToken_TokenIsExpired_ReturnsBadRequestException()
+    public async Task RevokeToken_TokenIsExpired_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -185,7 +185,7 @@ public class RefreshTokenControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task RevokeToken_TokenIsRevoked_ReturnsBadRequestException()
+    public async Task RevokeToken_TokenIsRevoked_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();

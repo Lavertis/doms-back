@@ -610,9 +610,7 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointments = GetAppointments(3);
-
         var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
@@ -627,20 +625,11 @@ public class AppointmentHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task GetFilteredAppointmentsHandler_OnlyPageSizeIsProvided_ReturnsError()
+    public async Task GetFilteredAppointmentsHandler_OnlyPageSizeIsProvided_ReturnsBadRequest400StatusCode()
     {
         // arrange
         const int pageSize = 10;
         var appointments = GetAppointments(35);
-
-        const int expectedPageNumber = 1;
-        var expectedResponse = appointments
-            .Select(a => Mapper.Map<AppointmentSearchResponse>(a))
-            .Skip((expectedPageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter {PageSize = pageSize});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
@@ -651,20 +640,14 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
-    public async Task GetFilteredAppointmentsHandler_OnlyPageNumberIsProvided_ReturnsError()
+    public async Task GetFilteredAppointmentsHandler_OnlyPageNumberIsProvided_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var appointments = GetAppointments(35);
-
-        const int expectedPageNumber = 1;
-        var expectedPageSize = appointments.Count;
-        var expectedResponse = appointments
-            .Select(a => Mapper.Map<AppointmentSearchResponse>(a));
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter {PageNumber = 2});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
@@ -675,24 +658,16 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
-    public async Task GetFilteredAppointmentsHandler_PageSizeIsNegative_ReturnsError()
+    public async Task GetFilteredAppointmentsHandler_PageSizeIsNegative_ReturnsBadRequest400StatusCode()
     {
         // arrange
         const int pageSize = -10;
         const int pageNumber = 2;
         var appointments = GetAppointments(35);
-
-        const int expectedPageSize = 1;
-        var expectedResponse = appointments
-            .Select(a => Mapper.Map<AppointmentSearchResponse>(a))
-            .Skip((pageNumber - 1) * expectedPageSize)
-            .Take(expectedPageSize)
-            .ToList();
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request,
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
@@ -704,24 +679,17 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
-    public async Task GetFilteredAppointmentsHandler_PageNumberIsNegative_ReturnsError()
+    public async Task GetFilteredAppointmentsHandler_PageNumberIsNegative_ReturnsBadRequest400StatusCode()
     {
         // arrange
         const int pageSize = 10;
         const int pageNumber = -2;
         var appointments = GetAppointments(35);
 
-        const int expectedPageNumber = 1;
-        var expectedResponse = appointments
-            .Select(a => Mapper.Map<AppointmentSearchResponse>(a))
-            .Skip((expectedPageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request,
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
@@ -733,7 +701,7 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
@@ -770,20 +738,13 @@ public class AppointmentHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task GetFilteredAppointmentsHandler_PageNumberIsHigherThanNumberOfRecords_ReturnsError()
+    public async Task
+        GetFilteredAppointmentsHandler_PageNumberIsHigherThanNumberOfRecords_ReturnsBadRequest400StatusCode()
     {
         // arrange
         const int pageSize = 5;
         const int pageNumber = 20;
         var appointments = GetAppointments(pageNumber - 3);
-
-        const int expectedPageNumber = 4;
-        var expectedResponse = appointments
-            .Select(a => Mapper.Map<AppointmentSearchResponse>(a))
-            .Skip((expectedPageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-
         var request = new GetAppointmentsFilteredRequest();
         var query = new GetFilteredAppointmentsQuery(request,
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
@@ -795,7 +756,7 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]
@@ -833,7 +794,7 @@ public class AppointmentHandlerTests : UnitTest
         );
 
         // act
-        var result = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None);
 
         // assert
         A.CallTo(() => _fakeAppointmentRepository.CreateAsync(A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();
@@ -844,7 +805,7 @@ public class AppointmentHandlerTests : UnitTest
     [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("Status", "NonExistingStatus")]
     [InlineData("Type", "NonExistingType")]
-    public async Task CreateAppointmentHandler_ContainsNonExistingFieldValue_ReturnsNotFound404Exception(
+    public async Task CreateAppointmentHandler_ContainsNonExistingFieldValue_ReturnsNotFound404StatusCode(
         string fieldName, string fieldValue)
     {
         // arrange
@@ -968,7 +929,7 @@ public class AppointmentHandlerTests : UnitTest
         );
 
         // act
-        var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
+        await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
         A.CallTo(() => _fakeAppointmentRepository.UpdateAsync(A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();
@@ -1049,7 +1010,7 @@ public class AppointmentHandlerTests : UnitTest
         );
 
         // act
-        var result = await handler.Handle(updateAppointmentCommand, CancellationToken.None);
+        await handler.Handle(updateAppointmentCommand, CancellationToken.None);
 
         // assert
         A.CallTo(() => _fakeAppointmentRepository.UpdateAsync(A<Appointment>.Ignored)).MustHaveHappenedOnceExactly();

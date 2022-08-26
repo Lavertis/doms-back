@@ -484,7 +484,7 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdatePrescription_ValidRequest_UpdatesPrescription()
+    public async Task UpdatePrescriptionById_ValidRequest_UpdatesPrescription()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -533,7 +533,8 @@ public class PrescriptionControllerTests : IntegrationTest
     [Theory]
     [InlineData("Title", "NewTitle")]
     [InlineData("Description", "NewDescription")]
-    public async Task UpdatePrescription_SingleFieldProvided_UpdatesProvidedField(string fieldName, string fieldValue)
+    public async Task UpdatePrescriptionById_SingleFieldProvided_UpdatesProvidedField(string fieldName,
+        string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -578,7 +579,7 @@ public class PrescriptionControllerTests : IntegrationTest
     [InlineData("Description", "")]
     [InlineData("PatientId", "")]
     [InlineData("PatientId", "invalidGuid")]
-    public async Task UpdatePrescription_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
+    public async Task UpdatePrescriptionById_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -622,7 +623,7 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdatePrescription_DrugListNotNullAndEmpty_ReturnsBadRequest()
+    public async Task UpdatePrescriptionById_DrugListNotNullAndEmpty_ReturnsBadRequest()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -655,7 +656,7 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdatePrescription_NoAuthenticatedUser_ReturnsUnauthorized()
+    public async Task UpdatePrescriptionById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -681,7 +682,7 @@ public class PrescriptionControllerTests : IntegrationTest
     [Theory]
     [InlineData(RoleTypes.Admin)]
     [InlineData(RoleTypes.Patient)]
-    public async Task UpdatePrescription_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
+    public async Task UpdatePrescriptionById_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
         var client = await GetHttpClientAsync();

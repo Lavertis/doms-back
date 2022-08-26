@@ -69,7 +69,7 @@ public class AppointmentController : BaseController
     [HttpGet("patient/current/search")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<PagedResponse<AppointmentSearchResponse>>>
-        GetAppointmentsForAuthenticatedPatientFiltered(
+        GetAppointmentsForAuthenticatedPatientFilteredAsync(
             DateTime? dateStart,
             DateTime? dateEnd,
             string? type,

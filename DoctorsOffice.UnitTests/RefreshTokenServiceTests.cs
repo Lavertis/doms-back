@@ -15,14 +15,12 @@ namespace DoctorsOffice.UnitTests;
 public class RefreshTokenServiceTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
-    private readonly IOptions<JwtSettings> _fakeJwtSettings;
     private readonly RefreshTokenService _refreshTokenService;
 
     public RefreshTokenServiceTests()
     {
         _fakeAppUserManager = A.Fake<AppUserManager>();
-        _fakeJwtSettings = A.Fake<IOptions<JwtSettings>>();
-        _refreshTokenService = new RefreshTokenService(_fakeAppUserManager, _fakeJwtSettings);
+        _refreshTokenService = new RefreshTokenService(_fakeAppUserManager, A.Fake<IOptions<JwtSettings>>());
     }
 
     [Fact]
@@ -85,16 +83,15 @@ public class RefreshTokenServiceTests : UnitTest
     }
 
     [Fact]
-    public async Task GenerateRefreshToken_ReturnsRefreshToken()
+    public async Task GenerateRefreshTokenAsync_ReturnsRefreshToken()
     {
         // arrange
         const string ipAddress = "dummyIpAddress";
-        var cancellationToken = A.Dummy<CancellationToken>();
         var dummyUsersQueryable = A.CollectionOfDummy<AppUser>(1).AsQueryable().BuildMock();
         A.CallTo(() => _fakeAppUserManager.Users).Returns(dummyUsersQueryable);
 
         // act
-        var result = await _refreshTokenService.GenerateRefreshTokenAsync(ipAddress, cancellationToken);
+        var result = await _refreshTokenService.GenerateRefreshTokenAsync(ipAddress, CancellationToken.None);
 
         // assert
         result.Should().NotBeNull();

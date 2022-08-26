@@ -146,7 +146,7 @@ public class PrescriptionHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task CreatePrescription_ValidRequest_CreatesPrescription()
+    public async Task CreatePrescriptionHandler_ValidRequest_CreatesPrescription()
     {
         // arrange
         var expectedPrescription = new Prescription
@@ -181,7 +181,7 @@ public class PrescriptionHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task UpdatePrescription_ValidRequest_UpdatesPrescription()
+    public async Task UpdatePrescriptionHandler_ValidRequest_UpdatesPrescription()
     {
         // arrange
         var prescriptionId = Guid.NewGuid();
@@ -232,7 +232,7 @@ public class PrescriptionHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task UpdatePrescription_PrescriptionWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
+    public async Task UpdatePrescriptionHandler_PrescriptionWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var prescriptionsQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();

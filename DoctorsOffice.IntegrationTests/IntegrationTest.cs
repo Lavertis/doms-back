@@ -27,9 +27,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     private const string TestPatientPassword = "PatientPassword123!";
 
     private readonly WebApplicationFactory<Program> _factory;
+    protected readonly IMapper Mapper = AutoMapperModule.CreateAutoMapper();
     private AppUserManager _appUserManager = null!;
     protected AppDbContext DbContext = null!;
-    protected IMapper Mapper = AutoMapperModule.CreateAutoMapper();
 
     protected IntegrationTest(WebApplicationFactory<Program> factory)
     {

@@ -10,10 +10,10 @@ public readonly record struct AppointmentStatuses
 
     public static readonly Dictionary<string, List<string>> AllowedTransitions = new()
     {
-        { Pending, new List<string> { Pending, Accepted, Rejected } },
-        { Accepted, new List<string> { Accepted, Completed, Cancelled } },
-        { Rejected, new List<string> { Rejected } },
-        { Cancelled, new List<string> { Cancelled } },
-        { Completed, new List<string> { Completed } },
+        {Pending, new List<string> {Pending, Accepted, Rejected}},
+        {Accepted, new List<string> {Accepted, Completed, Cancelled}},
+        {Rejected, new List<string> {Rejected}},
+        {Cancelled, new List<string> {Cancelled}},
+        {Completed, new List<string> {Completed}},
     };
 }
