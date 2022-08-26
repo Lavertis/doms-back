@@ -29,5 +29,5 @@ public class UserController : BaseController
     /// </summary>
     [HttpGet("{userId:guid}")]
     public async Task<ActionResult<UserResponse>> GetUserByIdAsync(Guid userId)
-        => CreateResponse(await Mediator.Send(new GetUserByIdQuery(userId: userId)));
+        => CreateResponse(await Mediator.Send(new GetUserByIdQuery(userId)));
 }

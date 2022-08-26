@@ -26,7 +26,7 @@ public class DoctorController : BaseController
     [HttpGet("current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> GetAuthenticatedDoctorAsync()
-        => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(doctorId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(JwtSubject())));
 
     /// <summary>
     /// Returns all doctors. Only for admins
@@ -51,7 +51,7 @@ public class DoctorController : BaseController
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<DoctorResponse>> UpdateAuthenticatedDoctorAsync(
         UpdateAuthenticatedDoctorRequest request)
-        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request, JwtSubject())));
 
     /// <summary>
     /// Updates doctor by id. Only for admins
@@ -59,7 +59,7 @@ public class DoctorController : BaseController
     [HttpPatch("{doctorId:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<DoctorResponse>> UpdateDoctorByIdAsync(Guid doctorId, UpdateDoctorRequest request)
-        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request: request, doctorId: doctorId)));
+        => CreateResponse(await Mediator.Send(new UpdateDoctorByIdCommand(request, doctorId)));
 
     /// <summary>
     /// Deletes doctor by id. Only for admins
@@ -67,5 +67,5 @@ public class DoctorController : BaseController
     [HttpDelete("{doctorId:guid}")]
     [Authorize(Roles = RoleTypes.Admin)]
     public async Task<ActionResult<Unit>> DeleteDoctorByIdAsync(Guid doctorId)
-        => CreateResponse(await Mediator.Send(new DeleteDoctorByIdCommand(doctorId: doctorId)));
+        => CreateResponse(await Mediator.Send(new DeleteDoctorByIdCommand(doctorId)));
 }

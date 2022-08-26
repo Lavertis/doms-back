@@ -23,7 +23,7 @@ public class RefreshTokenController : BaseController
     [Authorize(Roles = RoleTypes.Admin)]
     [HttpGet("user/{userId:guid}")]
     public async Task<ActionResult<IEnumerable<RefreshToken>>> GetRefreshTokensByUserIdAsync(Guid userId)
-        => CreateResponse(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId: userId)));
+        => CreateResponse(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId)));
 
     /// <summary> 
     /// Revokes specified refresh token.
@@ -31,5 +31,5 @@ public class RefreshTokenController : BaseController
     [AllowAnonymous]
     [HttpPost("revoke")]
     public async Task<ActionResult<Unit>> RevokeTokenAsync(RevokeRefreshTokenRequest request)
-        => CreateResponse(await Mediator.Send(new RevokeRefreshTokenCommand(request: request, ipAddress: IpAddress())));
+        => CreateResponse(await Mediator.Send(new RevokeRefreshTokenCommand(request, IpAddress())));
 }

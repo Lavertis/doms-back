@@ -6,14 +6,7 @@ namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentById
 
 public class GetAppointmentByIdQuery : IRequest<HttpResult<AppointmentResponse>>
 {
-    public readonly Guid AppointmentId;
-    public readonly string RoleName;
-    public readonly Guid UserId;
-
-    public GetAppointmentByIdQuery(Guid appointmentId, Guid userId, string roleName)
-    {
-        AppointmentId = appointmentId;
-        UserId = userId;
-        RoleName = roleName;
-    }
+    public Guid AppointmentId { get; set; }
+    public string RoleName { get; set; } = null!;
+    public Guid UserId { get; set; }
 }

@@ -40,7 +40,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
     {
         var result = new HttpResult<AppointmentResponse>();
 
-        switch (request.Role)
+        switch (request.RoleName)
         {
             case RoleTypes.Doctor when request.DoctorId != request.UserId:
                 return result

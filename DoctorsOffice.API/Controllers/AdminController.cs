@@ -22,14 +22,14 @@ public class AdminController : BaseController
     /// </summary>
     [HttpGet("current")]
     public async Task<ActionResult<AdminResponse>> GetAuthenticatedAdminAsync()
-        => CreateResponse(await Mediator.Send(new GetAdminByIdQuery(adminId: JwtSubject())));
+        => CreateResponse(await Mediator.Send(new GetAdminByIdQuery(JwtSubject())));
 
     /// <summary>
     /// Returns admin with specified id. Only for admins.
     /// </summary>
     [HttpGet("{adminId:guid}")]
     public async Task<ActionResult<AdminResponse>> GetAdminByIdAsync(Guid adminId)
-        => CreateResponse(await Mediator.Send(new GetAdminByIdQuery(adminId: adminId)));
+        => CreateResponse(await Mediator.Send(new GetAdminByIdQuery(adminId)));
 
     /// <summary>
     /// Returns all admins. Only for admins.

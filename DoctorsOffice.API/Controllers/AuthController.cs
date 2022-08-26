@@ -22,12 +22,12 @@ public class AuthController : BaseController
     /// </summary>
     [HttpPost("authenticate")]
     public async Task<ActionResult<AuthenticateResponse>> AuthenticateAsync(AuthenticateRequest request)
-        => CreateResponse(await Mediator.Send(new AuthenticateCommand(request: request, ipAddress: IpAddress())));
+        => CreateResponse(await Mediator.Send(new AuthenticateCommand(request, IpAddress())));
 
     /// <summary>
     /// Returns a new pair of access token and refresh token by current refresh token.
     /// </summary>
     [HttpPost("refresh-token")]
     public async Task<ActionResult<AuthenticateResponse>> RefreshTokenAsync(RefreshTokenRequest request)
-        => CreateResponse(await Mediator.Send(new RefreshTokenCommand(request: request, ipAddress: IpAddress())));
+        => CreateResponse(await Mediator.Send(new RefreshTokenCommand(request, IpAddress())));
 }

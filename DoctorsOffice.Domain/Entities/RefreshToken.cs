@@ -7,7 +7,7 @@ namespace DoctorsOffice.Domain.Entities;
 [Table("RefreshTokens")]
 public class RefreshToken : BaseEntity
 {
-    public string Token { get; set; } = default!;
+    public string Token { get; set; } = null!;
     public DateTime ExpiresAt { get; set; }
     public string? CreatedByIp { get; set; }
     public DateTime? RevokedAt { get; set; }

@@ -6,8 +6,8 @@ namespace DoctorsOffice.Domain.Entities;
 [Table("Prescriptions")]
 public class Prescription : BaseEntity
 {
-    public string Title { get; set; } = default!;
-    public string Description { get; set; } = default!;
+    public string Title { get; set; } = null!;
+    public string Description { get; set; } = null!;
     public Doctor Doctor { get; set; } = default!;
     public Guid DoctorId { get; set; }
     public Patient Patient { get; set; } = default!;

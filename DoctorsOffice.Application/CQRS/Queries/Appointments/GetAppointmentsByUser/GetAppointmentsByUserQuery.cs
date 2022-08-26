@@ -6,12 +6,6 @@ namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentsByU
 
 public class GetAppointmentsByUserQuery : IRequest<HttpResult<IEnumerable<AppointmentResponse>>>
 {
-    public readonly string Role;
-    public readonly Guid UserId;
-
-    public GetAppointmentsByUserQuery(Guid userId, string role)
-    {
-        UserId = userId;
-        Role = role;
-    }
+    public string RoleName { get; set; } = null!;
+    public Guid UserId { get; set; }
 }

@@ -45,7 +45,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        switch (request.Role)
+        switch (request.RoleName)
         {
             case RoleTypes.Doctor when appointmentToUpdate.DoctorId != request.UserId:
                 return result
@@ -58,7 +58,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         }
 
         if (!string.IsNullOrEmpty(request.Status) &&
-            request.Role == RoleTypes.Doctor &&
+            request.RoleName == RoleTypes.Doctor &&
             !AppointmentStatuses.AllowedTransitions[appointmentToUpdate.Status.Name].Contains(request.Status))
         {
             return result

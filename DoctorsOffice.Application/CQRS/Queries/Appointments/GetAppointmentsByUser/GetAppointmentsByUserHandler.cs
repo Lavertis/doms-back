@@ -26,7 +26,7 @@ public class GetAppointmentsByUserHandler
     {
         var result = new HttpResult<IEnumerable<AppointmentResponse>>();
 
-        return request.Role switch
+        return request.RoleName switch
         {
             RoleTypes.Doctor => result.WithValue(await GetDoctorAppointments(request.UserId, cancellationToken)),
             RoleTypes.Patient => result.WithValue(await GetPatientAppointments(request.UserId, cancellationToken)),

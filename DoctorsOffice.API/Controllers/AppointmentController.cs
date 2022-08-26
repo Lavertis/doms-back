@@ -28,7 +28,11 @@ public class AppointmentController : BaseController
     [HttpGet("user/current")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAllAppointmentsForAuthenticatedUserAsync()
-        => CreateResponse(await Mediator.Send(new GetAppointmentsByUserQuery(userId: JwtSubject(), role: JwtRole())));
+        => CreateResponse(await Mediator.Send(new GetAppointmentsByUserQuery
+        {
+            UserId = JwtSubject(),
+            RoleName = JwtRole()
+        }));
 
     /// <summary>
     /// Returns appointment by id. User can only get owned appointment. For doctors and patients
@@ -36,9 +40,12 @@ public class AppointmentController : BaseController
     [HttpGet("user/current/{appointmentId:guid}")]
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> GetAppointmentByIdAsync(Guid appointmentId)
-        => CreateResponse(await Mediator.Send(new GetAppointmentByIdQuery(
-            appointmentId: appointmentId, userId: JwtSubject(), roleName: JwtRole()
-        )));
+        => CreateResponse(await Mediator.Send(new GetAppointmentByIdQuery
+        {
+            AppointmentId = appointmentId,
+            UserId = JwtSubject(),
+            RoleName = JwtRole()
+        }));
 
     /// <summary>
     /// Returns all appointments matching search criteria sorted by date. Only for doctors
@@ -52,16 +59,15 @@ public class AppointmentController : BaseController
         string? type,
         string? status,
         [FromQuery] PaginationFilter paginationFilter)
-        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
-            new GetAppointmentsFilteredRequest
-            {
-                DateStart = dateStart,
-                DateEnd = dateEnd,
-                Type = type,
-                Status = status,
-                PatientId = patientId,
-                DoctorId = JwtSubject()
-            }, paginationFilter)));
+        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(paginationFilter)
+        {
+            DateStart = dateStart,
+            DateEnd = dateEnd,
+            Type = type,
+            Status = status,
+            PatientId = patientId,
+            DoctorId = JwtSubject()
+        }));
 
     /// <summary>
     /// Returns appointments for authenticated patient matching search criteria sorted by date. Only for patients
@@ -75,15 +81,14 @@ public class AppointmentController : BaseController
             string? type,
             string? status,
             [FromQuery] PaginationFilter paginationFilter)
-        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(
-            new GetAppointmentsFilteredRequest
-            {
-                DateStart = dateStart,
-                DateEnd = dateEnd,
-                Type = type,
-                Status = status,
-                PatientId = JwtSubject()
-            }, paginationFilter)));
+        => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery(paginationFilter)
+        {
+            DateStart = dateStart,
+            DateEnd = dateEnd,
+            Type = type,
+            Status = status,
+            PatientId = JwtSubject()
+        }));
 
     /// <summary>
     /// Creates new appointment. Only for doctors
@@ -91,12 +96,12 @@ public class AppointmentController : BaseController
     [HttpPost("doctor/current")]
     [Authorize(Roles = RoleTypes.Doctor)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentAsync(CreateAppointmentRequest request)
-        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(
-            request: request,
-            status: AppointmentStatuses.Accepted,
-            role: RoleTypes.Doctor,
-            userId: JwtSubject()
-        )));
+        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(request)
+        {
+            RoleName = RoleTypes.Doctor,
+            UserId = JwtSubject(),
+            Status = AppointmentStatuses.Accepted
+        }));
 
     /// <summary>
     /// Creates appointment request. Only for patients
@@ -104,12 +109,12 @@ public class AppointmentController : BaseController
     [HttpPost("patient/current/request")]
     [Authorize(Roles = RoleTypes.Patient)]
     public async Task<ActionResult<AppointmentResponse>> CreateAppointmentRequestAsync(CreateAppointmentRequest request)
-        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(
-            request: request,
-            status: AppointmentStatuses.Pending,
-            role: RoleTypes.Patient,
-            userId: JwtSubject()
-        )));
+        => CreateResponse(await Mediator.Send(new CreateAppointmentCommand(request)
+        {
+            RoleName = RoleTypes.Patient,
+            UserId = JwtSubject(),
+            Status = AppointmentStatuses.Pending
+        }));
 
     /// <summary>
     /// Updates appointment. For patients and doctors
@@ -118,7 +123,10 @@ public class AppointmentController : BaseController
     [Authorize(Roles = $"{RoleTypes.Doctor}, {RoleTypes.Patient}")]
     public async Task<ActionResult<AppointmentResponse>> UpdateAppointmentByIdAsync(
         UpdateAppointmentRequest request, Guid appointmentId)
-        => CreateResponse(await Mediator.Send(new UpdateAppointmentCommand(
-            request: request, appointmentId: appointmentId, userId: JwtSubject(), role: JwtRole()
-        )));
+        => CreateResponse(await Mediator.Send(new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = appointmentId,
+            UserId = JwtSubject(),
+            RoleName = JwtRole()
+        }));
 }

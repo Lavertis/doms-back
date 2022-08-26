@@ -7,7 +7,7 @@ namespace DoctorsOffice.Domain.Entities;
 public class Appointment : BaseEntity
 {
     public DateTime Date { get; set; }
-    public string Description { get; set; } = default!;
+    public string Description { get; set; } = null!;
     public virtual Patient Patient { get; set; } = default!;
     public virtual Guid PatientId { get; set; }
     public virtual Doctor Doctor { get; set; } = default!;

@@ -5,5 +5,5 @@ namespace DoctorsOffice.Domain.Entities;
 [Table("AppointmentStatuses")]
 public class AppointmentStatus : BaseEntity
 {
-    public string Name { get; set; } = default!;
+    public string Name { get; set; } = null!;
 }

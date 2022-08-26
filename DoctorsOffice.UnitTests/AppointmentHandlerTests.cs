@@ -50,7 +50,7 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = appointmentsQueryable.Select(a => Mapper.Map<AppointmentResponse>(a));
 
-        var query = new GetAppointmentsByUserQuery(patientId, RoleTypes.Patient);
+        var query = new GetAppointmentsByUserQuery {UserId = patientId, RoleName = RoleTypes.Patient};
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -68,7 +68,7 @@ public class AppointmentHandlerTests : UnitTest
         var emptyAppointmentQueryable = A.CollectionOfDummy<Appointment>(0).BuildMock();
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(emptyAppointmentQueryable);
 
-        var query = new GetAppointmentsByUserQuery(patientId, RoleTypes.Patient);
+        var query = new GetAppointmentsByUserQuery {UserId = patientId, RoleName = RoleTypes.Patient};
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -89,7 +89,7 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = appointmentsQueryable.Select(a => Mapper.Map<AppointmentResponse>(a));
 
-        var query = new GetAppointmentsByUserQuery(doctorId, RoleTypes.Doctor);
+        var query = new GetAppointmentsByUserQuery {UserId = doctorId, RoleName = RoleTypes.Doctor};
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -109,7 +109,7 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(emptyAppointmentQueryable);
 
-        var query = new GetAppointmentsByUserQuery(doctorId, RoleTypes.Doctor);
+        var query = new GetAppointmentsByUserQuery {UserId = doctorId, RoleName = RoleTypes.Doctor};
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -135,7 +135,12 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = Mapper.Map<AppointmentResponse>(appointment);
 
-        var query = new GetAppointmentByIdQuery(appointment.Id, Guid.NewGuid(), RoleTypes.Admin);
+        var query = new GetAppointmentByIdQuery
+        {
+            AppointmentId = appointment.Id,
+            UserId = Guid.NewGuid(),
+            RoleName = RoleTypes.Admin
+        };
         var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository, _fakeAppointmentService, Mapper);
 
         // act
@@ -153,7 +158,12 @@ public class AppointmentHandlerTests : UnitTest
         var appointmentsQueryable = A.CollectionOfDummy<Appointment>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
 
-        var query = new GetAppointmentByIdQuery(nonExistingAppointmentId, Guid.NewGuid(), string.Empty);
+        var query = new GetAppointmentByIdQuery
+        {
+            AppointmentId = nonExistingAppointmentId,
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
         var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository, _fakeAppointmentService, Mapper);
 
         // act
@@ -171,8 +181,7 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
 
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -211,12 +220,11 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             DateStart = DateTime.UtcNow.AddDays(1),
             DateEnd = DateTime.UtcNow.Subtract(1.Days())
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -235,11 +243,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidType = "InvalidType";
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             Type = invalidType
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -258,11 +265,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidStatus = "InvalidStatus";
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             Status = invalidStatus
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -280,12 +286,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidPatientId = Guid.NewGuid();
-
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             PatientId = invalidPatientId
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -303,12 +307,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidDoctorId = Guid.NewGuid();
-
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             DoctorId = invalidDoctorId
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -355,12 +357,11 @@ public class AppointmentHandlerTests : UnitTest
         var dateStart = DateTime.UtcNow.AddDays(1);
         var dateEnd = DateTime.UtcNow.AddDays(2);
 
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             DateStart = dateStart,
             DateEnd = dateEnd
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -412,11 +413,10 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             Type = selectedType.Name
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -467,12 +467,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedStatus = statuses[1];
-
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             Status = selectedStatus.Name
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -529,12 +527,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedPatient = patients[1];
-
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             PatientId = selectedPatient.Id
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -588,12 +584,10 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedDoctor = doctors[1];
-
-        var request = new GetAppointmentsFilteredRequest
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
         {
             DoctorId = selectedDoctor.Id
         };
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         // act
@@ -611,8 +605,7 @@ public class AppointmentHandlerTests : UnitTest
         // arrange
         var appointments = GetAppointments(3);
         var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter());
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter());
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -630,8 +623,7 @@ public class AppointmentHandlerTests : UnitTest
         // arrange
         const int pageSize = 10;
         var appointments = GetAppointments(35);
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter {PageSize = pageSize});
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter {PageSize = pageSize});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -648,8 +640,7 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointments = GetAppointments(35);
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request, new PaginationFilter {PageNumber = 2});
+        var query = new GetFilteredAppointmentsQuery(new PaginationFilter {PageNumber = 2});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -668,8 +659,7 @@ public class AppointmentHandlerTests : UnitTest
         const int pageSize = -10;
         const int pageNumber = 2;
         var appointments = GetAppointments(35);
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request,
+        var query = new GetFilteredAppointmentsQuery(
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
@@ -690,8 +680,7 @@ public class AppointmentHandlerTests : UnitTest
         const int pageNumber = -2;
         var appointments = GetAppointments(35);
 
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request,
+        var query = new GetFilteredAppointmentsQuery(
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
@@ -721,8 +710,7 @@ public class AppointmentHandlerTests : UnitTest
             .Take(expectedPageSize)
             .ToList();
 
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request,
+        var query = new GetFilteredAppointmentsQuery(
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
@@ -745,8 +733,7 @@ public class AppointmentHandlerTests : UnitTest
         const int pageSize = 5;
         const int pageNumber = 20;
         var appointments = GetAppointments(pageNumber - 3);
-        var request = new GetAppointmentsFilteredRequest();
-        var query = new GetFilteredAppointmentsQuery(request,
+        var query = new GetFilteredAppointmentsQuery(
             new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
@@ -783,7 +770,12 @@ public class AppointmentHandlerTests : UnitTest
             Type = type.Name,
             Description = ""
         };
-        var command = new CreateAppointmentCommand(request, status.Name, string.Empty, Guid.NewGuid());
+        var command = new CreateAppointmentCommand(request)
+        {
+            Status = status.Name,
+            RoleName = string.Empty,
+            UserId = Guid.NewGuid()
+        };
         var handler = new CreateAppointmentHandler(
             _fakeAppointmentRepository,
             _fakeDoctorRepository,
@@ -873,9 +865,23 @@ public class AppointmentHandlerTests : UnitTest
 
         CreateAppointmentCommand command;
         if (fieldName == "Status")
-            command = new CreateAppointmentCommand(request, fieldValue, string.Empty, Guid.NewGuid());
+        {
+            command = new CreateAppointmentCommand(request)
+            {
+                UserId = Guid.NewGuid(),
+                Status = fieldValue,
+                RoleName = string.Empty
+            };
+        }
         else
-            command = new CreateAppointmentCommand(request, status.Name, string.Empty, Guid.NewGuid());
+        {
+            command = new CreateAppointmentCommand(request)
+            {
+                UserId = Guid.NewGuid(),
+                Status = status.Name,
+                RoleName = string.Empty
+            };
+        }
 
         var handler = new CreateAppointmentHandler(
             _fakeAppointmentRepository,
@@ -914,12 +920,12 @@ public class AppointmentHandlerTests : UnitTest
             Description = "newDescription",
             Status = newAppointmentStatus.Name
         };
-        var updateAppointmentCommand = new UpdateAppointmentCommand(
-            request: request,
-            appointmentId: appointment.Id,
-            userId: Guid.NewGuid(),
-            role: string.Empty
-        );
+        var updateAppointmentCommand = new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = appointment.Id,
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
 
         var handler = new UpdateAppointmentHandler(
             _fakeAppointmentRepository,
@@ -949,12 +955,12 @@ public class AppointmentHandlerTests : UnitTest
             Description = "newDescription",
             Status = "new status"
         };
-        var updateAppointmentCommand = new UpdateAppointmentCommand(
-            request: request,
-            appointmentId: Guid.NewGuid(),
-            userId: Guid.NewGuid(),
-            role: string.Empty
-        );
+        var updateAppointmentCommand = new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
 
         var handler = new UpdateAppointmentHandler(
             _fakeAppointmentRepository,
@@ -990,12 +996,12 @@ public class AppointmentHandlerTests : UnitTest
         else
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(request, fieldValue);
 
-        var updateAppointmentCommand = new UpdateAppointmentCommand(
-            request: request,
-            appointmentId: appointment.Id,
-            userId: Guid.NewGuid(),
-            role: string.Empty
-        );
+        var updateAppointmentCommand = new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = appointment.Id,
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
         A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
@@ -1029,12 +1035,12 @@ public class AppointmentHandlerTests : UnitTest
             Type = "nonExistingType",
             Description = ""
         };
-        var updateAppointmentCommand = new UpdateAppointmentCommand(
-            request: request,
-            appointmentId: Guid.NewGuid(),
-            userId: Guid.NewGuid(),
-            role: string.Empty
-        );
+        var updateAppointmentCommand = new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
         A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
@@ -1069,12 +1075,12 @@ public class AppointmentHandlerTests : UnitTest
             Status = "nonExistingStatus",
             Description = ""
         };
-        var updateAppointmentCommand = new UpdateAppointmentCommand(
-            request: request,
-            appointmentId: Guid.NewGuid(),
-            userId: Guid.NewGuid(),
-            role: string.Empty
-        );
+        var updateAppointmentCommand = new UpdateAppointmentCommand(request)
+        {
+            AppointmentId = Guid.NewGuid(),
+            UserId = Guid.NewGuid(),
+            RoleName = string.Empty
+        };
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
         AppointmentStatus? nullStatus = null;
