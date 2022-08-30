@@ -8,13 +8,7 @@ namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppoint
 
 public class GetFilteredAppointmentsQuery : IRequest<HttpResult<PagedResponse<AppointmentSearchResponse>>>
 {
-    public readonly PaginationFilter PaginationFilter;
-
-    public GetFilteredAppointmentsQuery(PaginationFilter paginationFilter)
-    {
-        PaginationFilter = paginationFilter;
-    }
-
+    public PaginationFilter? PaginationFilter { get; set; }
     public DateTime? DateEnd { get; set; }
     public DateTime? DateStart { get; set; }
     public Guid? DoctorId { get; set; }

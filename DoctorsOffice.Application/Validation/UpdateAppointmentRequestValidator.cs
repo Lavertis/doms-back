@@ -42,7 +42,7 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
             RuleFor(e => e.Status)
                 .Must(status => status == AppointmentStatuses.Cancelled)
                 .WithMessage("Only allowed status is Cancelled")
-                .When(e => userRole == RoleTypes.Patient);
+                .When(e => userRole == Roles.Patient);
         });
     }
 }

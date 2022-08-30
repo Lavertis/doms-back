@@ -44,8 +44,8 @@ public class RefreshTokenControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Doctor)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Doctor)]
+    [InlineData(Roles.Patient)]
     public async Task GetRefreshTokensByUserId_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange

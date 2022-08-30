@@ -59,9 +59,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         var roles = new List<AppRole>
         {
-            new() {Name = RoleTypes.Admin, NormalizedName = RoleTypes.Admin.ToUpper(), Id = adminRoleId},
-            new() {Name = RoleTypes.Patient, NormalizedName = RoleTypes.Patient.ToUpper(), Id = Guid.NewGuid()},
-            new() {Name = RoleTypes.Doctor, NormalizedName = RoleTypes.Doctor.ToUpper(), Id = Guid.NewGuid()}
+            new() { Name = Domain.Enums.Roles.Admin, NormalizedName = Domain.Enums.Roles.Admin.ToUpper(), Id = adminRoleId },
+            new() { Name = Domain.Enums.Roles.Patient, NormalizedName = Domain.Enums.Roles.Patient.ToUpper(), Id = Guid.NewGuid() },
+            new() { Name = Domain.Enums.Roles.Doctor, NormalizedName = Domain.Enums.Roles.Doctor.ToUpper(), Id = Guid.NewGuid() }
         };
         builder.Entity<AppRole>().HasData(roles);
     }
@@ -103,9 +103,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
         foreach (var entityEntry in entityEntries)
         {
             var now = DateTime.UtcNow;
-            ((BaseEntity) entityEntry.Entity).UpdatedAt = now;
+            ((BaseEntity)entityEntry.Entity).UpdatedAt = now;
             if (entityEntry.State == EntityState.Added)
-                ((BaseEntity) entityEntry.Entity).CreatedAt = now;
+                ((BaseEntity)entityEntry.Entity).CreatedAt = now;
         }
     }
 
@@ -113,7 +113,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     {
         var appointmentTypeFields = typeof(AppointmentTypes).GetFields();
         var appointmentTypes = appointmentTypeFields
-            .Select(appointmentTypeField => new AppointmentType {Id = Guid.NewGuid(), Name = appointmentTypeField.Name})
+            .Select(appointmentTypeField => new AppointmentType { Id = Guid.NewGuid(), Name = appointmentTypeField.Name })
             .ToList();
         builder.Entity<AppointmentType>().HasData(appointmentTypes);
     }
@@ -124,7 +124,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
             typeof(AppointmentStatuses).GetFields().Where(field => field.Name != "AllowedTransitions");
         var appointmentStatuses = appointmentStatusFields
             .Select(appointmentStatusField => new AppointmentStatus
-                {Id = Guid.NewGuid(), Name = appointmentStatusField.Name})
+                { Id = Guid.NewGuid(), Name = appointmentStatusField.Name })
             .ToList();
         builder.Entity<AppointmentStatus>().HasData(appointmentStatuses);
     }

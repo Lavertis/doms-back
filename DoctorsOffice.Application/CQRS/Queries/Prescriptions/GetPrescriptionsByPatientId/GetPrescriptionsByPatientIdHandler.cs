@@ -2,6 +2,7 @@ using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +10,7 @@ namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsB
 
 public class
     GetPrescriptionsByPatientIdHandler
-    : IRequestHandler<GetPrescriptionsByPatientIdQuery, HttpResult<IEnumerable<PrescriptionResponse>>>
+    : IRequestHandler<GetPrescriptionsByPatientIdQuery, HttpResult<PagedResponse<PrescriptionResponse>>>
 {
     private readonly IMapper _mapper;
     private readonly IPrescriptionRepository _prescriptionRepository;
@@ -20,19 +21,16 @@ public class
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<PrescriptionResponse>>> Handle(
+    public Task<HttpResult<PagedResponse<PrescriptionResponse>>> Handle(
         GetPrescriptionsByPatientIdQuery request, CancellationToken cancellationToken)
     {
-        var result = new HttpResult<IEnumerable<PrescriptionResponse>>();
+        var prescriptionResponsesQueryable = _prescriptionRepository.GetAll()
+            .Include(p => p.DrugItems)
+            .Where(p => p.PatientId == request.PatientId)
+            .Select(p => _mapper.Map<PrescriptionResponse>(p));
 
-        var prescriptions = _prescriptionRepository.GetAll()
-            .Include(prescription => prescription.DrugItems)
-            .Where(prescription => prescription.PatientId == request.PatientId);
-
-        var prescriptionResponses = await prescriptions
-            .Select(p => _mapper.Map<PrescriptionResponse>(p))
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        return result.WithValue(prescriptionResponses);
+        return Task.FromResult(
+            PaginationUtils.CreatePagedHttpResult(prescriptionResponsesQueryable, request.PaginationFilter)
+        );
     }
 }

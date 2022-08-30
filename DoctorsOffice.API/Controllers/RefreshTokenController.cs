@@ -20,7 +20,7 @@ public class RefreshTokenController : BaseController
     /// <summary>
     /// Returns refresh tokens for user by id. Only for admins.
     /// </summary>
-    [Authorize(Roles = RoleTypes.Admin)]
+    [Authorize(Roles = Roles.Admin)]
     [HttpGet("user/{userId:guid}")]
     public async Task<ActionResult<IEnumerable<RefreshToken>>> GetRefreshTokensByUserIdAsync(Guid userId)
         => CreateResponse(await Mediator.Send(new GetRefreshTokensByUserIdQuery(userId)));

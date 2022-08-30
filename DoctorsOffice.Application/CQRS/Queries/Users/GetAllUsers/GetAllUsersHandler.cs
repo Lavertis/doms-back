@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Domain.Wrappers;
 using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Users.GetAllUsers;
 
-public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, HttpResult<IEnumerable<UserResponse>>>
+public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, HttpResult<PagedResponse<UserResponse>>>
 {
     private readonly AppUserManager _appUserManager;
     private readonly IMapper _mapper;
@@ -18,12 +18,12 @@ public class GetAllUsersHandler : IRequestHandler<GetAllUsersQuery, HttpResult<I
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<UserResponse>>> Handle(GetAllUsersQuery request,
+    public Task<HttpResult<PagedResponse<UserResponse>>> Handle(GetAllUsersQuery request,
         CancellationToken cancellationToken)
     {
-        var result = new HttpResult<IEnumerable<UserResponse>>();
-        var users = await _appUserManager.Users.ToListAsync(cancellationToken: cancellationToken);
-        var userResponses = users.Select(user => _mapper.Map<UserResponse>(user));
-        return result.WithValue(userResponses);
+        var userResponsesQueryable = _appUserManager.Users
+            .Select(user => _mapper.Map<UserResponse>(user));
+
+        return Task.FromResult(PaginationUtils.CreatePagedHttpResult(userResponsesQueryable, request.PaginationFilter));
     }
 }

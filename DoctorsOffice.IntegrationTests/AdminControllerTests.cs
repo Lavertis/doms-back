@@ -2,8 +2,10 @@
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Wrappers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace DoctorsOffice.IntegrationTests;
@@ -65,8 +67,8 @@ public class AdminControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Doctor)]
     public async Task GetAuthenticatedAdmin_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -89,7 +91,7 @@ public class AdminControllerTests : IntegrationTest
 
         var admin = new Admin
         {
-            AppUser = new AppUser {Id = Guid.NewGuid()}
+            AppUser = new AppUser { Id = Guid.NewGuid() }
         };
 
         DbContext.Admins.Add(admin);
@@ -137,8 +139,8 @@ public class AdminControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Doctor)]
     public async Task GetAdminById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -163,9 +165,9 @@ public class AdminControllerTests : IntegrationTest
 
         var admins = new List<Admin>
         {
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
         };
 
         DbContext.Admins.AddRange(admins);
@@ -176,10 +178,10 @@ public class AdminControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<AdminResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
 
         foreach (var admin in admins)
-            responseContent.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
+            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
     }
 
     [Fact]
@@ -197,9 +199,9 @@ public class AdminControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<AdminResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
 
-        responseContent.Should().BeEmpty();
+        responseContent.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -216,8 +218,8 @@ public class AdminControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Doctor)]
     public async Task GetAllAdmins_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -229,5 +231,72 @@ public class AdminControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAllAdmins_NoPaginationProvided_ReturnsAllAdmins()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        await AuthenticateAsAdminAsync(client);
+
+        var admins = new List<Admin>
+        {
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+        };
+
+        DbContext.Admins.AddRange(admins);
+        await DbContext.SaveChangesAsync();
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
+
+        foreach (var admin in admins)
+            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+    }
+
+    [Fact]
+    public async Task GetAllAdmins_PaginationProvided_ReturnsRequestedPage()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        await AuthenticateAsAdminAsync(client);
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+
+        var admins = new List<Admin>();
+        for (var i = 0; i < 20; i++)
+        {
+            admins.Add(new Admin { AppUser = new AppUser { Id = Guid.NewGuid() } });
+        }
+
+        DbContext.Admins.AddRange(admins);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = await DbContext.Admins
+            .Select(a => Mapper.Map<AdminResponse>(a))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
     }
 }

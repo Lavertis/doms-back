@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Filters;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetAppointmentsByUser;
 
 public class GetAppointmentsByUserHandler
-    : IRequestHandler<GetAppointmentsByUserQuery, HttpResult<IEnumerable<AppointmentResponse>>>
+    : IRequestHandler<GetAppointmentsByUserQuery, HttpResult<PagedResponse<AppointmentResponse>>>
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IMapper _mapper;
@@ -21,21 +23,22 @@ public class GetAppointmentsByUserHandler
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<AppointmentResponse>>> Handle(
+    public Task<HttpResult<PagedResponse<AppointmentResponse>>> Handle(
         GetAppointmentsByUserQuery request, CancellationToken cancellationToken)
     {
-        var result = new HttpResult<IEnumerable<AppointmentResponse>>();
-
-        return request.RoleName switch
+        var result = request.RoleName switch
         {
-            RoleTypes.Doctor => result.WithValue(await GetDoctorAppointments(request.UserId, cancellationToken)),
-            RoleTypes.Patient => result.WithValue(await GetPatientAppointments(request.UserId, cancellationToken)),
-            _ => result.WithError(new Error {Message = "Invalid role"}).WithStatusCode(StatusCodes.Status400BadRequest)
+            Roles.Doctor => GetDoctorAppointmentsPagedResult(request.UserId, request.PaginationFilter),
+            Roles.Patient => GetPatientAppointmentsPagedResult(request.UserId, request.PaginationFilter),
+            _ => new HttpResult<PagedResponse<AppointmentResponse>>()
+                .WithError(new Error { Message = "Invalid role" })
+                .WithStatusCode(StatusCodes.Status400BadRequest)
         };
+        return Task.FromResult(result);
     }
 
-    private async Task<IList<AppointmentResponse>> GetDoctorAppointments(
-        Guid doctorId, CancellationToken cancellationToken)
+    private HttpResult<PagedResponse<AppointmentResponse>> GetDoctorAppointmentsPagedResult(
+        Guid doctorId, PaginationFilter? paginationFilter)
     {
         var appointments = _appointmentRepository.GetAll()
             .Include(appointment => appointment.Doctor)
@@ -45,14 +48,14 @@ public class GetAppointmentsByUserHandler
             .Where(a => a.Doctor.Id == doctorId)
             .OrderBy(a => a.Date);
 
-        var appointmentResponses = await appointments
-            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment))
-            .ToListAsync(cancellationToken: cancellationToken);
-        return appointmentResponses;
+        var appointmentResponsesQueryable = appointments
+            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment));
+
+        return PaginationUtils.CreatePagedHttpResult(appointmentResponsesQueryable, paginationFilter);
     }
 
-    private async Task<IList<AppointmentResponse>> GetPatientAppointments(
-        Guid patientId, CancellationToken cancellationToken)
+    private HttpResult<PagedResponse<AppointmentResponse>> GetPatientAppointmentsPagedResult(
+        Guid patientId, PaginationFilter? paginationFilter)
     {
         var appointments = _appointmentRepository.GetAll()
             .Include(appointment => appointment.Doctor)
@@ -62,9 +65,9 @@ public class GetAppointmentsByUserHandler
             .Where(a => a.Patient.Id == patientId)
             .OrderBy(a => a.Date);
 
-        var appointmentResponses = await appointments
-            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment))
-            .ToListAsync(cancellationToken: cancellationToken);
-        return appointmentResponses;
+        var appointmentResponsesQueryable = appointments
+            .Select(appointment => _mapper.Map<AppointmentResponse>(appointment));
+
+        return PaginationUtils.CreatePagedHttpResult(appointmentResponsesQueryable, paginationFilter);
     }
 }

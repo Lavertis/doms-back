@@ -2,6 +2,7 @@
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAllAdmins;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Domain.Filters;
 using DoctorsOffice.Domain.Repositories;
 using FakeItEasy;
 using FluentAssertions;
@@ -30,13 +31,13 @@ public class AdminHandlerTests : UnitTest
             new()
             {
                 Id = adminId,
-                AppUser = new AppUser {Id = adminId}
+                AppUser = new AppUser { Id = adminId }
             }
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeAdminRepository.GetAll())
             .Returns(adminsQueryable);
 
-        var expectedResponse = new AdminResponse {Id = adminId};
+        var expectedResponse = new AdminResponse { Id = adminId };
 
         var query = new GetAdminByIdQuery(adminId);
         var handler = new GetAdminByIdHandler(_fakeAdminRepository, Mapper);
@@ -72,9 +73,9 @@ public class AdminHandlerTests : UnitTest
         // arrange
         var adminsQueryable = new List<Admin>
         {
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
-            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
@@ -87,7 +88,7 @@ public class AdminHandlerTests : UnitTest
 
         // assert
         foreach (var admin in adminsQueryable)
-            result.Value.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
+            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
     }
 
     [Fact]
@@ -104,6 +105,65 @@ public class AdminHandlerTests : UnitTest
         var result = await handler.Handle(query, default);
 
         // assert
-        result.Value.Should().BeEmpty();
+        result.Value!.Records.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetAllAdminsHandler_NoPageSizeAndPageNumberProvided_ReturnsAllAdmins()
+    {
+        // arrange
+        var adminsQueryable = new List<Admin>
+        {
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+        }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
+
+        var query = new GetAllAdminsQuery();
+        var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
+
+        // act
+        var result = await handler.Handle(query, default);
+
+        // assert
+        foreach (var admin in adminsQueryable)
+            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+    }
+
+    [Fact]
+    public async Task GetAllAdminsHandler_PageSizeAndPageNumberProvided_ReturnsSpecifiedPage()
+    {
+        // arrange
+        var adminsQueryable = new List<Admin>
+        {
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
+            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+        }.AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
+
+        const int pageSize = 2;
+        const int pageNumber = 2;
+
+        var expectedResponse = adminsQueryable
+            .Select(a => Mapper.Map<AdminResponse>(a))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var query = new GetAllAdminsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+        };
+        var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
+
+        // act
+        var result = await handler.Handle(query, default);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 }

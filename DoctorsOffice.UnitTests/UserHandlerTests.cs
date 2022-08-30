@@ -2,11 +2,13 @@
 using DoctorsOffice.Application.CQRS.Queries.Users.GetUserById;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Domain.Filters;
 using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -35,7 +37,7 @@ public class UserHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().BeEmpty();
+        result.Value!.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -52,7 +54,7 @@ public class UserHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().HaveCount(3);
+        result.Value!.Records.Should().HaveCount(3);
     }
 
     [Fact]
@@ -69,7 +71,58 @@ public class UserHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().ContainSingle();
+        result.Value!.Records.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async void GetAllUsersHandler_NoPaginationProvided_ReturnsAllUsers()
+    {
+        // arrange
+        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(3).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
+
+        var expectedResponse = await fakeAppUserQueryable
+            .Select(u => Mapper.Map<UserResponse>(u))
+            .ToListAsync();
+
+        var query = new GetAllUsersQuery();
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
+
+        // act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
+    }
+
+
+    [Fact]
+    public async void GetAllUsersHandler_PaginationProvided_ReturnsAllUsers()
+    {
+        // arrange
+        var fakeAppUserQueryable = A.CollectionOfDummy<AppUser>(20).AsQueryable().BuildMock();
+        A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
+
+        const int pageSize = 5;
+        const int pageNumber = 3;
+
+        var expectedResponse = await fakeAppUserQueryable
+            .Select(u => Mapper.Map<UserResponse>(u))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var query = new GetAllUsersQuery
+        {
+            PaginationFilter = new PaginationFilter { PageNumber = pageNumber, PageSize = pageSize }
+        };
+        var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
+
+        // act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]

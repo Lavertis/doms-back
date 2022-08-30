@@ -41,7 +41,7 @@ public class AppointmentHandlerTests : UnitTest
     }
 
     [Fact]
-    public async Task GetAppointmentsByPatientIdHandler_PatientExists_ReturnsAllAppointments()
+    public async Task GetAppointmentsByUserIdHandler_PatientExists_ReturnsAllAppointments()
     {
         // arrange
         var patientId = Guid.NewGuid();
@@ -50,36 +50,44 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = appointmentsQueryable.Select(a => Mapper.Map<AppointmentResponse>(a));
 
-        var query = new GetAppointmentsByUserQuery {UserId = patientId, RoleName = RoleTypes.Patient};
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = patientId,
+            RoleName = Roles.Patient
+        };
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().BeEquivalentTo(expectedResponse);
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
-    public async Task GetAppointmentsByPatientIdHandler_PatientDoesntExist_ReturnsEmptyList()
+    public async Task GetAppointmentsByUserIdHandler_PatientDoesntExist_ReturnsEmptyList()
     {
         // arrange
         var patientId = Guid.NewGuid();
         var emptyAppointmentQueryable = A.CollectionOfDummy<Appointment>(0).BuildMock();
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(emptyAppointmentQueryable);
 
-        var query = new GetAppointmentsByUserQuery {UserId = patientId, RoleName = RoleTypes.Patient};
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = patientId,
+            RoleName = Roles.Patient
+        };
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().BeEmpty();
+        result.Value!.Records.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task GetAppointmentsByDoctorIdHandler_DoctorExists_ReturnsALlAppointments()
+    public async Task GetAppointmentsByUserIdHandler_DoctorExists_ReturnsALlAppointments()
     {
         // arrange
         var doctorId = Guid.NewGuid();
@@ -89,18 +97,22 @@ public class AppointmentHandlerTests : UnitTest
 
         var expectedResponse = appointmentsQueryable.Select(a => Mapper.Map<AppointmentResponse>(a));
 
-        var query = new GetAppointmentsByUserQuery {UserId = doctorId, RoleName = RoleTypes.Doctor};
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = doctorId,
+            RoleName = Roles.Doctor
+        };
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().BeEquivalentTo(expectedResponse);
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
-    public async Task GetAppointmentsByDoctorIdHandler_DoctorDoesntExist_ReturnsEmptyList()
+    public async Task GetAppointmentsByUserIdHandler_DoctorDoesntExist_ReturnsEmptyList()
     {
         // arrange
         var doctorId = Guid.NewGuid();
@@ -109,14 +121,74 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(emptyAppointmentQueryable);
 
-        var query = new GetAppointmentsByUserQuery {UserId = doctorId, RoleName = RoleTypes.Doctor};
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = doctorId,
+            RoleName = Roles.Doctor
+        };
         var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.Value.Should().BeEmpty();
+        result.Value!.Records.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetAppointmentsByUserIdHandler_NoPaginationProvided_ReturnsAllAppointments()
+    {
+        // arrange
+        var patientId = Guid.NewGuid();
+        var appointmentsQueryable = GetAppointments(20, patientId: patientId, doctorId: Guid.NewGuid()).BuildMock();
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
+
+        var expectedResponse = appointmentsQueryable.Select(a => Mapper.Map<AppointmentResponse>(a));
+
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = patientId,
+            RoleName = Roles.Patient
+        };
+        var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
+
+        // act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
+    }
+
+    [Fact]
+    public async Task GetAppointmentsByUserIdHandler_PaginationProvided_ReturnsRequestedPage()
+    {
+        // arrange
+        var patientId = Guid.NewGuid();
+        var appointmentsQueryable = GetAppointments(20, patientId: patientId, doctorId: Guid.NewGuid()).BuildMock();
+        A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
+
+        const int pageSize = 2;
+        const int pageNumber = 3;
+
+        var expectedResponse = appointmentsQueryable
+            .Select(a => Mapper.Map<AppointmentResponse>(a))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var query = new GetAppointmentsByUserQuery
+        {
+            UserId = patientId,
+            RoleName = Roles.Patient,
+            PaginationFilter = new PaginationFilter { PageNumber = pageNumber, PageSize = pageSize }
+        };
+        var handler = new GetAppointmentsByUserHandler(_fakeAppointmentRepository, Mapper);
+
+        // act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 
     [Fact]
@@ -124,7 +196,7 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointment = GetAppointments(1).First();
-        var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
+        var appointmentsQueryable = new List<Appointment> { appointment }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
         A.CallTo(() => _fakeAppointmentService.CanUserAccessAppointment(
             A<Guid>.Ignored,
@@ -139,7 +211,7 @@ public class AppointmentHandlerTests : UnitTest
         {
             AppointmentId = appointment.Id,
             UserId = Guid.NewGuid(),
-            RoleName = RoleTypes.Admin
+            RoleName = Roles.Admin
         };
         var handler = new GetAppointmentByIdHandler(_fakeAppointmentRepository, _fakeAppointmentService, Mapper);
 
@@ -178,10 +250,9 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointments = GetAppointments(3);
-
         var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
 
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter());
+        var query = new GetFilteredAppointmentsQuery();
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -197,10 +268,10 @@ public class AppointmentHandlerTests : UnitTest
     public async Task GetFilteredAppointmentsHandler_DateEndBeforeDateStart_ReturnsEmptyList()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
-        var patient = new Patient {Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = ""};
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
+        var patient = new Patient { Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "" };
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
         const int appointmentCount = 3;
 
         var appointments = new List<Appointment>();
@@ -220,7 +291,7 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             DateStart = DateTime.UtcNow.AddDays(1),
             DateEnd = DateTime.UtcNow.Subtract(1.Days())
@@ -243,7 +314,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidType = "InvalidType";
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             Type = invalidType
         };
@@ -265,7 +336,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         const string invalidStatus = "InvalidStatus";
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             Status = invalidStatus
         };
@@ -286,7 +357,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidPatientId = Guid.NewGuid();
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             PatientId = invalidPatientId
         };
@@ -307,7 +378,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var invalidDoctorId = Guid.NewGuid();
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             DoctorId = invalidDoctorId
         };
@@ -324,17 +395,17 @@ public class AppointmentHandlerTests : UnitTest
     public async Task GetFilteredAppointmentsHandler_ValidDateRange_ReturnsAppointmentsInDateRange()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
         var patient = new Patient
         {
             Id = Guid.NewGuid(),
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Email = "", PhoneNumber = ""}
+            AppUser = new AppUser { Email = "", PhoneNumber = "" }
         };
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
         const int appointmentCount = 5;
 
         var appointments = new List<Appointment>();
@@ -357,7 +428,7 @@ public class AppointmentHandlerTests : UnitTest
         var dateStart = DateTime.UtcNow.AddDays(1);
         var dateEnd = DateTime.UtcNow.AddDays(2);
 
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             DateStart = dateStart,
             DateEnd = dateEnd
@@ -376,21 +447,21 @@ public class AppointmentHandlerTests : UnitTest
     public async Task GetFilteredAppointmentsHandler_ValidType_ReturnsAppointmentsMatchingType()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
         var patient = new Patient
         {
             Id = Guid.NewGuid(),
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Email = "", PhoneNumber = ""}
+            AppUser = new AppUser { Email = "", PhoneNumber = "" }
         };
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
         var types = new List<AppointmentType>
         {
-            new() {Id = Guid.NewGuid(), Name = "Type1"},
-            new() {Id = Guid.NewGuid(), Name = "Type2"},
-            new() {Id = Guid.NewGuid(), Name = "Type2"}
+            new() { Id = Guid.NewGuid(), Name = "Type1" },
+            new() { Id = Guid.NewGuid(), Name = "Type2" },
+            new() { Id = Guid.NewGuid(), Name = "Type2" }
         };
         const int appointmentCount = 10;
 
@@ -413,7 +484,7 @@ public class AppointmentHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             Type = selectedType.Name
         };
@@ -431,22 +502,22 @@ public class AppointmentHandlerTests : UnitTest
     public async Task GetFilteredAppointmentsHandler_ValidStatus_ReturnsAppointmentsMatchingStatus()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
         var patient = new Patient
         {
             Id = Guid.NewGuid(),
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Email = "", PhoneNumber = ""}
+            AppUser = new AppUser { Email = "", PhoneNumber = "" }
         };
         var statuses = new List<AppointmentStatus>
         {
-            new() {Id = Guid.NewGuid(), Name = "Status1"},
-            new() {Id = Guid.NewGuid(), Name = "Status2"},
-            new() {Id = Guid.NewGuid(), Name = "Status2"}
+            new() { Id = Guid.NewGuid(), Name = "Status1" },
+            new() { Id = Guid.NewGuid(), Name = "Status2" },
+            new() { Id = Guid.NewGuid(), Name = "Status2" }
         };
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
         const int appointmentCount = 10;
 
         var appointments = new List<Appointment>();
@@ -467,7 +538,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedStatus = statuses[1];
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             Status = selectedStatus.Name
         };
@@ -485,27 +556,27 @@ public class AppointmentHandlerTests : UnitTest
     public async Task GetFilteredAppointmentsHandler_ValidPatientId_ReturnsAppointmentsBelongingToPatient()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
         var patients = new List<Patient>
         {
             new()
             {
                 Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "",
-                AppUser = new AppUser {Email = "", PhoneNumber = ""}
+                AppUser = new AppUser { Email = "", PhoneNumber = "" }
             },
             new()
             {
                 Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "",
-                AppUser = new AppUser {Email = "", PhoneNumber = ""}
+                AppUser = new AppUser { Email = "", PhoneNumber = "" }
             },
             new()
             {
                 Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "",
-                AppUser = new AppUser {Email = "", PhoneNumber = ""}
+                AppUser = new AppUser { Email = "", PhoneNumber = "" }
             }
         };
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
         const int appointmentCount = 10;
 
         var appointments = new List<Appointment>();
@@ -527,7 +598,7 @@ public class AppointmentHandlerTests : UnitTest
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         var selectedPatient = patients[1];
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             PatientId = selectedPatient.Id
         };
@@ -551,16 +622,16 @@ public class AppointmentHandlerTests : UnitTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Email = "", PhoneNumber = ""}
+            AppUser = new AppUser { Email = "", PhoneNumber = "" }
         };
         var doctors = new List<Doctor>
         {
-            new() {Id = Guid.NewGuid()},
-            new() {Id = Guid.NewGuid()},
-            new() {Id = Guid.NewGuid()}
+            new() { Id = Guid.NewGuid() },
+            new() { Id = Guid.NewGuid() },
+            new() { Id = Guid.NewGuid() }
         };
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
         const int appointmentCount = 10;
 
         var appointments = new List<Appointment>();
@@ -579,41 +650,26 @@ public class AppointmentHandlerTests : UnitTest
             });
         }
 
-        var doctorsAppointments = appointments.Where(a => a.DoctorId == doctors[1].Id).ToList();
+        var selectedDoctor = doctors[1];
+        var expectedResponse = appointments
+            .Where(a => a.DoctorId == selectedDoctor.Id)
+            .Select(appointment => Mapper.Map<AppointmentSearchResponse>(appointment));
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
-        var selectedDoctor = doctors[1];
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter())
+        var query = new GetFilteredAppointmentsQuery
         {
             DoctorId = selectedDoctor.Id
         };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
 
         // act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
         result.Value!.Records.Should().NotBeEmpty();
-        result.Value!.Records.Should().OnlyContain(appointmentResponse =>
-            doctorsAppointments.Any(a => a.Id == appointmentResponse.Id));
-    }
-
-    [Fact]
-    public async Task GetFilteredAppointmentsHandler_NoPageSizeAndPageNumberProvided_ReturnsAllAppointments()
-    {
-        // arrange
-        var appointments = GetAppointments(3);
-        var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter());
-        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
-
-        A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
-
-        // act
-        var result = await handler.Handle(query, CancellationToken.None);
-
-        // assert
         result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
     }
 
@@ -623,7 +679,11 @@ public class AppointmentHandlerTests : UnitTest
         // arrange
         const int pageSize = 10;
         var appointments = GetAppointments(35);
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter {PageSize = pageSize});
+
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -636,11 +696,33 @@ public class AppointmentHandlerTests : UnitTest
     }
 
     [Fact]
+    public async Task GetFilteredAppointmentsHandler_NoPageSizeAndPageNumberProvided_ReturnsAllAppointments()
+    {
+        // arrange
+        var appointments = GetAppointments(3);
+        var expectedResponse = appointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a));
+
+        var query = new GetFilteredAppointmentsQuery();
+        var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
+
+        A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
+
+        // act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // assert
+        result.Value!.Records.Should().BeEquivalentTo(expectedResponse);
+    }
+
+    [Fact]
     public async Task GetFilteredAppointmentsHandler_OnlyPageNumberIsProvided_ReturnsBadRequest400StatusCode()
     {
         // arrange
         var appointments = GetAppointments(35);
-        var query = new GetFilteredAppointmentsQuery(new PaginationFilter {PageNumber = 2});
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageNumber = 2 }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -659,8 +741,10 @@ public class AppointmentHandlerTests : UnitTest
         const int pageSize = -10;
         const int pageNumber = 2;
         var appointments = GetAppointments(35);
-        var query = new GetFilteredAppointmentsQuery(
-            new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -680,8 +764,10 @@ public class AppointmentHandlerTests : UnitTest
         const int pageNumber = -2;
         var appointments = GetAppointments(35);
 
-        var query = new GetFilteredAppointmentsQuery(
-            new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -710,8 +796,10 @@ public class AppointmentHandlerTests : UnitTest
             .Take(expectedPageSize)
             .ToList();
 
-        var query = new GetFilteredAppointmentsQuery(
-            new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -727,14 +815,16 @@ public class AppointmentHandlerTests : UnitTest
 
     [Fact]
     public async Task
-        GetFilteredAppointmentsHandler_PageNumberIsHigherThanNumberOfRecords_ReturnsBadRequest400StatusCode()
+        GetFilteredAppointmentsHandler_PageNumberIsHigherThanNumberOfRecords_ReturnsRangeNotSatisfiable416StatusCode()
     {
         // arrange
         const int pageSize = 5;
         const int pageNumber = 20;
         var appointments = GetAppointments(pageNumber - 3);
-        var query = new GetFilteredAppointmentsQuery(
-            new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber});
+        var query = new GetFilteredAppointmentsQuery
+        {
+            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+        };
         var handler = new GetFilteredAppointmentsHandler(_fakeAppointmentRepository, Mapper);
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointments.AsQueryable().BuildMock());
@@ -743,17 +833,17 @@ public class AppointmentHandlerTests : UnitTest
         var result = await handler.Handle(query, CancellationToken.None);
 
         // assert
-        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+        result.StatusCode.Should().Be(StatusCodes.Status416RangeNotSatisfiable);
     }
 
     [Fact]
     public async Task CreateAppointmentHandler_ValidRequest_CreatesNewAppointment()
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
-        var patient = new Patient {Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = ""};
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
+        var patient = new Patient { Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "" };
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
 
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
         A.CallTo(() => _fakePatientRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(patient);
@@ -801,10 +891,10 @@ public class AppointmentHandlerTests : UnitTest
         string fieldName, string fieldValue)
     {
         // arrange
-        var doctor = new Doctor {Id = Guid.NewGuid()};
-        var patient = new Patient {Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = ""};
-        var status = new AppointmentStatus {Id = Guid.NewGuid(), Name = "Pending"};
-        var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
+        var doctor = new Doctor { Id = Guid.NewGuid() };
+        var patient = new Patient { Id = Guid.NewGuid(), FirstName = "", LastName = "", Address = "" };
+        var status = new AppointmentStatus { Id = Guid.NewGuid(), Name = "Pending" };
+        var type = new AppointmentType { Id = Guid.NewGuid(), Name = "Consultation" };
 
         var request = new CreateAppointmentRequest
         {
@@ -904,9 +994,9 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
-        var newAppointmentType = new AppointmentType {Id = Guid.NewGuid(), Name = "new type"};
-        var newAppointmentStatus = new AppointmentStatus {Id = Guid.NewGuid(), Name = "new status"};
+        var appointmentsQueryable = new List<Appointment> { appointment }.AsQueryable().BuildMock();
+        var newAppointmentType = new AppointmentType { Id = Guid.NewGuid(), Name = "new type" };
+        var newAppointmentStatus = new AppointmentStatus { Id = Guid.NewGuid(), Name = "new status" };
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
         A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
@@ -986,9 +1076,9 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
-        var newAppointmentType = new AppointmentType {Id = Guid.NewGuid(), Name = "new type"};
-        var newAppointmentStatus = new AppointmentStatus {Id = Guid.NewGuid(), Name = "new status"};
+        var appointmentsQueryable = new List<Appointment> { appointment }.AsQueryable().BuildMock();
+        var newAppointmentType = new AppointmentType { Id = Guid.NewGuid(), Name = "new type" };
+        var newAppointmentStatus = new AppointmentStatus { Id = Guid.NewGuid(), Name = "new status" };
 
         var request = new UpdateAppointmentRequest();
         if (fieldName == "Date")
@@ -1027,7 +1117,7 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
+        var appointmentsQueryable = new List<Appointment> { appointment }.AsQueryable().BuildMock();
 
         var request = new UpdateAppointmentRequest
         {
@@ -1067,7 +1157,7 @@ public class AppointmentHandlerTests : UnitTest
     {
         // arrange
         var appointment = GetAppointments(1)[0];
-        var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
+        var appointmentsQueryable = new List<Appointment> { appointment }.AsQueryable().BuildMock();
 
         var request = new UpdateAppointmentRequest
         {
@@ -1117,17 +1207,17 @@ public class AppointmentHandlerTests : UnitTest
         if (appointmentTypeId == default)
             appointmentTypeId = Guid.NewGuid();
 
-        var doctor = new Doctor {Id = doctorId};
+        var doctor = new Doctor { Id = doctorId };
         var patient = new Patient
         {
             Id = patientId,
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Email = "", PhoneNumber = ""}
+            AppUser = new AppUser { Email = "", PhoneNumber = "" }
         };
-        var status = new AppointmentStatus {Id = appointmentStatusId, Name = "Pending"};
-        var type = new AppointmentType {Id = appointmentTypeId, Name = "Consultation"};
+        var status = new AppointmentStatus { Id = appointmentStatusId, Name = "Pending" };
+        var type = new AppointmentType { Id = appointmentTypeId, Name = "Consultation" };
 
         var appointments = new List<Appointment>();
         for (var i = 0; i < count; i++)

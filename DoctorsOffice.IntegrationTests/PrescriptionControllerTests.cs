@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Wrappers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser { Id = patientId }
         };
         DbContext.Patients.Add(patient);
 
@@ -44,7 +45,7 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = otherPatientId}
+            AppUser = new AppUser { Id = otherPatientId }
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -57,7 +58,7 @@ public class PrescriptionControllerTests : IntegrationTest
                 Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = i % 2 == 0 ? patientId : otherPatientId,
-                DrugItems = new List<DrugItem> {new()}
+                DrugItems = new List<DrugItem> { new() }
             });
         }
 
@@ -69,13 +70,13 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
         var expectedPrescriptions = prescriptions
             .Where(p => p.PatientId == patientId)
             .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
-            responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
+            responseContent.Records.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
     }
 
     [Fact]
@@ -92,9 +93,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
 
-        responseContent.Should().BeEmpty();
+        responseContent.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -110,7 +111,7 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser { Id = patientId }
         };
         DbContext.Patients.Add(patient);
 
@@ -119,9 +120,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
 
-        responseContent.Should().BeEmpty();
+        responseContent.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -140,8 +141,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Patient)]
     public async Task GetPrescriptionsByPatientId_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -153,6 +154,107 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetPrescriptionsByPatientId_NoPaginationProvided_ReturnsPrescriptionByPatientId()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
+        var patientId = Guid.NewGuid();
+
+        var patient = new Patient
+        {
+            FirstName = "",
+            LastName = "",
+            Address = "",
+            AppUser = new AppUser { Id = patientId }
+        };
+        DbContext.Patients.Add(patient);
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = authenticatedDoctorId,
+                PatientId = patientId,
+                DrugItems = new List<DrugItem> { new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = prescriptions.Select(prescription => Mapper.Map<PrescriptionResponse>(prescription));
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/patient/{patientId}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+    }
+
+    [Fact]
+    public async Task GetPrescriptionsByPatientId_PaginationProvided_ReturnsRequestedPage()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
+        var patientId = Guid.NewGuid();
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+
+        var patient = new Patient
+        {
+            FirstName = "",
+            LastName = "",
+            Address = "",
+            AppUser = new AppUser { Id = patientId }
+        };
+        DbContext.Patients.Add(patient);
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = authenticatedDoctorId,
+                PatientId = patientId,
+                DrugItems = new List<DrugItem> { new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = prescriptions
+            .Select(prescription => Mapper.Map<PrescriptionResponse>(prescription))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/patient/{patientId}?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
     }
 
     [Fact]
@@ -169,7 +271,7 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = otherPatientId}
+            AppUser = new AppUser { Id = otherPatientId }
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -182,7 +284,7 @@ public class PrescriptionControllerTests : IntegrationTest
                 Description = "",
                 DoctorId = DbContext.Doctors.First().Id,
                 PatientId = i % 2 == 0 ? authenticatedPatientId : otherPatientId,
-                DrugItems = new List<DrugItem> {new(), new()}
+                DrugItems = new List<DrugItem> { new(), new() }
             });
         }
 
@@ -194,14 +296,14 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
 
         var expectedPrescriptions = prescriptions
             .Where(p => p.PatientId == authenticatedPatientId)
             .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
-            responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
+            responseContent.Records.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
     }
 
 
@@ -218,9 +320,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
 
-        responseContent.Should().BeEmpty();
+        responseContent.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -237,8 +339,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Doctor)]
     public async Task GetPrescriptionsForAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(
         string roleName)
     {
@@ -254,6 +356,87 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
+    public async Task GetPrescriptionsForAuthenticatedPatient_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = DbContext.Doctors.First().Id,
+                PatientId = authenticatedPatientId,
+                DrugItems = new List<DrugItem> { new(), new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = prescriptions
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+    }
+
+    [Fact]
+    public async Task GetPrescriptionsForAuthenticatedPatient_PaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = DbContext.Doctors.First().Id,
+                PatientId = authenticatedPatientId,
+                DrugItems = new List<DrugItem> { new(), new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = prescriptions
+            .Select(p => Mapper.Map<PrescriptionResponse>(p))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/patient/current?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+    }
+
+    [Fact]
     public async Task
         GetPrescriptionsForAuthenticatedDoctor_AuthenticatedUserIsDoctor_ReturnsPrescriptionsForAuthenticatedDoctor()
     {
@@ -264,7 +447,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var otherDoctorId = Guid.NewGuid();
         var otherDoctor = new Doctor
         {
-            AppUser = new AppUser {Id = otherDoctorId}
+            AppUser = new AppUser { Id = otherDoctorId }
         };
         DbContext.Doctors.Add(otherDoctor);
 
@@ -277,7 +460,7 @@ public class PrescriptionControllerTests : IntegrationTest
                 Description = "",
                 DoctorId = i % 2 == 0 ? authenticatedDoctorId : otherDoctorId,
                 PatientId = DbContext.Patients.First().Id,
-                DrugItems = new List<DrugItem> {new(), new()}
+                DrugItems = new List<DrugItem> { new(), new() }
             });
         }
 
@@ -289,13 +472,13 @@ public class PrescriptionControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<List<PrescriptionResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
         var expectedPrescriptions = prescriptions
             .Where(p => p.DoctorId == authenticatedDoctorId)
             .Select(p => Mapper.Map<PrescriptionResponse>(p));
 
         foreach (var expectedPrescription in expectedPrescriptions)
-            responseContent.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
+            responseContent.Records.Should().ContainSingle(p => p.Id == expectedPrescription.Id);
     }
 
     [Fact]
@@ -327,8 +510,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Patient)]
     public async Task GetPrescriptionsForAuthenticatedDoctor_AuthenticatedUserIsNotDoctor_ReturnsForbidden(
         string roleName)
     {
@@ -344,6 +527,87 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
+    public async Task GetPrescriptionsForAuthenticatedDoctor_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = authenticatedDoctorId,
+                PatientId = DbContext.Patients.First().Id,
+                DrugItems = new List<DrugItem> { new(), new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedPrescriptions = prescriptions
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedPrescriptions);
+    }
+
+    [Fact]
+    public async Task GetPrescriptionsForAuthenticatedDoctor_PaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+
+        var prescriptions = new List<Prescription>();
+        for (var i = 0; i < 10; i++)
+        {
+            prescriptions.Add(new Prescription
+            {
+                Title = "",
+                Description = "",
+                DoctorId = authenticatedDoctorId,
+                PatientId = DbContext.Patients.First().Id,
+                DrugItems = new List<DrugItem> { new(), new() }
+            });
+        }
+
+        DbContext.Prescriptions.AddRange(prescriptions);
+        await DbContext.SaveChangesAsync();
+
+        var expectedPrescriptions = prescriptions
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => Mapper.Map<PrescriptionResponse>(p));
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/doctor/current?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<PrescriptionResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedPrescriptions);
+    }
+
+    [Fact]
     public async Task CreatePrescription_ValidRequest_CreatesPrescription()
     {
         // arrange
@@ -355,7 +619,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "Title",
             Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         // act
@@ -392,7 +656,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "Title",
             Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         if (fieldName.EndsWith("Id"))
@@ -449,7 +713,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "Title",
             Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         // act
@@ -460,8 +724,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Patient)]
     public async Task CreatePrescription_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -473,7 +737,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "Title",
             Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         // act
@@ -497,7 +761,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Description = "OldDescription",
             PatientId = Guid.NewGuid(),
             DoctorId = authenticatedDoctorId,
-            DrugItems = new List<DrugItem> {new() {Id = Guid.NewGuid()}}
+            DrugItems = new List<DrugItem> { new() { Id = Guid.NewGuid() } }
         };
         DbContext.Prescriptions.Add(prescriptionToUpdate);
         await DbContext.SaveChangesAsync();
@@ -507,7 +771,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -666,7 +930,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -680,8 +944,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Patient)]
     public async Task UpdatePrescriptionById_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -693,7 +957,7 @@ public class PrescriptionControllerTests : IntegrationTest
             Title = "NewTitle",
             Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()}
+            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);

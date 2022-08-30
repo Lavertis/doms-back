@@ -35,7 +35,7 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, HttpRe
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
             Password = request.Password,
-            RoleName = RoleTypes.Patient
+            RoleName = Roles.Patient
         });
         if (createUserResult.IsFailed || createUserResult.Value is null)
         {

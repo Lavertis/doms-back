@@ -5,6 +5,8 @@ using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPat
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Filters;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,31 +25,48 @@ public class PrescriptionController : BaseController
     /// Returns all prescriptions for specified patient. Only for doctors.
     /// </summary>
     [HttpGet("patient/{patientId:guid}")]
-    [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<IEnumerable<PrescriptionResponse>>> GetPrescriptionsByPatientIdAsync(Guid patientId)
-        => CreateResponse(await Mediator.Send(new GetPrescriptionsByPatientIdQuery(patientId)));
+    [Authorize(Roles = Roles.Doctor)]
+    public async Task<ActionResult<PagedResponse<PrescriptionResponse>>> GetPrescriptionsByPatientIdAsync(
+        Guid patientId, [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(
+            await Mediator.Send(new GetPrescriptionsByPatientIdQuery
+            {
+                PatientId = patientId,
+                PaginationFilter = paginationFilter
+            }));
 
     /// <summary>
     /// Returns all prescriptions for authenticated patient. Only for patients.
     /// </summary>
     [HttpGet("patient/current")]
-    [Authorize(Roles = RoleTypes.Patient)]
-    public async Task<ActionResult<IEnumerable<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedPatientAsync()
-        => CreateResponse(await Mediator.Send(new GetPrescriptionsByPatientIdQuery(JwtSubject())));
+    [Authorize(Roles = Roles.Patient)]
+    public async Task<ActionResult<PagedResponse<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedPatientAsync(
+        [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(
+            await Mediator.Send(new GetPrescriptionsByPatientIdQuery
+            {
+                PatientId = JwtSubject(),
+                PaginationFilter = paginationFilter
+            }));
 
     /// <summary>
     /// Returns all prescriptions for authenticated doctor. Only for doctors.
     /// </summary>
     [HttpGet("doctor/current")]
-    [Authorize(Roles = RoleTypes.Doctor)]
-    public async Task<ActionResult<IEnumerable<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedDoctorAsync()
-        => CreateResponse(await Mediator.Send(new GetPrescriptionsByDoctorIdQuery(JwtSubject())));
+    [Authorize(Roles = Roles.Doctor)]
+    public async Task<ActionResult<PagedResponse<PrescriptionResponse>>> GetPrescriptionsForAuthenticatedDoctorAsync(
+        [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(await Mediator.Send(new GetPrescriptionsByDoctorIdQuery
+        {
+            DoctorId = JwtSubject(),
+            PaginationFilter = paginationFilter
+        }));
 
     /// <summary>
     /// Creates new prescription. Only for doctors.
     /// </summary>
     [HttpPost("doctor/current")]
-    [Authorize(Roles = RoleTypes.Doctor)]
+    [Authorize(Roles = Roles.Doctor)]
     public async Task<ActionResult<PrescriptionResponse>> CreatePrescriptionAsync(CreatePrescriptionRequest request)
         => CreateResponse(await Mediator.Send(new CreatePrescriptionCommand(request, JwtSubject())));
 
@@ -55,7 +74,7 @@ public class PrescriptionController : BaseController
     /// Updates prescription by id prescription. Only for doctors.
     /// </summary>
     [HttpPatch("{prescriptionId:guid}")]
-    [Authorize(Roles = RoleTypes.Doctor)]
+    [Authorize(Roles = Roles.Doctor)]
     public async Task<ActionResult<PrescriptionResponse>> UpdatePrescriptionByIdAsync(
         UpdatePrescriptionRequest request, Guid prescriptionId)
         => CreateResponse(

@@ -2,6 +2,8 @@
 using DoctorsOffice.Application.CQRS.Queries.Admins.GetAllAdmins;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Filters;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +12,7 @@ namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
 [Route("api/admins")]
-[Authorize(Roles = RoleTypes.Admin)]
+[Authorize(Roles = Roles.Admin)]
 public class AdminController : BaseController
 {
     public AdminController(IMediator mediator) : base(mediator)
@@ -35,6 +37,7 @@ public class AdminController : BaseController
     /// Returns all admins. Only for admins.
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AdminResponse>>> GetAllAdminsAsync()
-        => CreateResponse(await Mediator.Send(new GetAllAdminsQuery()));
+    public async Task<ActionResult<PagedResponse<AdminResponse>>> GetAllAdminsAsync(
+        [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(await Mediator.Send(new GetAllAdminsQuery { PaginationFilter = paginationFilter }));
 }

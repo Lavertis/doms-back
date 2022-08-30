@@ -46,9 +46,9 @@ public class AppointmentControllerTests : IntegrationTest
         var response = await client.GetAsync($"{UrlPrefix}/user/current");
 
         // assert
-        var responseContent = await response.Content.ReadAsAsync<IList<AppointmentResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentResponse>>();
 
-        responseContent.Should().BeEmpty();
+        responseContent.Records.Should().BeEmpty();
     }
 
     [Fact]
@@ -102,14 +102,14 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<IList<AppointmentResponse>>();
-        responseContent.Should().HaveCount(appointmentsCount);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentResponse>>();
+        responseContent.Records.Should().HaveCount(appointmentsCount);
         DbContext.Appointments.Where(a => a.Patient.Id == userId).ToList()
             .Should().OnlyContain(
                 userAppointment =>
-                    responseContent.Any(responseAppointment => responseAppointment.Id == userAppointment.Id)
+                    responseContent.Records.Any(responseAppointment => responseAppointment.Id == userAppointment.Id)
             );
-        responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
     }
 
     [Fact]
@@ -160,15 +160,15 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         RefreshDbContext();
-        var responseContent = await response.Content.ReadAsAsync<List<AppointmentResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentResponse>>();
 
-        responseContent.Should().HaveCount(appointmentsCount);
+        responseContent.Records.Should().HaveCount(appointmentsCount);
         DbContext.Appointments.Where(a => a.Doctor.Id == authenticatedUserId).ToList()
             .Should().OnlyContain(
                 userAppointment =>
-                    responseContent.Any(responseAppointment => responseAppointment.Id == userAppointment.Id)
+                    responseContent.Records.Any(responseAppointment => responseAppointment.Id == userAppointment.Id)
             );
-        responseContent.Should().BeInAscendingOrder(appointment => appointment.Date);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
     }
 
     [Fact]
@@ -183,6 +183,98 @@ public class AppointmentControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAllAppointmentsForAuthenticatedUser_NoPaginationProvided_ReturnsOnlyUserAppointments()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var userId = await AuthenticateAsPatientAsync(client);
+        var user = (await DbContext.Patients.FindAsync(userId))!;
+        var doctor = DbContext.Doctors.First();
+        var appointmentStatus = DbContext.AppointmentStatuses.First();
+        var appointmentType = DbContext.AppointmentTypes.First();
+
+        const int appointmentsCount = 3;
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < appointmentsCount; i++)
+        {
+            appointments.Add(new Appointment
+            {
+                Date = DateTime.UtcNow.AddDays(1),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = user,
+                Status = appointmentStatus,
+                Type = appointmentType
+            });
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = appointments.Select(appointment => Mapper.Map<AppointmentResponse>(appointment));
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/user/current");
+
+        // assert
+        RefreshDbContext();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentResponse>>();
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
+    }
+
+    [Fact]
+    public async Task GetAllAppointmentsForAuthenticatedUser_PaginationProvided_ReturnsRequestedPage()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        var userId = await AuthenticateAsPatientAsync(client);
+        var user = (await DbContext.Patients.FindAsync(userId))!;
+        var doctor = DbContext.Doctors.First();
+        var appointmentStatus = DbContext.AppointmentStatuses.First();
+        var appointmentType = DbContext.AppointmentTypes.First();
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+        const int appointmentsCount = 20;
+        var appointments = new List<Appointment>();
+        for (var i = 0; i < appointmentsCount; i++)
+        {
+            appointments.Add(new Appointment
+            {
+                Date = DateTime.UtcNow.AddDays(1),
+                Description = "Description",
+                Doctor = doctor,
+                Patient = user,
+                Status = appointmentStatus,
+                Type = appointmentType
+            });
+        }
+
+        DbContext.Appointments.AddRange(appointments);
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = appointments
+            .Select(appointment => Mapper.Map<AppointmentResponse>(appointment))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}/user/current?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        RefreshDbContext();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<AppointmentResponse>>();
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+        responseContent.Records.Should().BeInAscendingOrder(appointment => appointment.Date);
     }
 
     [Fact]
@@ -376,20 +468,20 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
 
         var doctor1 = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
-        var doctor2 = new Doctor {AppUser = new AppUser()};
+        var doctor2 = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(doctor2);
-        var doctors = new List<Doctor> {doctor1, doctor2};
+        var doctors = new List<Doctor> { doctor1, doctor2 };
 
         var patient1 = DbContext.Patients.First();
         var patient2 = new Patient
         {
-            AppUser = new AppUser {Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e")},
+            AppUser = new AppUser { Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e") },
             FirstName = "",
             LastName = "",
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var appointmentTypes = DbContext.AppointmentTypes.ToList();
         var appointmentStatuses = DbContext.AppointmentStatuses.ToList();
@@ -465,9 +557,9 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
-        var otherDoctor = new Doctor {AppUser = new AppUser()};
+        var otherDoctor = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(otherDoctor);
-        var doctors = new List<Doctor> {doctor, otherDoctor};
+        var doctors = new List<Doctor> { doctor, otherDoctor };
 
         var patient = DbContext.Patients.First();
 
@@ -558,8 +650,8 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Admin)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Admin)]
     public async Task GetAppointmentsFiltered_AuthorizedUserIsOtherThanDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -839,7 +931,7 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetAppointmentsFiltered_PageNumberIsHigherThanNumberOfRecords_ReturnsBadRequest()
+    public async Task GetAppointmentsFiltered_PageNumberIsHigherThanNumberOfRecords_ReturnsRangeNotSatisfiable()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -878,7 +970,7 @@ public class AppointmentControllerTests : IntegrationTest
         var response = await client.GetAsync($"{UrlPrefix}/doctor/current/search?{queryString}");
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.RequestedRangeNotSatisfiable);
     }
 
     [Theory]
@@ -903,7 +995,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var doctor = DbContext.Doctors.First();
 
@@ -976,7 +1068,7 @@ public class AppointmentControllerTests : IntegrationTest
             Address = ""
         };
         DbContext.Patients.Add(patient2);
-        var patients = new List<Patient> {patient1, patient2};
+        var patients = new List<Patient> { patient1, patient2 };
 
         var doctor = DbContext.Doctors.First();
 
@@ -1073,14 +1165,14 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Doctor)]
-    [InlineData(RoleTypes.Admin)]
+    [InlineData(Roles.Doctor)]
+    [InlineData(Roles.Admin)]
     public async Task GetAppointmentsForAuthenticatedPatientFiltered_AuthenticatedUserOtherThanPatient_ReturnsForbidden(
-        string roleType)
+        string role)
     {
         // arrange
         var client = await GetHttpClientAsync();
-        await AuthenticateAsRoleAsync(client, roleType);
+        await AuthenticateAsRoleAsync(client, role);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/patient/current/search");
@@ -1191,13 +1283,13 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Admin)]
-    public async Task CreateAppointment_AuthorizedUserOtherThanDoctor_ReturnsForbidden(string roleType)
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Admin)]
+    public async Task CreateAppointment_AuthorizedUserOtherThanDoctor_ReturnsForbidden(string role)
     {
         // arrange
         var client = await GetHttpClientAsync();
-        await AuthenticateAsRoleAsync(client, roleType);
+        await AuthenticateAsRoleAsync(client, role);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 
@@ -1214,7 +1306,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         await AuthenticateAsDoctorAsync(client);
-        var otherDoctor = new Doctor {AppUser = new AppUser()};
+        var otherDoctor = new Doctor { AppUser = new AppUser() };
         DbContext.Doctors.Add(otherDoctor);
         var patient = DbContext.Patients.First();
 
@@ -1327,13 +1419,13 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Doctor)]
-    [InlineData(RoleTypes.Admin)]
-    public async Task CreateAppointmentRequest_AuthorizedUserOtherThanPatient_ReturnsForbidden(string roleType)
+    [InlineData(Roles.Doctor)]
+    [InlineData(Roles.Admin)]
+    public async Task CreateAppointmentRequest_AuthorizedUserOtherThanPatient_ReturnsForbidden(string role)
     {
         // arrange
         var client = await GetHttpClientAsync();
-        await AuthenticateAsRoleAsync(client, roleType);
+        await AuthenticateAsRoleAsync(client, role);
 
         var createAppointmentRequest = new CreateAppointmentRequest();
 
@@ -1351,7 +1443,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         await AuthenticateAsPatientAsync(client);
-        var otherPatient = new Patient {AppUser = new AppUser()};
+        var otherPatient = new Patient { AppUser = new AppUser() };
         DbContext.Patients.Add(otherPatient);
         var doctor = DbContext.Doctors.First();
 

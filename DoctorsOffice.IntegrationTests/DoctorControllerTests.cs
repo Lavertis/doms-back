@@ -4,6 +4,7 @@ using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Wrappers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -75,8 +76,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Admin)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Admin)]
     public async Task GetAuthenticatedDoctor_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -98,7 +99,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
+            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
 
         await DbContext.SaveChangesAsync();
 
@@ -107,10 +108,10 @@ public class DoctorControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<IList<DoctorResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<DoctorResponse>>();
 
-        responseContent.Count.Should().Be(DbContext.Doctors.Count());
-        responseContent.Should().BeEquivalentTo(
+        responseContent.Records.Count().Should().Be(DbContext.Doctors.Count());
+        responseContent.Records.Should().BeEquivalentTo(
             DbContext.Doctors
                 .Include(a => a.AppUser)
                 .Select(d => Mapper.Map<DoctorResponse>(d))
@@ -132,9 +133,9 @@ public class DoctorControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseContent = await response.Content.ReadAsAsync<IList<DoctorResponse>>();
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<DoctorResponse>>();
 
-        responseContent.Count.Should().Be(0);
+        responseContent.Records.Count().Should().Be(0);
     }
 
     [Fact]
@@ -151,8 +152,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Doctor)]
     public async Task GetAllDoctors_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -164,6 +165,69 @@ public class DoctorControllerTests : IntegrationTest
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetAllDoctors_NoPaginationProvided_ReturnsAllDoctors()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        await AuthenticateAsAdminAsync(client);
+
+        for (var i = 0; i < 3; i++)
+            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = await DbContext.Doctors
+            .Include(d => d.AppUser)
+            .Select(doctor => Mapper.Map<DoctorResponse>(doctor))
+            .ToListAsync();
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<DoctorResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
+    }
+
+    [Fact]
+    public async Task GetAllDoctors_PaginationProvided_ReturnsAllDoctors()
+    {
+        // arrange
+        var client = await GetHttpClientAsync();
+        await AuthenticateAsAdminAsync(client);
+
+        const int pageSize = 3;
+        const int pageNumber = 2;
+
+        for (var i = 0; i < 3; i++)
+            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+
+        await DbContext.SaveChangesAsync();
+
+        var expectedResponseContent = await DbContext.Doctors
+            .Include(d => d.AppUser)
+            .Select(doctor => Mapper.Map<DoctorResponse>(doctor))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString.Add("pageSize", pageSize.ToString());
+        queryString.Add("pageNumber", pageNumber.ToString());
+
+        // act
+        var response = await client.GetAsync($"{UrlPrefix}?{queryString}");
+
+        // assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<PagedResponse<DoctorResponse>>();
+
+        responseContent.Records.Should().BeEquivalentTo(expectedResponseContent);
     }
 
     [Fact]
@@ -316,8 +380,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Patient)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Patient)]
+    [InlineData(Roles.Doctor)]
     public async Task CreateDoctor_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -660,8 +724,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Patient)]
     public async Task UpdateAuthenticatedDoctor_AuthenticatedUserIsNotDoctor_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -1049,8 +1113,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Doctor)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Doctor)]
+    [InlineData(Roles.Patient)]
     public async Task UpdateDoctorById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -1081,7 +1145,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
-        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId}};
+        var doctorToDelete = new Doctor { AppUser = new AppUser { Id = doctorId } };
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
 
@@ -1108,7 +1172,7 @@ public class DoctorControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = notDoctorId}
+            AppUser = new AppUser { Id = notDoctorId }
         };
         DbContext.Patients.Add(notDoctor);
         await DbContext.SaveChangesAsync();
@@ -1152,8 +1216,8 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Doctor)]
-    [InlineData(RoleTypes.Patient)]
+    [InlineData(Roles.Doctor)]
+    [InlineData(Roles.Patient)]
     public async Task DeleteDoctorById_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -1187,7 +1251,7 @@ public class DoctorControllerTests : IntegrationTest
             }
         };
         DbContext.Doctors.Add(newDoctor);
-        var doctorRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Doctor)!.Id;
+        var doctorRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == Roles.Doctor)!.Id;
         DbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = newDoctor.AppUser.Id,

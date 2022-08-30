@@ -4,7 +4,6 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Appointments.GetFilteredAppointments;
@@ -21,11 +20,10 @@ public class GetFilteredAppointmentsHandler
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<PagedResponse<AppointmentSearchResponse>>> Handle(
+    public Task<HttpResult<PagedResponse<AppointmentSearchResponse>>> Handle(
         GetFilteredAppointmentsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = new HttpResult<PagedResponse<AppointmentSearchResponse>>();
         var appointmentsQueryable = _appointmentRepository.GetAll()
             .Include(a => a.Type)
             .Include(a => a.Status)
@@ -49,16 +47,6 @@ public class GetFilteredAppointmentsHandler
             .OrderBy(a => a.Date)
             .Select(a => _mapper.Map<AppointmentSearchResponse>(a));
 
-        var pagedResult = PaginationUtils.CreatePagedResponse(
-            recordsQueryable: responsesQueryable,
-            paginationFilter: request.PaginationFilter,
-            totalRecords: await appointmentsQueryable.CountAsync(cancellationToken: cancellationToken)
-        );
-        if (pagedResult.IsFailed)
-            return result
-                .WithError(pagedResult.Error)
-                .WithStatusCode(StatusCodes.Status400BadRequest);
-
-        return result.WithValue(pagedResult.Value!);
+        return Task.FromResult(PaginationUtils.CreatePagedHttpResult(responsesQueryable, request.PaginationFilter));
     }
 }

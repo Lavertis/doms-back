@@ -1,6 +1,6 @@
 ﻿namespace DoctorsOffice.Domain.Enums;
 
-public readonly record struct RoleTypes
+public readonly record struct Roles
 {
     public const string Admin = nameof(Admin);
     public const string Patient = nameof(Patient);

@@ -13,7 +13,7 @@ namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
 [Route("api/patients")]
-[Authorize(Roles = RoleTypes.Patient)]
+[Authorize(Roles = Roles.Patient)]
 public class PatientController : BaseController
 {
     public PatientController(IMediator mediator) : base(mediator)

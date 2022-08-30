@@ -77,7 +77,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         {
             UserName = TestAdminUserName
         };
-        await CreateUserAsync(testAdminUser, TestAdminPassword, RoleTypes.Admin);
+        await CreateUserAsync(testAdminUser, TestAdminPassword, Roles.Admin);
         var testAdmin = new Admin {Id = testAdminUser.Id,};
         await DbContext.Admins.AddAsync(testAdmin);
 
@@ -85,7 +85,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         {
             UserName = TestDoctorUserName
         };
-        await CreateUserAsync(testDoctorUser, TestDoctorPassword, RoleTypes.Doctor);
+        await CreateUserAsync(testDoctorUser, TestDoctorPassword, Roles.Doctor);
         var testDoctor = new Doctor {Id = testDoctorUser.Id,};
         await DbContext.Doctors.AddAsync(testDoctor);
 
@@ -95,7 +95,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             Email = "testPatientEmail@mail.com",
             PhoneNumber = "1234567890",
         };
-        await CreateUserAsync(testPatientUser, TestPatientPassword, RoleTypes.Patient);
+        await CreateUserAsync(testPatientUser, TestPatientPassword, Roles.Patient);
         var testPatient = new Patient
         {
             Id = testPatientUser.Id,
@@ -123,9 +123,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         return roleName switch
         {
-            RoleTypes.Admin => await AuthenticateAsAdminAsync(client),
-            RoleTypes.Doctor => await AuthenticateAsDoctorAsync(client),
-            RoleTypes.Patient => await AuthenticateAsPatientAsync(client),
+            Roles.Admin => await AuthenticateAsAdminAsync(client),
+            Roles.Doctor => await AuthenticateAsDoctorAsync(client),
+            Roles.Patient => await AuthenticateAsPatientAsync(client),
             _ => throw new ArgumentException($"Unknown role name: {roleName}")
         };
     }

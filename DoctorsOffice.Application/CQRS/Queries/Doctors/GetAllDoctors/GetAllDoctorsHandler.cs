@@ -2,12 +2,13 @@
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
 
-public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResult<IEnumerable<DoctorResponse>>>
+public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResult<PagedResponse<DoctorResponse>>>
 {
     private readonly IDoctorRepository _doctorRepository;
     private readonly IMapper _mapper;
@@ -18,16 +19,13 @@ public class GetAllDoctorsHandler : IRequestHandler<GetAllDoctorsQuery, HttpResu
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<DoctorResponse>>> Handle(GetAllDoctorsQuery request,
+    public Task<HttpResult<PagedResponse<DoctorResponse>>> Handle(GetAllDoctorsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = new HttpResult<IEnumerable<DoctorResponse>>();
+        var doctorResponsesQueryable = _doctorRepository.GetAll()
+            .Include(a => a.AppUser)
+            .Select(doctor => _mapper.Map<DoctorResponse>(doctor));
 
-        var doctorResponses = await _doctorRepository.GetAll()
-            .Include(doctor => doctor.AppUser)
-            .Select(doctor => _mapper.Map<DoctorResponse>(doctor))
-            .ToListAsync(cancellationToken: cancellationToken);
-
-        return result.WithValue(doctorResponses);
+        return Task.FromResult(PaginationUtils.CreatePagedHttpResult(doctorResponsesQueryable, request.PaginationFilter));
     }
 }

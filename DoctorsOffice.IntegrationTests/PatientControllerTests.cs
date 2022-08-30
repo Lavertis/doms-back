@@ -46,13 +46,13 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Doctor)]
-    public async Task GetAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(string roleType)
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Doctor)]
+    public async Task GetAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(string role)
     {
         // arrange
         var client = await GetHttpClientAsync();
-        await AuthenticateAsRoleAsync(client, roleType);
+        await AuthenticateAsRoleAsync(client, role);
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/current");
@@ -586,8 +586,8 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Doctor)]
     public async Task UpdateAuthenticatedPatient_AuthenticatedUserOtherThanPatient_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -906,8 +906,8 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(RoleTypes.Admin)]
-    [InlineData(RoleTypes.Doctor)]
+    [InlineData(Roles.Admin)]
+    [InlineData(Roles.Doctor)]
     public async Task DeleteAuthenticatedPatient_AuthenticatedUserIsNotPatient_ReturnsForbidden(string roleName)
     {
         // arrange
@@ -973,7 +973,7 @@ public class PatientControllerTests : IntegrationTest
             }
         };
         DbContext.Patients.Add(newPatient);
-        var patientRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == RoleTypes.Patient)!.Id;
+        var patientRoleId = DbContext.Roles.FirstOrDefault(r => r.Name == Roles.Patient)!.Id;
         DbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = newPatient.AppUser.Id,
