@@ -32,12 +32,8 @@ if (!app.Environment.IsDevelopment())
     DatabaseUtils.ApplyMigrations(app.Services);
 }
 
-if (!app.Environment.IsProduction())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCorsModule(builder.Configuration.GetSection("Cors").Get<CorsSettings>());
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();

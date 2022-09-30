@@ -17,7 +17,7 @@ public static class DatabaseModule
         return aspnetcoreEnvironment switch
         {
             "Development" => configuration.GetConnectionString("AppDb"),
-            "Staging" => GetHerokuConnectionString()!,
+            "Production" => GetHerokuConnectionString()!,
             _ => throw new Exception("Wrong ASPNETCORE_ENVIRONMENT value")
         };
     }
