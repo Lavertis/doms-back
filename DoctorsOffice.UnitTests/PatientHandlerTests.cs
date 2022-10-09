@@ -236,6 +236,9 @@ public class PatientHandlerTests : UnitTest
             case "LastName":
                 result.Value!.LastName.Should().Be(fieldValue);
                 break;
+            case "NationalId":
+                result.Value!.NationalId.Should().Be(fieldValue);
+                break;
             case "Email":
                 result.Value!.Email.Should().Be(fieldValue);
                 break;

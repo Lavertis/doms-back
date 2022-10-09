@@ -17,7 +17,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
                 .WithMessage("Username must be at least 4 characters long")
                 .MaximumLength(16)
                 .WithMessage("Username must be at most 16 characters long")
-                .MustAsync(async (userName, _) => (await appUserManager.FindByNameAsync(userName)).IsFailed)
+                .MustAsync(async (userName, _) => (await appUserManager.FindByNameAsync(userName)).IsError)
                 .WithMessage("Username already exists");
         });
 
@@ -26,7 +26,7 @@ public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorReques
             RuleFor(e => e.Email)
                 .EmailAddress()
                 .WithMessage("Email must be a valid email address")
-                .MustAsync(async (email, _) => (await appUserManager.FindByEmailAsync(email)).IsFailed)
+                .MustAsync(async (email, _) => (await appUserManager.FindByEmailAsync(email)).IsError)
                 .WithMessage("Email already exists");
         });
 

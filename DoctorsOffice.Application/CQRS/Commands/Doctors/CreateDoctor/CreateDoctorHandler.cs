@@ -37,20 +37,15 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
             Password = request.Password,
             RoleName = Roles.Doctor
         });
-        if (createUserResult.IsFailed || createUserResult.Value is null)
+        if (createUserResult.IsError || createUserResult.HasValidationErrors)
         {
-            if (createUserResult.ErrorField is not null && createUserResult.Error is not null)
-            {
-                return result
-                    .WithFieldError(createUserResult.ErrorField, createUserResult.Error)
-                    .WithStatusCode(createUserResult.StatusCode);
-            }
-
+            if (createUserResult.HasValidationErrors)
+                return result.WithValidationErrors(createUserResult.ValidationErrors);
             return result.WithError(createUserResult.Error).WithStatusCode(createUserResult.StatusCode);
         }
 
-        var newAppUser = createUserResult.Value;
-        var newDoctor = new Doctor { AppUser = newAppUser };
+        var newAppUser = createUserResult.Value!;
+        var newDoctor = new Doctor {AppUser = newAppUser};
 
         var doctorEntity = await _doctorRepository.CreateAsync(newDoctor);
         var doctorResponse = _mapper.Map<DoctorResponse>(doctorEntity);

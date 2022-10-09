@@ -25,7 +25,7 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
                 .WithMessage("Username must be at least 4 characters long")
                 .MaximumLength(16)
                 .WithMessage("Username must be at most 16 characters long")
-                .MustAsync(async (userName, _) => (await appUserManager.FindByNameAsync(userName)).IsFailed)
+                .MustAsync(async (userName, _) => (await appUserManager.FindByNameAsync(userName)).IsError)
                 .WithMessage("Username already exists");
         });
 
@@ -50,9 +50,16 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
             RuleFor(e => e.Email)
                 .EmailAddress()
                 .WithMessage("Email must be a valid email address")
-                .MustAsync(async (email, _) => (await appUserManager.FindByEmailAsync(email)).IsFailed)
+                .MustAsync(async (email, _) => (await appUserManager.FindByEmailAsync(email)).IsError)
                 .WithMessage("Email already exists");
         });
+
+        RuleFor(e => e.NationalId)
+            .NotEmpty()
+            .WithMessage("National ID is required")
+            .MaximumLength(50)
+            .WithMessage("National ID must be at most 50 characters long")
+            .When(e => e.NationalId is not null);
 
         RuleFor(e => e.PhoneNumber)
             .NotEmpty()
@@ -88,7 +95,7 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
             {
                 var result =
                     await appUserManager.ValidatePasswordAsync(authenticatedUser.UserName, currentPassword);
-                return result.IsSuccess && result.Value;
+                return !result.IsError && result.Value;
             })
             .WithMessage("Current password is incorrect");
     }

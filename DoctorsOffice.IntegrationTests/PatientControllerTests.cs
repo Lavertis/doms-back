@@ -104,6 +104,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
+            NationalId = "123456789",
             PhoneNumber = "123456789",
             Address = "testAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -197,6 +198,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "firstName",
             LastName = "lastName",
             Address = "address",
+            NationalId = "",
             AppUser = new AppUser
             {
                 UserName = createPatientRequest.UserName,
@@ -239,6 +241,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "firstName",
             LastName = "lastName",
             Address = "address",
+            NationalId = "123456789",
             AppUser = new AppUser
             {
                 UserName = "conflictingPatient",
@@ -325,6 +328,7 @@ public class PatientControllerTests : IntegrationTest
             Email = "test@test.com",
             PhoneNumber = "123456789",
             Address = "testAddress",
+            NationalId = "123456789",
             DateOfBirth = DateTime.Parse("2020-07-10T04:12:34"),
             Password = "testPassword12345#",
             ConfirmPassword = "testPassword12345#"
@@ -360,6 +364,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -369,12 +374,13 @@ public class PatientControllerTests : IntegrationTest
         var authenticatedPatientId =
             await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
 
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest()
+        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
             UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
+            NationalId = "987654321",
             PhoneNumber = "123456789",
             Address = "testAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
@@ -422,6 +428,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -434,6 +441,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName2",
             LastName = "oldLastName2",
             Email = "oldEmail2@mail.com",
+            NationalId = "987654321",
             Address = "oldAddress2",
             PhoneNumber = "123455789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -473,6 +481,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -485,6 +494,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName2",
             LastName = "oldLastName2",
             Email = "oldEmail2@mail.com",
+            NationalId = "987654321",
             Address = "oldAddress2",
             PhoneNumber = "123457789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -523,6 +533,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -561,6 +572,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -646,6 +658,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -682,6 +695,7 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("PhoneNumber", "999999999")]
     [InlineData("UserName", "newUserName")]
     [InlineData("Email", "newMail@mail.com")]
+    [InlineData("NationalId", "123456789")]
     public async Task UpdateAuthenticatedPatient_SingleFiledPresent_UpdatesField(string fieldName, string fieldValue)
     {
         var client = await GetHttpClientAsync();
@@ -696,6 +710,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -746,6 +761,9 @@ public class PatientControllerTests : IntegrationTest
                 updatedPatient.AppUser.Email.Should().Be(fieldValue);
                 updatedPatient.AppUser.NormalizedEmail.Should().Be(fieldValue.ToUpper());
                 break;
+            case "NationalId":
+                updatedPatient.NationalId.Should().Be(fieldValue);
+                break;
             case "Address":
                 updatedPatient.Address.Should().Be(fieldValue);
                 break;
@@ -774,6 +792,7 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("UserName", "")]
     [InlineData("Email", "")]
     [InlineData("Email", "aaa")]
+    [InlineData("NationalId", "")]
     public async Task UpdateAuthenticatedPatient_SingleInvalidField_ReturnsBadRequest(string fieldName,
         string fieldValue)
     {
@@ -789,6 +808,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "987654321",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -831,6 +851,9 @@ public class PatientControllerTests : IntegrationTest
             case "Email":
                 updatedPatient.AppUser.Email.Should().NotBe(fieldValue);
                 break;
+            case "NationalId":
+                updatedPatient.NationalId.Should().NotBe(fieldValue);
+                break;
             case "Address":
                 updatedPatient.Address.Should().NotBe(fieldValue);
                 break;
@@ -860,6 +883,7 @@ public class PatientControllerTests : IntegrationTest
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
+            NationalId = "123456789",
             Address = "oldAddress",
             PhoneNumber = "123456789",
             DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
@@ -961,6 +985,7 @@ public class PatientControllerTests : IntegrationTest
             LastName = createPatientCommand.LastName,
             Address = createPatientCommand.Address,
             DateOfBirth = createPatientCommand.DateOfBirth,
+            NationalId = createPatientCommand.NationalId,
             AppUser = new AppUser
             {
                 UserName = createPatientCommand.UserName,

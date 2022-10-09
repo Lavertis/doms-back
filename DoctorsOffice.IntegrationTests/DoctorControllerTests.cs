@@ -99,7 +99,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
 
         await DbContext.SaveChangesAsync();
 
@@ -175,7 +175,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
 
         await DbContext.SaveChangesAsync();
 
@@ -205,7 +205,7 @@ public class DoctorControllerTests : IntegrationTest
         const int pageNumber = 2;
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor { AppUser = new AppUser() });
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
 
         await DbContext.SaveChangesAsync();
 
@@ -817,6 +817,7 @@ public class DoctorControllerTests : IntegrationTest
             FirstName = "FirstName",
             LastName = "LastName",
             Address = "Address",
+            NationalId = "",
             AppUser = new AppUser
             {
                 Id = patientId,
@@ -1145,7 +1146,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
-        var doctorToDelete = new Doctor { AppUser = new AppUser { Id = doctorId } };
+        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId}};
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
 
@@ -1172,7 +1173,8 @@ public class DoctorControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = notDoctorId }
+            NationalId = "",
+            AppUser = new AppUser {Id = notDoctorId}
         };
         DbContext.Patients.Add(notDoctor);
         await DbContext.SaveChangesAsync();

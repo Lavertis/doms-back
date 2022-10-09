@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,24 +17,13 @@ public abstract class BaseController : ControllerBase
 
     protected ActionResult<TValue> CreateResponse<TValue>(HttpResult<TValue> result)
     {
-        switch (result.StatusCode)
+        return result.StatusCode switch
         {
-            case >= 200 and < 300:
-                return StatusCode(result.StatusCode, result.Value);
-            default:
-            {
-                if (!string.IsNullOrEmpty(result.ErrorField))
-                    return StatusCode(result.StatusCode, CreateFieldError(result.ErrorField, result.Error));
-                return StatusCode(result.StatusCode, result.Error);
-            }
-        }
-    }
-
-    private static object CreateFieldError(string fieldName, Error? error)
-    {
-        var errors = new Dictionary<string, Collection<string?>>();
-        errors.Add(fieldName, new Collection<string?> {error?.Message});
-        return new {errors};
+            >= 200 and < 300 => StatusCode(result.StatusCode, result.Value),
+            _ when result.IsError => StatusCode(result.StatusCode, new {Error = new {result.Error?.Message}}),
+            _ when result.HasValidationErrors => StatusCode(result.StatusCode, new {Errors = result.ValidationErrors}),
+            _ => throw new Exception("Failed to created response")
+        };
     }
 
     protected Guid JwtSubject()

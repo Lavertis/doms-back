@@ -6,11 +6,16 @@ namespace DoctorsOffice.Domain.Entities;
 [Table("Prescriptions")]
 public class Prescription : BaseEntity
 {
-    public string Title { get; set; } = null!;
-    public string Description { get; set; } = null!;
+    public DateTime FulfillmentDeadline { get; set; }
+
     public Doctor Doctor { get; set; } = default!;
     public Guid DoctorId { get; set; }
+
     public Patient Patient { get; set; } = default!;
     public Guid PatientId { get; set; }
-    public IList<DrugItem> DrugItems { get; set; } = default!;
+
+    public Appointment? Appointment { get; set; }
+    public Guid? AppointmentId { get; set; }
+
+    public List<DrugItem> DrugItems { get; set; } = new();
 }

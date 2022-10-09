@@ -10,24 +10,20 @@ public class UpdatePrescriptionRequestValidator : AbstractValidator<UpdatePrescr
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Title)
-            .NotEmpty()
-            .WithMessage("Cannot be empty")
-            .When(x => x.Title != null);
-
-        RuleFor(x => x.Description)
-            .NotEmpty()
-            .WithMessage("Cannot be empty")
-            .When(x => x.Description != null);
-
         RuleFor(x => x.PatientId)
-            .MustAsync(async (id, cancellationToken) => await patientRepository.ExistsByIdAsync(id!.Value))
+            .MustAsync(async (id, _) => await patientRepository.ExistsByIdAsync(id!.Value))
             .WithMessage("Patient with specified id does not exist")
             .When(x => x.PatientId is not null);
 
-        RuleFor(x => x.DrugIds)
+        RuleFor(x => x.FulfillmentDeadline)
             .NotEmpty()
-            .WithMessage("Drugs ids must be specified")
-            .When(x => x.DrugIds is not null);
+            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .WithMessage("Fulfillment deadline cannot be in the past")
+            .When(x => x.FulfillmentDeadline is not null);
+
+        RuleFor(x => x.DrugItems)
+            .NotEmpty()
+            .WithMessage("DrugItems cannot be empty if not null")
+            .When(x => x.DrugItems is not null);
     }
 }

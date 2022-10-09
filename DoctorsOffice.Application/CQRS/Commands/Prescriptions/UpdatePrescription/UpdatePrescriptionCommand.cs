@@ -7,18 +7,16 @@ namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescripti
 
 public class UpdatePrescriptionCommand : IRequest<HttpResult<PrescriptionResponse>>
 {
-    public readonly string? Description;
-    public readonly IList<Guid>? DrugsIds;
+    public readonly IList<CreateDrugItemRequest>? DrugItems;
+    public readonly DateTime? FulfillmentDeadline;
     public readonly Guid? PatientId;
     public readonly Guid PrescriptionId;
-    public readonly string? Title;
 
     public UpdatePrescriptionCommand(UpdatePrescriptionRequest request, Guid prescriptionId)
     {
         PrescriptionId = prescriptionId;
-        Title = request.Title;
-        Description = request.Description;
         PatientId = request.PatientId;
-        DrugsIds = request.DrugIds;
+        DrugItems = request.DrugItems;
+        FulfillmentDeadline = request.FulfillmentDeadline;
     }
 }

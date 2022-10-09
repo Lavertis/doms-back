@@ -9,6 +9,9 @@ public class UpdateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>
 {
     public readonly DateTime? Date;
     public readonly string? Description;
+    public readonly string? Diagnosis;
+    public readonly string? Interview;
+    public readonly string? Recommendations;
     public readonly string? Status;
     public readonly string? Type;
 
@@ -18,6 +21,9 @@ public class UpdateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>
         Description = request.Description;
         Type = request.Type;
         Status = request.Status;
+        Interview = request.Interview;
+        Diagnosis = request.Diagnosis;
+        Recommendations = request.Recommendations;
     }
 
     public string RoleName { get; set; } = null!;

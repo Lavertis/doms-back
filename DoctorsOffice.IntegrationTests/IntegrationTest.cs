@@ -101,6 +101,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             Id = testPatientUser.Id,
             FirstName = "testPatientFirstName",
             LastName = "testPatientLastName",
+            NationalId = "1234567890",
             Address = "testPatientAddress"
         };
         await DbContext.Patients.AddAsync(testPatient);

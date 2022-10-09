@@ -9,22 +9,22 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DoctorsOfficeApi.Migrations
+namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220727022911_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20221009205221_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.2")
+                .HasAnnotation("ProductVersion", "6.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.Appointment", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Appointment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,11 +40,20 @@ namespace DoctorsOfficeApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Diagnosis")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Interview")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("PatientId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Recommendations")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("StatusId")
                         .HasColumnType("uuid");
@@ -68,7 +77,7 @@ namespace DoctorsOfficeApi.Migrations
                     b.ToTable("Appointments");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.AppointmentStatus", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.AppointmentStatus", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -91,42 +100,42 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("86d74701-f4ef-42f8-a360-52f8bee7c44d"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Pending",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("4c96f5d6-0515-4139-b4bd-59a65d01e6a1"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("8445a2f4-97cd-45c9-921f-f649f85cc0be"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Accepted",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
-                            Id = new Guid("2e7f4e81-9ade-4674-b460-a2c85591c5dc"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Rejected",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("ad8e470f-8676-47cc-a26c-5a7b748067a6"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("ccbb0db5-1661-4f9b-9482-67280ebdb6b5"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Cancelled",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
-                            Id = new Guid("fdec7c40-7761-4f9d-8e2e-47c7ecde2268"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Id = new Guid("5de8a7ba-fb65-464f-9583-181d20d44b1b"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Completed",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Pending",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("1cf993e4-73f2-497f-ad38-bccb4b4d0eee"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Rejected",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.AppointmentType", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.AppointmentType", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,21 +158,21 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a902aeed-24b1-411d-bbfa-c5cfb185bd50"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Consultation",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Id = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Checkup",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
-                            Id = new Guid("66b7b052-0319-4dae-8431-970c4c2dba18"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Checkup",
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Id = new Guid("532ec4d6-a4ad-4ece-a0b5-9f03e1033bf5"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Consultation",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.AppRole", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.AppRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -192,28 +201,28 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b45f3c60-81bd-4476-a29e-62660ed26c7a"),
-                            ConcurrencyStamp = "17a90cd0-7d66-4483-88be-eca29d6eab29",
+                            Id = new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4"),
+                            ConcurrencyStamp = "6506ab69-c793-4d0a-87d4-6565e98523d4",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = new Guid("03e30ba1-e798-4c28-be7f-94d6c523ee99"),
-                            ConcurrencyStamp = "4273fadf-2245-4079-96d5-d0d8d6fa73af",
+                            Id = new Guid("d4349d0c-d18c-4324-be02-254ad1208004"),
+                            ConcurrencyStamp = "d4349d0c-d18c-4324-be02-254ad1208004",
                             Name = "Patient",
                             NormalizedName = "PATIENT"
                         },
                         new
                         {
-                            Id = new Guid("1dad4b95-dda7-459e-a2fb-a2734edbbc42"),
-                            ConcurrencyStamp = "31ad518f-7b40-481d-9b74-fbbe59707e98",
+                            Id = new Guid("80389a16-fbd0-4db1-b655-05a29d202a75"),
+                            ConcurrencyStamp = "80389a16-fbd0-4db1-b655-05a29d202a75",
                             Name = "Doctor",
                             NormalizedName = "DOCTOR"
                         });
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.DrugItem", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.DrugItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -222,8 +231,22 @@ namespace DoctorsOfficeApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("PrescriptionId")
+                    b.Property<string>("Dosage")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PrescriptionId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("Rxcui")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -235,33 +258,33 @@ namespace DoctorsOfficeApi.Migrations
                     b.ToTable("DrugItems");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.Prescription", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("FulfillmentDeadline")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("PatientId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
 
                     b.HasIndex("DoctorId");
 
@@ -270,7 +293,7 @@ namespace DoctorsOfficeApi.Migrations
                     b.ToTable("Prescriptions");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Admin", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Admin", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -288,13 +311,13 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Id = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.AppUser", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,20 +378,20 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490"),
+                            Id = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "4be317a9-0a4c-41ad-aa05-6f9036770976",
+                            ConcurrencyStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
                             EmailConfirmed = false,
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEK/Bbl+Uq3lc5vR36ZhD0nsOds77SCAkGb1JdJx93Iv8/iZwoviOHabYelApSXO3xg==",
+                            PasswordHash = "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "1700a4b4-b1f5-4f92-902b-5d0444a38bf2",
+                            SecurityStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Doctor", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Doctor", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -384,7 +407,7 @@ namespace DoctorsOfficeApi.Migrations
                     b.ToTable("Doctors");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Patient", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Patient", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -404,6 +427,10 @@ namespace DoctorsOfficeApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NationalId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -501,8 +528,8 @@ namespace DoctorsOfficeApi.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490"),
-                            RoleId = new Guid("b45f3c60-81bd-4476-a29e-62660ed26c7a")
+                            UserId = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
+                            RoleId = new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4")
                         });
                 });
 
@@ -525,27 +552,27 @@ namespace DoctorsOfficeApi.Migrations
                     b.ToTable("AspNetUserTokens", null, t => t.ExcludeFromMigrations());
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.Appointment", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Appointment", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.Doctor", "Doctor")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.Patient", "Patient")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DoctorsOfficeApi.Entities.AppointmentStatus", "Status")
+                    b.HasOne("DoctorsOffice.Domain.Entities.AppointmentStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DoctorsOfficeApi.Entities.AppointmentType", "Type")
+                    b.HasOne("DoctorsOffice.Domain.Entities.AppointmentType", "Type")
                         .WithMany()
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -560,35 +587,45 @@ namespace DoctorsOfficeApi.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.DrugItem", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.DrugItem", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.Prescription", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.Prescription", "Prescription")
                         .WithMany("DrugItems")
-                        .HasForeignKey("PrescriptionId");
+                        .HasForeignKey("PrescriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Prescription");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.Prescription", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.Doctor", "Doctor")
+                    b.HasOne("DoctorsOffice.Domain.Entities.Appointment", "Appointment")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("AppointmentId");
+
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.Patient", "Patient")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Appointment");
 
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Admin", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Admin", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", "AppUser")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", "AppUser")
                         .WithMany()
                         .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -597,9 +634,9 @@ namespace DoctorsOfficeApi.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.AppUser", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.AppUser", b =>
                 {
-                    b.OwnsMany("DoctorsOfficeApi.Entities.RefreshToken", "RefreshTokens", b1 =>
+                    b.OwnsMany("DoctorsOffice.Domain.Entities.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
@@ -649,9 +686,9 @@ namespace DoctorsOfficeApi.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Doctor", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Doctor", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", "AppUser")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", "AppUser")
                         .WithMany()
                         .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -660,9 +697,9 @@ namespace DoctorsOfficeApi.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.UserTypes.Patient", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Patient", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", "AppUser")
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", "AppUser")
                         .WithMany()
                         .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -673,7 +710,7 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.AppRole", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.AppRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -682,7 +719,7 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -691,7 +728,7 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -700,13 +737,13 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.AppRole", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.AppRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -715,14 +752,19 @@ namespace DoctorsOfficeApi.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("DoctorsOfficeApi.Entities.UserTypes.AppUser", null)
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DoctorsOfficeApi.Entities.Prescription", b =>
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Appointment", b =>
+                {
+                    b.Navigation("Prescriptions");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
                     b.Navigation("DrugItems");
                 });

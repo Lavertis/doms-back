@@ -14,5 +14,6 @@ public static class RepositoryModule
         services.AddScoped<IAppointmentStatusRepository, AppointmentStatusRepository>();
         services.AddScoped<IAppointmentTypeRepository, AppointmentTypeRepository>();
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+        services.AddScoped<IDrugItemRepository, DrugItemRepository>();
     }
 }

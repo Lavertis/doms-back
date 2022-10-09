@@ -52,12 +52,13 @@ public class AppointmentController : BaseController
     /// <summary>
     /// Returns all appointments matching search criteria sorted by date. Only for doctors
     /// </summary>
-    [HttpGet("doctor/current/search")]
+    [HttpGet("search")]
     [Authorize(Roles = Roles.Doctor)]
     public async Task<ActionResult<PagedResponse<AppointmentSearchResponse>>> GetAppointmentsFilteredAsync(
         DateTime? dateStart,
         DateTime? dateEnd,
         Guid? patientId,
+        Guid? doctorId,
         string? type,
         string? status,
         [FromQuery] PaginationFilter paginationFilter)
@@ -69,7 +70,7 @@ public class AppointmentController : BaseController
             Type = type,
             Status = status,
             PatientId = patientId,
-            DoctorId = JwtSubject()
+            DoctorId = doctorId
         }));
 
     /// <summary>

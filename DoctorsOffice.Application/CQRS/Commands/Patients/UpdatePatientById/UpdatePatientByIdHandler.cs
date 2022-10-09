@@ -45,6 +45,7 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
 
         patient.FirstName = request.FirstName ?? patient.FirstName;
         patient.LastName = request.LastName ?? patient.LastName;
+        patient.NationalId = request.NationalId ?? patient.NationalId;
         patient.Address = request.Address ?? patient.Address;
         patient.DateOfBirth = request.DateOfBirth ?? patient.DateOfBirth;
 

@@ -13,7 +13,6 @@ namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
 [Route("api/patients")]
-[Authorize(Roles = Roles.Patient)]
 public class PatientController : BaseController
 {
     public PatientController(IMediator mediator) : base(mediator)
@@ -21,9 +20,18 @@ public class PatientController : BaseController
     }
 
     /// <summary>
+    /// Get patient by id.
+    /// </summary>
+    [HttpGet("{id:guid}")]
+    [Authorize(Roles = Roles.Doctor)]
+    public async Task<ActionResult<PatientResponse>> GetPatientByIdAsync(Guid id)
+        => CreateResponse(await Mediator.Send(new GetPatientByIdQuery(id)));
+
+    /// <summary>
     /// Returns authenticated patient.
     /// </summary>
     [HttpGet("current")]
+    [Authorize(Roles = Roles.Patient)]
     public async Task<ActionResult<PatientResponse>> GetAuthenticatedPatientAsync()
         => CreateResponse(await Mediator.Send(new GetPatientByIdQuery(JwtSubject())));
 
@@ -39,6 +47,7 @@ public class PatientController : BaseController
     /// Updates account of the authenticated patient. Only for patients
     /// </summary>
     [HttpPatch("current")]
+    [Authorize(Roles = Roles.Patient)]
     public async Task<ActionResult<PatientResponse>> UpdateAuthenticatedPatientAsync(
         UpdateAuthenticatedPatientRequest request)
         => CreateResponse(await Mediator.Send(new UpdatePatientByIdCommand(request, JwtSubject())));
@@ -47,6 +56,7 @@ public class PatientController : BaseController
     /// Deletes account of the authenticated patient. Only for patients
     /// </summary>
     [HttpDelete("current")]
+    [Authorize(Roles = Roles.Patient)]
     public async Task<ActionResult<Unit>> DeleteAuthenticatedPatientAsync()
         => CreateResponse(await Mediator.Send(new DeletePatientByIdCommand(JwtSubject())));
 }

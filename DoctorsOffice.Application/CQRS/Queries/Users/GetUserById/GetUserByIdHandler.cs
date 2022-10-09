@@ -22,7 +22,7 @@ public class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, HttpResult<U
     {
         var result = new HttpResult<UserResponse>();
         var findByIdResult = await _appUserManager.FindByIdAsync(request.UserId);
-        if (findByIdResult.IsFailed || findByIdResult.Value is null)
+        if (findByIdResult.IsError || findByIdResult.Value is null)
         {
             return result
                 .WithError(findByIdResult.Error)

@@ -54,7 +54,7 @@ public class AuthControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task Authenticate_UserNameDoesntExist_ReturnsBadRequest()
+    public async Task Authenticate_UserNameDoesntExist_ReturnsNotFound()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -69,11 +69,11 @@ public class AuthControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/authenticate", request);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
-    public async Task Authenticate_PasswordIsIncorrect_ReturnsBadRequest()
+    public async Task Authenticate_PasswordIsIncorrect_ReturnsNotFound()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -99,7 +99,7 @@ public class AuthControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/authenticate", request);
 
         // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]

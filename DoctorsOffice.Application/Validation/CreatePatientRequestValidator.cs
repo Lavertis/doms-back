@@ -32,6 +32,12 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
             .MaximumLength(100)
             .WithMessage("First name must be at most 100 characters long");
 
+        RuleFor(e => e.NationalId)
+            .NotEmpty()
+            .WithMessage("National ID is required")
+            .MaximumLength(50)
+            .WithMessage("National ID must be at most 50 characters long");
+
         RuleFor(e => e.Email)
             .NotEmpty()
             .WithMessage("Email is required")

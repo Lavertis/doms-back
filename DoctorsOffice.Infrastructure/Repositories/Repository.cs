@@ -33,6 +33,14 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return createdEntity;
     }
 
+    public virtual async Task<IEnumerable<TEntity>> CreateRangeAsync(List<TEntity> entities)
+    {
+        entities.ForEach(e => e.Id = e.Id == Guid.Empty ? Guid.NewGuid() : e.Id);
+        await DbContext.Set<TEntity>().AddRangeAsync(entities);
+        await DbContext.SaveChangesAsync();
+        return entities;
+    }
+
     public virtual async Task<TEntity> UpdateAsync(TEntity entity)
     {
         var updatedEntity = DbContext.Set<TEntity>().Update(entity).Entity;

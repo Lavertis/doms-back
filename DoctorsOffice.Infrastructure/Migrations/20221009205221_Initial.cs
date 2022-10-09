@@ -4,9 +4,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace DoctorsOfficeApi.Migrations
+namespace DoctorsOffice.Infrastructure.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -206,6 +206,7 @@ namespace DoctorsOfficeApi.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: false),
                     LastName = table.Column<string>(type: "text", nullable: false),
+                    NationalId = table.Column<string>(type: "text", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -256,6 +257,9 @@ namespace DoctorsOfficeApi.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
+                    Interview = table.Column<string>(type: "text", nullable: true),
+                    Diagnosis = table.Column<string>(type: "text", nullable: true),
+                    Recommendations = table.Column<string>(type: "text", nullable: true),
                     PatientId = table.Column<Guid>(type: "uuid", nullable: false),
                     DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
                     StatusId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -297,16 +301,21 @@ namespace DoctorsOfficeApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
+                    FulfillmentDeadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
                     PatientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AppointmentId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Prescriptions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Prescriptions_Appointments_AppointmentId",
+                        column: x => x.AppointmentId,
+                        principalTable: "Appointments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Prescriptions_Doctors_DoctorId",
                         column: x => x.DoctorId,
@@ -326,7 +335,11 @@ namespace DoctorsOfficeApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PrescriptionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Rxcui = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    Dosage = table.Column<string>(type: "text", nullable: false),
+                    PrescriptionId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -337,7 +350,8 @@ namespace DoctorsOfficeApi.Migrations
                         name: "FK_DrugItems_Prescriptions_PrescriptionId",
                         column: x => x.PrescriptionId,
                         principalTable: "Prescriptions",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -345,11 +359,11 @@ namespace DoctorsOfficeApi.Migrations
                 columns: new[] { "Id", "CreatedAt", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e7f4e81-9ade-4674-b460-a2c85591c5dc"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Rejected", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("4c96f5d6-0515-4139-b4bd-59a65d01e6a1"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Accepted", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("86d74701-f4ef-42f8-a360-52f8bee7c44d"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Pending", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("ad8e470f-8676-47cc-a26c-5a7b748067a6"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Cancelled", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("fdec7c40-7761-4f9d-8e2e-47c7ecde2268"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Completed", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("1cf993e4-73f2-497f-ad38-bccb4b4d0eee"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Rejected", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("5de8a7ba-fb65-464f-9583-181d20d44b1b"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Completed", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("8445a2f4-97cd-45c9-921f-f649f85cc0be"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Accepted", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Pending", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("ccbb0db5-1661-4f9b-9482-67280ebdb6b5"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Cancelled", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) }
                 });
 
             migrationBuilder.InsertData(
@@ -357,8 +371,8 @@ namespace DoctorsOfficeApi.Migrations
                 columns: new[] { "Id", "CreatedAt", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { new Guid("66b7b052-0319-4dae-8431-970c4c2dba18"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Checkup", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("a902aeed-24b1-411d-bbfa-c5cfb185bd50"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "Consultation", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("532ec4d6-a4ad-4ece-a0b5-9f03e1033bf5"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Consultation", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "Checkup", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) }
                 });
 
             migrationBuilder.InsertData(
@@ -366,25 +380,25 @@ namespace DoctorsOfficeApi.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { new Guid("03e30ba1-e798-4c28-be7f-94d6c523ee99"), "4273fadf-2245-4079-96d5-d0d8d6fa73af", "Patient", "PATIENT" },
-                    { new Guid("1dad4b95-dda7-459e-a2fb-a2734edbbc42"), "31ad518f-7b40-481d-9b74-fbbe59707e98", "Doctor", "DOCTOR" },
-                    { new Guid("b45f3c60-81bd-4476-a29e-62660ed26c7a"), "17a90cd0-7d66-4483-88be-eca29d6eab29", "Admin", "ADMIN" }
+                    { new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4"), "6506ab69-c793-4d0a-87d4-6565e98523d4", "Admin", "ADMIN" },
+                    { new Guid("80389a16-fbd0-4db1-b655-05a29d202a75"), "80389a16-fbd0-4db1-b655-05a29d202a75", "Doctor", "DOCTOR" },
+                    { new Guid("d4349d0c-d18c-4324-be02-254ad1208004"), "d4349d0c-d18c-4324-be02-254ad1208004", "Patient", "PATIENT" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490"), 0, "4be317a9-0a4c-41ad-aa05-6f9036770976", null, false, null, "ADMIN", "AQAAAAEAACcQAAAAEK/Bbl+Uq3lc5vR36ZhD0nsOds77SCAkGb1JdJx93Iv8/iZwoviOHabYelApSXO3xg==", null, false, "1700a4b4-b1f5-4f92-902b-5d0444a38bf2", false, "admin" });
+                values: new object[] { new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"), 0, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", null, false, null, "ADMIN", "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==", null, false, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "Admins",
                 columns: new[] { "Id", "CreatedAt", "UpdatedAt" },
-                values: new object[] { new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) });
+                values: new object[] { new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("b45f3c60-81bd-4476-a29e-62660ed26c7a"), new Guid("2caf0c35-5290-4bc2-8294-4aecafa16490") });
+                values: new object[] { new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4"), new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
@@ -449,6 +463,11 @@ namespace DoctorsOfficeApi.Migrations
                 column: "PrescriptionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Prescriptions_AppointmentId",
+                table: "Prescriptions",
+                column: "AppointmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Prescriptions_DoctorId",
                 table: "Prescriptions",
                 column: "DoctorId");
@@ -470,9 +489,6 @@ namespace DoctorsOfficeApi.Migrations
                 name: "Admins");
 
             migrationBuilder.DropTable(
-                name: "Appointments");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -491,16 +507,19 @@ namespace DoctorsOfficeApi.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "AppointmentStatuses");
-
-            migrationBuilder.DropTable(
-                name: "AppointmentTypes");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Prescriptions");
+
+            migrationBuilder.DropTable(
+                name: "Appointments");
+
+            migrationBuilder.DropTable(
+                name: "AppointmentStatuses");
+
+            migrationBuilder.DropTable(
+                name: "AppointmentTypes");
 
             migrationBuilder.DropTable(
                 name: "Doctors");

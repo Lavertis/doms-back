@@ -28,15 +28,7 @@ public class UserService : IUserService
         var validationResult =
             await new CreateUserRequestValidator(_appUserManager, _appRoleManager).ValidateAsync(request);
         if (!validationResult.IsValid)
-        {
-            var firstFailure = validationResult.Errors.FirstOrDefault();
-            if (firstFailure is not null)
-            {
-                return result
-                    .WithFieldError(firstFailure.PropertyName, new Error {Message = firstFailure.ErrorMessage})
-                    .WithStatusCode(StatusCodes.Status400BadRequest);
-            }
-        }
+            return result.WithValidationErrors(validationResult.Errors);
 
         var user = _mapper.Map<AppUser>(request);
 
@@ -65,18 +57,10 @@ public class UserService : IUserService
 
         var validationResult = await new UpdateUserRequestValidator(_appUserManager).ValidateAsync(request);
         if (!validationResult.IsValid)
-        {
-            var firstFailure = validationResult.Errors.FirstOrDefault();
-            if (firstFailure is not null)
-            {
-                return result
-                    .WithFieldError(firstFailure.PropertyName, new Error {Message = firstFailure.ErrorMessage})
-                    .WithStatusCode(StatusCodes.Status400BadRequest);
-            }
-        }
+            return result.WithValidationErrors(validationResult.Errors);
 
         var findByIdResult = await _appUserManager.FindByIdAsync(userId);
-        if (findByIdResult.IsFailed || findByIdResult.Value is null)
+        if (findByIdResult.IsError || findByIdResult.Value is null)
         {
             return result
                 .WithError(new Error {Message = "User with requested id does not exist"})

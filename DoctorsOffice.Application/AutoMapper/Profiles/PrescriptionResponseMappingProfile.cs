@@ -8,8 +8,8 @@ public class PrescriptionResponseMappingProfile : Profile
 {
     public PrescriptionResponseMappingProfile()
     {
-        CreateMap<Prescription, PrescriptionResponse>()
-            .ForMember(d => d.DrugsIds, opt =>
-                opt.MapFrom(prescription => prescription.DrugItems.Select(drugItem => drugItem.Id)));
+        CreateMap<Prescription, PrescriptionResponse>();
+        // .ForMember(d => d.DrugItems, opt =>
+        //     opt.MapFrom(prescription => prescription.DrugItems.Select(drugItem => drugItem.Id)));
     }
 }

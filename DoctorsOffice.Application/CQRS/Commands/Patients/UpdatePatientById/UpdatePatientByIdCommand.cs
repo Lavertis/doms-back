@@ -13,6 +13,7 @@ public class UpdatePatientByIdCommand : IRequest<HttpResult<PatientResponse>>
     public readonly string? Email;
     public readonly string? FirstName;
     public readonly string? LastName;
+    public readonly string? NationalId;
     public readonly string? NewPassword;
     public readonly Guid PatientId;
     public readonly string? PhoneNumber;
@@ -24,6 +25,7 @@ public class UpdatePatientByIdCommand : IRequest<HttpResult<PatientResponse>>
         UserName = request.UserName;
         FirstName = request.FirstName;
         LastName = request.LastName;
+        NationalId = request.NationalId;
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
         Address = request.Address;

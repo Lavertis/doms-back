@@ -1,5 +1,7 @@
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
+using DoctorsOffice.Application.CQRS.Commands.Prescriptions.DeletePrescription;
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByAppointmentId;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByDoctorId;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
 using DoctorsOffice.Domain.DTO.Requests;
@@ -20,6 +22,20 @@ public class PrescriptionController : BaseController
     public PrescriptionController(IMediator mediator) : base(mediator)
     {
     }
+
+    /// <summary>
+    /// Returns all prescriptions for specified appointment. Only for doctors.
+    /// </summary>
+    [HttpGet("appointment/{appointmentId:guid}")]
+    [Authorize(Roles = Roles.Doctor)]
+    public async Task<ActionResult<PagedResponse<PrescriptionResponse>>>
+        GetPrescriptionsByAppointmentIdAsync(Guid appointmentId, [FromQuery] PaginationFilter filter)
+        => CreateResponse(await Mediator.Send(new GetPrescriptionsByAppointmentIdQuery
+        {
+            AppointmentId = appointmentId,
+            DoctorId = JwtSubject(),
+            PaginationFilter = filter
+        }));
 
     /// <summary>
     /// Returns all prescriptions for specified patient. Only for doctors.
@@ -71,7 +87,7 @@ public class PrescriptionController : BaseController
         => CreateResponse(await Mediator.Send(new CreatePrescriptionCommand(request, JwtSubject())));
 
     /// <summary>
-    /// Updates prescription by id prescription. Only for doctors.
+    /// Updates prescription by id. Only for doctors.
     /// </summary>
     [HttpPatch("{prescriptionId:guid}")]
     [Authorize(Roles = Roles.Doctor)]
@@ -80,4 +96,16 @@ public class PrescriptionController : BaseController
         => CreateResponse(
             await Mediator.Send(new UpdatePrescriptionCommand(request, prescriptionId))
         );
+
+    /// <summary>
+    /// Delete prescription by id. Only for doctors.
+    /// </summary>
+    [HttpDelete("{prescriptionId:guid}")]
+    [Authorize(Roles = Roles.Doctor)]
+    public async Task<ActionResult<Unit>> DeletePrescriptionByIdAsync(Guid prescriptionId)
+        => CreateResponse(await Mediator.Send(new DeletePrescriptionCommand
+        {
+            PrescriptionId = prescriptionId,
+            DoctorId = JwtSubject()
+        }));
 }

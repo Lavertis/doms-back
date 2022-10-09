@@ -5,8 +5,7 @@ public abstract class Result<TResult, TValue> where TResult : Result<TResult, TV
     public Error? Error;
     public TValue? Value;
 
-    public bool IsSuccess => Error is null;
-    public bool IsFailed => Error is not null;
+    public bool IsError => Error != null;
 
     public TResult WithValue(TValue value)
     {

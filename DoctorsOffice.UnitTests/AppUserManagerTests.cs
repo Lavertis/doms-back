@@ -45,7 +45,7 @@ public class AppUserManagerTests : UnitTest
         var result = await _appUserManager.FindByIdAsync(Guid.NewGuid());
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.IsError.Should().BeTrue();
         result.Value.Should().BeNull();
     }
 
@@ -76,7 +76,7 @@ public class AppUserManagerTests : UnitTest
 
         // assert
         result.Value.Should().Be(appUser);
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class AppUserManagerTests : UnitTest
         var result = await _appUserManager.FindByNameAsync("test");
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.IsError.Should().BeTrue();
         result.Value.Should().BeNull();
     }
 
@@ -122,7 +122,7 @@ public class AppUserManagerTests : UnitTest
         var result = await _appUserManager.DeleteByIdAsync(id);
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.IsError.Should().BeTrue();
         result.Value.Should().BeFalse();
     }
 
@@ -247,7 +247,7 @@ public class AppUserManagerTests : UnitTest
         var result = await _appUserManager.ValidatePasswordAsync("userName", "password");
 
         // assert
-        result.IsFailed.Should().BeTrue();
+        result.IsError.Should().BeTrue();
     }
 
     [Fact]

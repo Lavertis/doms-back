@@ -51,7 +51,7 @@ public class UserServiceTests : UnitTest
         var result = await _userService.CreateUserAsync(createUserRequest);
 
         // assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
     }
 
     [Fact]

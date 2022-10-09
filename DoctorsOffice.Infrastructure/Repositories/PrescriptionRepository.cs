@@ -10,7 +10,7 @@ public class PrescriptionRepository : Repository<Prescription>, IPrescriptionRep
     {
     }
 
-    public async Task UpdateDrugItemsAsync(Prescription prescription, IList<DrugItem> drugItems)
+    public async Task UpdateDrugItemsAsync(Prescription prescription, List<DrugItem> drugItems)
     {
         DbContext.Prescriptions.Attach(prescription);
         DbContext.DrugItems.AttachRange(drugItems);

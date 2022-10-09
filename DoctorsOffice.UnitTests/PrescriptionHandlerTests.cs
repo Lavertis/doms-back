@@ -19,11 +19,13 @@ namespace DoctorsOffice.UnitTests;
 
 public class PrescriptionHandlerTests : UnitTest
 {
+    private readonly IDrugItemRepository _fakeDrugItemRepository;
     private readonly IPrescriptionRepository _fakePrescriptionRepository;
 
     public PrescriptionHandlerTests()
     {
         _fakePrescriptionRepository = A.Fake<IPrescriptionRepository>();
+        _fakeDrugItemRepository = A.Fake<IDrugItemRepository>();
     }
 
     [Fact]
@@ -35,9 +37,9 @@ public class PrescriptionHandlerTests : UnitTest
         var prescription = new Prescription
         {
             Id = prescriptionId,
-            DrugItems = new List<DrugItem> { new() }
+            DrugItems = new List<DrugItem> {new()}
         };
-        var prescriptionsQueryable = new List<Prescription> { prescription }.AsQueryable().BuildMock();
+        var prescriptionsQueryable = new List<Prescription> {prescription}.AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
         var query = new GetPrescriptionByIdQuery(prescriptionId);
@@ -74,13 +76,13 @@ public class PrescriptionHandlerTests : UnitTest
         var patientId = Guid.NewGuid();
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } },
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } },
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } }
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
-        var query = new GetPrescriptionsByPatientIdQuery { PatientId = patientId };
+        var query = new GetPrescriptionsByPatientIdQuery {PatientId = patientId};
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -97,7 +99,7 @@ public class PrescriptionHandlerTests : UnitTest
         var dummyPrescriptionQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(dummyPrescriptionQueryable);
 
-        var query = new GetPrescriptionsByPatientIdQuery { PatientId = Guid.NewGuid() };
+        var query = new GetPrescriptionsByPatientIdQuery {PatientId = Guid.NewGuid()};
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -114,9 +116,9 @@ public class PrescriptionHandlerTests : UnitTest
         var patientId = Guid.NewGuid();
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } },
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } },
-            new() { PatientId = patientId, DrugItems = new List<DrugItem> { new() } }
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}},
+            new() {PatientId = patientId, DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
@@ -124,7 +126,7 @@ public class PrescriptionHandlerTests : UnitTest
             .Select(p => Mapper.Map<PrescriptionResponse>(p))
             .ToListAsync();
 
-        var query = new GetPrescriptionsByPatientIdQuery { PatientId = patientId };
+        var query = new GetPrescriptionsByPatientIdQuery {PatientId = patientId};
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -142,7 +144,7 @@ public class PrescriptionHandlerTests : UnitTest
         var prescriptions = new List<Prescription>();
         for (var i = 0; i < 20; i++)
         {
-            prescriptions.Add(new Prescription { PatientId = patientId, DrugItems = new List<DrugItem> { new() } });
+            prescriptions.Add(new Prescription {PatientId = patientId, DrugItems = new List<DrugItem> {new()}});
         }
 
         var prescriptionsQueryable = prescriptions.AsQueryable().BuildMock();
@@ -160,7 +162,7 @@ public class PrescriptionHandlerTests : UnitTest
         var query = new GetPrescriptionsByPatientIdQuery
         {
             PatientId = patientId,
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
         var handler = new GetPrescriptionsByPatientIdHandler(_fakePrescriptionRepository, Mapper);
 
@@ -178,13 +180,13 @@ public class PrescriptionHandlerTests : UnitTest
         var doctorId = Guid.NewGuid();
         var prescriptionsQueryable = new List<Prescription>
         {
-            new() { DoctorId = doctorId, DrugItems = new List<DrugItem> { new() } },
-            new() { DoctorId = doctorId, DrugItems = new List<DrugItem> { new() } },
-            new() { DoctorId = doctorId, DrugItems = new List<DrugItem> { new() } }
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}},
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}},
+            new() {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}}
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
 
-        var query = new GetPrescriptionsByDoctorIdQuery { DoctorId = doctorId };
+        var query = new GetPrescriptionsByDoctorIdQuery {DoctorId = doctorId};
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -202,7 +204,7 @@ public class PrescriptionHandlerTests : UnitTest
         var dummyPrescriptionQueryable = A.CollectionOfDummy<Prescription>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(dummyPrescriptionQueryable);
 
-        var query = new GetPrescriptionsByDoctorIdQuery { DoctorId = doctorId };
+        var query = new GetPrescriptionsByDoctorIdQuery {DoctorId = doctorId};
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -220,7 +222,7 @@ public class PrescriptionHandlerTests : UnitTest
         var prescriptions = new List<Prescription>();
         for (var i = 0; i < 20; i++)
         {
-            prescriptions.Add(new Prescription { DoctorId = doctorId, DrugItems = new List<DrugItem> { new() } });
+            prescriptions.Add(new Prescription {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}});
         }
 
         var prescriptionsQueryable = prescriptions.AsQueryable().BuildMock();
@@ -231,7 +233,7 @@ public class PrescriptionHandlerTests : UnitTest
             .Select(p => Mapper.Map<PrescriptionResponse>(p))
             .ToListAsync();
 
-        var query = new GetPrescriptionsByDoctorIdQuery { DoctorId = doctorId };
+        var query = new GetPrescriptionsByDoctorIdQuery {DoctorId = doctorId};
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
         // act
@@ -249,7 +251,7 @@ public class PrescriptionHandlerTests : UnitTest
         var prescriptions = new List<Prescription>();
         for (var i = 0; i < 20; i++)
         {
-            prescriptions.Add(new Prescription { DoctorId = doctorId, DrugItems = new List<DrugItem> { new() } });
+            prescriptions.Add(new Prescription {DoctorId = doctorId, DrugItems = new List<DrugItem> {new()}});
         }
 
         var prescriptionsQueryable = prescriptions.AsQueryable().BuildMock();
@@ -267,7 +269,7 @@ public class PrescriptionHandlerTests : UnitTest
         var query = new GetPrescriptionsByDoctorIdQuery
         {
             DoctorId = doctorId,
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
         var handler = new GetPrescriptionsByDoctorIdHandler(_fakePrescriptionRepository, Mapper);
 
@@ -284,24 +286,24 @@ public class PrescriptionHandlerTests : UnitTest
         // arrange
         var expectedPrescription = new Prescription
         {
-            Title = "Test Prescription",
-            Description = "Test Description",
             PatientId = Guid.NewGuid(),
             DoctorId = Guid.NewGuid(),
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
         A.CallTo(() => _fakePrescriptionRepository.CreateAsync(A<Prescription>.Ignored))
             .Returns(expectedPrescription);
+        A.CallTo(() => _fakeDrugItemRepository.CreateRangeAsync(A<List<DrugItem>>.Ignored))
+            .Returns(expectedPrescription.DrugItems);
 
         var request = new CreatePrescriptionRequest
         {
-            Title = expectedPrescription.Title,
-            Description = expectedPrescription.Description,
             PatientId = expectedPrescription.PatientId,
-            DrugsIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
+            DrugItems = expectedPrescription.DrugItems
+                .Select(d => new CreateDrugItemRequest {Rxcui = d.Rxcui})
+                .ToList()
         };
         var command = new CreatePrescriptionCommand(request, expectedPrescription.DoctorId);
-        var handler = new CreatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
+        var handler = new CreatePrescriptionHandler(_fakePrescriptionRepository, Mapper, _fakeDrugItemRepository);
 
         // act
         var result = await handler.Handle(command, default);
@@ -321,36 +323,30 @@ public class PrescriptionHandlerTests : UnitTest
         var oldPrescription = new Prescription
         {
             Id = prescriptionId,
-            Title = "Old Prescription Title",
-            Description = "Old Description",
             PatientId = Guid.NewGuid(),
             DoctorId = Guid.NewGuid(),
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new(), new()}
         };
 
         var expectedPrescription = new Prescription
         {
             Id = prescriptionId,
-            Title = "New Prescription Title",
-            Description = "New Description",
             PatientId = Guid.NewGuid(),
             DoctorId = oldPrescription.DoctorId,
-            DrugItems = new List<DrugItem> { new(), new() }
+            DrugItems = new List<DrugItem> {new(), new()}
         };
 
         A.CallTo(() => _fakePrescriptionRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(oldPrescription);
-        var prescriptionsQueryable = new List<Prescription> { oldPrescription }.AsQueryable().BuildMock();
+        var prescriptionsQueryable = new List<Prescription> {oldPrescription}.AsQueryable().BuildMock();
         A.CallTo(() => _fakePrescriptionRepository.GetAll()).Returns(prescriptionsQueryable);
         A.CallTo(() => _fakePrescriptionRepository.UpdateAsync(A<Prescription>.Ignored))
             .Returns(oldPrescription);
 
         var request = new UpdatePrescriptionRequest
         {
-            Title = expectedPrescription.Title,
-            Description = expectedPrescription.Description,
             PatientId = expectedPrescription.PatientId,
-            DrugIds = expectedPrescription.DrugItems.Select(d => d.Id).ToList()
+            DrugItems = expectedPrescription.DrugItems.Select(d => new CreateDrugItemRequest {Rxcui = d.Rxcui}).ToList()
         };
         var command = new UpdatePrescriptionCommand(request, prescriptionId);
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository, Mapper);
@@ -373,10 +369,8 @@ public class PrescriptionHandlerTests : UnitTest
 
         var request = new UpdatePrescriptionRequest
         {
-            Title = "New Prescription Title",
-            Description = "New Description",
             PatientId = Guid.NewGuid(),
-            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
         var command = new UpdatePrescriptionCommand(request, Guid.NewGuid());
         var handler = new UpdatePrescriptionHandler(_fakePrescriptionRepository, Mapper);

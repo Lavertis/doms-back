@@ -36,14 +36,18 @@ public class UpdatePrescriptionHandler : IRequestHandler<UpdatePrescriptionComma
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        prescriptionToUpdate.Title = request.Title ?? prescriptionToUpdate.Title;
-        prescriptionToUpdate.Description = request.Description ?? prescriptionToUpdate.Description;
         prescriptionToUpdate.PatientId = request.PatientId ?? prescriptionToUpdate.PatientId;
+        prescriptionToUpdate.FulfillmentDeadline =
+            request.FulfillmentDeadline ?? prescriptionToUpdate.FulfillmentDeadline;
 
         await _prescriptionRepository.UpdateAsync(prescriptionToUpdate);
-        if (request.DrugsIds is not null)
-            await _prescriptionRepository.UpdateDrugItemsAsync(prescriptionToUpdate,
-                request.DrugsIds!.Select(id => new DrugItem {Id = id}).ToList());
+        if (request.DrugItems is not null)
+        {
+            var drugItems = request.DrugItems
+                .Select(d => new DrugItem {Rxcui = d.Rxcui, Dosage = d.Dosage, Name = d.Name, Quantity = d.Quantity})
+                .ToList();
+            await _prescriptionRepository.UpdateDrugItemsAsync(prescriptionToUpdate, drugItems);
+        }
 
         var updatedPrescription = await _prescriptionRepository.GetAll()
             .Include(prescription => prescription.DrugItems)

@@ -10,22 +10,19 @@ public class CreatePrescriptionRequestValidator : AbstractValidator<CreatePrescr
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.Title)
-            .NotEmpty()
-            .WithMessage("Title is required");
-
-        RuleFor(x => x.Description)
-            .NotEmpty()
-            .WithMessage("Description is required");
-
         RuleFor(x => x.PatientId)
             .NotEmpty()
             .WithMessage("PatientId is required")
             .MustAsync(async (id, _) => await patientRepository.ExistsByIdAsync(id))
             .WithMessage("Patient with specified id does not exist");
 
-        RuleFor(x => x.DrugsIds)
+        RuleFor(x => x.FulfillmentDeadline)
             .NotEmpty()
-            .WithMessage("DrugIds is required");
+            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .WithMessage("Fulfillment deadline cannot be in the past");
+
+        RuleFor(x => x.DrugItems)
+            .NotEmpty()
+            .WithMessage("DrugItems are required");
     }
 }

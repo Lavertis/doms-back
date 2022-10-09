@@ -13,12 +13,12 @@ public static class DatabaseModule
 
     private static string GetConnectionString(IConfiguration configuration)
     {
-        var aspnetcoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-        return aspnetcoreEnvironment switch
+        var aspNetCoreEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        return aspNetCoreEnvironment switch
         {
             "Development" => configuration.GetConnectionString("AppDb"),
             "Production" => GetHerokuConnectionString()!,
-            _ => throw new Exception("Wrong ASPNETCORE_ENVIRONMENT value")
+            _ => throw new Exception("Wrong ASPNETCORE_ENVIRONMENT value: " + aspNetCoreEnvironment)
         };
     }
 

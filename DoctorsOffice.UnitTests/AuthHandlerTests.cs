@@ -35,6 +35,8 @@ public class AuthHandlerTests : UnitTest
 
         A.CallTo(() => _fakeAppUserManager.FindByNameAsync(A<string>.Ignored))
             .Returns(new CommonResult<AppUser>().WithValue(new AppUser()));
+        A.CallTo(() => _fakeAppUserManager.ValidatePasswordAsync(A<string>.Ignored, A<string>.Ignored))
+            .Returns(new CommonResult<bool>().WithValue(true));
         A.CallTo(() => _fakeJwtService.GetUserClaimsAsync(A<AppUser>.Ignored)).Returns(new List<Claim>());
         A.CallTo(() => _fakeJwtService.GenerateJwtToken(A<IList<Claim>>.Ignored)).Returns(dummyJwtToken);
         A.CallTo(() =>

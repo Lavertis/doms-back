@@ -10,7 +10,6 @@ public static class FluentValidationModule
     public static void AddFluentValidationModule(this IServiceCollection services)
     {
         services.AddFluentValidation();
-        services.AddScoped<IValidator<AuthenticateRequest>, AuthenticateRequestValidator>();
         services.AddScoped<IValidator<CreateAppointmentRequest>, CreateAppointmentRequestValidator>();
         services.AddScoped<IValidator<UpdateAppointmentRequest>, UpdateAppointmentRequestValidator>();
         services.AddScoped<IValidator<CreatePatientRequest>, CreatePatientRequestValidator>();

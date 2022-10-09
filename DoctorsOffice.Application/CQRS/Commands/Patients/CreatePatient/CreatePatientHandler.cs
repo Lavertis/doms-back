@@ -37,23 +37,19 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, HttpRe
             Password = request.Password,
             RoleName = Roles.Patient
         });
-        if (createUserResult.IsFailed || createUserResult.Value is null)
+        if (createUserResult.IsError || createUserResult.HasValidationErrors)
         {
-            if (createUserResult.ErrorField is not null && createUserResult.Error is not null)
-            {
-                return result
-                    .WithFieldError(createUserResult.ErrorField, createUserResult.Error)
-                    .WithStatusCode(createUserResult.StatusCode);
-            }
-
+            if (createUserResult.HasValidationErrors)
+                return result.WithValidationErrors(createUserResult.ValidationErrors);
             return result.WithError(createUserResult.Error).WithStatusCode(createUserResult.StatusCode);
         }
 
-        var newAppUser = createUserResult.Value;
+        var newAppUser = createUserResult.Value!;
         var newPatient = new Patient
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
+            NationalId = request.NationalId,
             DateOfBirth = request.DateOfBirth,
             Address = request.Address,
             AppUser = newAppUser

@@ -35,7 +35,8 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = patientId }
+            NationalId = "",
+            AppUser = new AppUser {Id = patientId}
         };
         DbContext.Patients.Add(patient);
 
@@ -45,7 +46,8 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = otherPatientId }
+            NationalId = "",
+            AppUser = new AppUser {Id = otherPatientId}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -54,11 +56,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = i % 2 == 0 ? patientId : otherPatientId,
-                DrugItems = new List<DrugItem> { new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -111,7 +115,7 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = patientId }
+            AppUser = new AppUser {Id = patientId}
         };
         DbContext.Patients.Add(patient);
 
@@ -169,7 +173,8 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = patientId }
+            NationalId = "",
+            AppUser = new AppUser {Id = patientId}
         };
         DbContext.Patients.Add(patient);
 
@@ -178,18 +183,17 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = patientId,
-                DrugItems = new List<DrugItem> { new() }
+                DrugItems = new List<DrugItem> {new() {Dosage = "1-1-1", Name = "Drug1"}}
             });
         }
 
         DbContext.Prescriptions.AddRange(prescriptions);
         await DbContext.SaveChangesAsync();
 
-        var expectedResponseContent = prescriptions.Select(prescription => Mapper.Map<PrescriptionResponse>(prescription));
+        var expectedResponseContent =
+            prescriptions.Select(prescription => Mapper.Map<PrescriptionResponse>(prescription));
 
         // act
         var response = await client.GetAsync($"{UrlPrefix}/patient/{patientId}");
@@ -217,7 +221,8 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = patientId }
+            NationalId = "",
+            AppUser = new AppUser {Id = patientId}
         };
         DbContext.Patients.Add(patient);
 
@@ -226,11 +231,9 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = patientId,
-                DrugItems = new List<DrugItem> { new() }
+                DrugItems = new List<DrugItem> {new() {Dosage = "1-1-1", Name = "Drug1"}}
             });
         }
 
@@ -271,7 +274,8 @@ public class PrescriptionControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             Address = "",
-            AppUser = new AppUser { Id = otherPatientId }
+            NationalId = "",
+            AppUser = new AppUser {Id = otherPatientId}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -280,11 +284,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = DbContext.Doctors.First().Id,
                 PatientId = i % 2 == 0 ? authenticatedPatientId : otherPatientId,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -356,7 +362,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetPrescriptionsForAuthenticatedPatient_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
+    public async Task
+        GetPrescriptionsForAuthenticatedPatient_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -367,11 +374,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = DbContext.Doctors.First().Id,
                 PatientId = authenticatedPatientId,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -392,7 +401,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetPrescriptionsForAuthenticatedPatient_PaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
+    public async Task
+        GetPrescriptionsForAuthenticatedPatient_PaginationProvided_ReturnsPrescriptionsForAuthenticatedPatient()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -406,11 +416,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = DbContext.Doctors.First().Id,
                 PatientId = authenticatedPatientId,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Id = Guid.NewGuid(), Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Id = Guid.NewGuid(), Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -447,7 +459,7 @@ public class PrescriptionControllerTests : IntegrationTest
         var otherDoctorId = Guid.NewGuid();
         var otherDoctor = new Doctor
         {
-            AppUser = new AppUser { Id = otherDoctorId }
+            AppUser = new AppUser {Id = otherDoctorId}
         };
         DbContext.Doctors.Add(otherDoctor);
 
@@ -456,11 +468,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = i % 2 == 0 ? authenticatedDoctorId : otherDoctorId,
                 PatientId = DbContext.Patients.First().Id,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -527,7 +541,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetPrescriptionsForAuthenticatedDoctor_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
+    public async Task
+        GetPrescriptionsForAuthenticatedDoctor_NoPaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -538,11 +553,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = DbContext.Patients.First().Id,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -563,7 +580,8 @@ public class PrescriptionControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task GetPrescriptionsForAuthenticatedDoctor_PaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
+    public async Task
+        GetPrescriptionsForAuthenticatedDoctor_PaginationProvided_ReturnsPrescriptionsForAuthenticatedDoctor()
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -577,11 +595,13 @@ public class PrescriptionControllerTests : IntegrationTest
         {
             prescriptions.Add(new Prescription
             {
-                Title = "",
-                Description = "",
                 DoctorId = authenticatedDoctorId,
                 PatientId = DbContext.Patients.First().Id,
-                DrugItems = new List<DrugItem> { new(), new() }
+                DrugItems = new List<DrugItem>
+                {
+                    new() {Dosage = "1-1-1", Name = "Drug1"},
+                    new() {Dosage = "2-2-2", Name = "Drug2"}
+                }
             });
         }
 
@@ -616,10 +636,13 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var createPrescriptionRequest = new CreatePrescriptionRequest
         {
-            Title = "Title",
-            Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            FulfillmentDeadline = DateTime.UtcNow.AddDays(1),
+            DrugItems = new List<CreateDrugItemRequest>
+            {
+                new() {Dosage = "1-1-1", Name = "Drug1"},
+                new() {Dosage = "2-2-2", Name = "Drug2"}
+            }
         };
 
         // act
@@ -633,16 +656,14 @@ public class PrescriptionControllerTests : IntegrationTest
             .Include(p => p.DrugItems)
             .First(p => p.Id == responseContent.Id);
 
-        createdPrescription.Title.Should().Be(createPrescriptionRequest.Title);
-        createdPrescription.Description.Should().Be(createPrescriptionRequest.Description);
         createdPrescription.PatientId.Should().Be(createPrescriptionRequest.PatientId);
-        createdPrescription.DrugItems.Should().Contain(d => d.Id == createPrescriptionRequest.DrugsIds.First());
+        createdPrescription.FulfillmentDeadline.Should().Be(createPrescriptionRequest.FulfillmentDeadline);
+        createdPrescription.DrugItems.Should()
+            .Contain(d => d.Rxcui == createPrescriptionRequest.DrugItems.First().Rxcui);
         createdPrescription.DoctorId.Should().Be(authenticatedDoctorId);
     }
 
     [Theory]
-    [InlineData("Title", "")]
-    [InlineData("Description", "")]
     [InlineData("PatientId", "")]
     [InlineData("PatientId", "invalidGuid")]
     public async Task CreatePrescription_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
@@ -653,10 +674,12 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var createPrescriptionRequest = new CreatePrescriptionRequest
         {
-            Title = "Title",
-            Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest>
+            {
+                new() {Dosage = "1-1-1", Name = "Drug1"},
+                new() {Dosage = "2-2-2", Name = "Drug2"}
+            }
         };
 
         if (fieldName.EndsWith("Id"))
@@ -689,10 +712,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var createPrescriptionRequest = new CreatePrescriptionRequest
         {
-            Title = "Title",
-            Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid>()
+            DrugItems = new List<CreateDrugItemRequest>()
         };
 
         // act
@@ -710,10 +731,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var createPrescriptionRequest = new CreatePrescriptionRequest
         {
-            Title = "Title",
-            Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
 
         // act
@@ -734,10 +753,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var createPrescriptionRequest = new CreatePrescriptionRequest
         {
-            Title = "Title",
-            Description = "Description",
             PatientId = DbContext.Patients.First().Id,
-            DrugsIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
 
         // act
@@ -757,21 +774,25 @@ public class PrescriptionControllerTests : IntegrationTest
         var prescriptionToUpdate = new Prescription
         {
             Id = Guid.NewGuid(),
-            Title = "OldTitle",
-            Description = "OldDescription",
             PatientId = Guid.NewGuid(),
             DoctorId = authenticatedDoctorId,
-            DrugItems = new List<DrugItem> { new() { Id = Guid.NewGuid() } }
+            DrugItems = new List<DrugItem>
+            {
+                new() {Dosage = "1-1-1", Name = "Drug1"},
+                new() {Dosage = "2-2-2", Name = "Drug2"}
+            }
         };
         DbContext.Prescriptions.Add(prescriptionToUpdate);
         await DbContext.SaveChangesAsync();
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest
         {
-            Title = "NewTitle",
-            Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest>
+            {
+                new() {Rxcui = 1, Dosage = "1-1-1", Name = "Drug1"},
+                new() {Rxcui = 2, Dosage = "2-2-2", Name = "Drug2"}
+            }
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -787,16 +808,13 @@ public class PrescriptionControllerTests : IntegrationTest
             .Include(p => p.DrugItems)
             .First(p => p.Id == prescriptionToUpdate.Id);
 
-        updatedPrescription.Title.Should().Be(updatePrescriptionRequest.Title);
-        updatedPrescription.Description.Should().Be(updatePrescriptionRequest.Description);
         updatedPrescription.PatientId.Should().Be(updatePrescriptionRequest.PatientId.Value);
-        foreach (var drugId in updatePrescriptionRequest.DrugIds)
-            updatedPrescription.DrugItems.Should().Contain(d => d.Id == drugId);
+        foreach (var drugItem in updatePrescriptionRequest.DrugItems)
+            updatedPrescription.DrugItems.Should().Contain(d => d.Rxcui == drugItem.Rxcui);
     }
 
     [Theory]
-    [InlineData("Title", "NewTitle")]
-    [InlineData("Description", "NewDescription")]
+    [InlineData("FulfillmentDeadline", "3022-10-08T14:09:39.309Z")]
     public async Task UpdatePrescriptionById_SingleFieldProvided_UpdatesProvidedField(string fieldName,
         string fieldValue)
     {
@@ -807,8 +825,6 @@ public class PrescriptionControllerTests : IntegrationTest
         var prescriptionToUpdate = new Prescription
         {
             Id = Guid.NewGuid(),
-            Title = "OldTitle",
-            Description = "OldDescription",
             PatientId = Guid.NewGuid(),
             DoctorId = authenticatedDoctorId,
         };
@@ -817,30 +833,34 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest();
 
-        typeof(UpdatePrescriptionRequest).GetProperty(fieldName)!.SetValue(updatePrescriptionRequest, fieldValue);
+        if (DateTime.TryParse(fieldValue, out var date))
+            typeof(UpdatePrescriptionRequest)
+                .GetProperty(fieldName)!
+                .SetValue(updatePrescriptionRequest, date);
+        else
+            typeof(UpdatePrescriptionRequest)
+                .GetProperty(fieldName)!
+                .SetValue(updatePrescriptionRequest, fieldValue);
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
 
         // act
         var response = await client.PatchAsync($"{UrlPrefix}/{prescriptionToUpdate.Id}", content);
+        var stuff = response.Content.ReadAsStringAsync().Result;
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
         var updatedPrescription = DbContext.Prescriptions.First(p => p.Id == prescriptionToUpdate.Id);
 
-        if (updatePrescriptionRequest.Title is not null)
-            updatedPrescription.Title.Should().Be(updatePrescriptionRequest.Title);
-        if (updatePrescriptionRequest.Description is not null)
-            updatedPrescription.Description.Should().Be(updatePrescriptionRequest.Description);
+        if (updatePrescriptionRequest.FulfillmentDeadline is not null)
+            updatedPrescription.FulfillmentDeadline.Should().Be(updatePrescriptionRequest.FulfillmentDeadline);
         if (updatePrescriptionRequest.PatientId is not null)
             updatedPrescription.PatientId.Should().Be(updatePrescriptionRequest.PatientId.Value);
     }
 
     [Theory]
-    [InlineData("Title", "")]
-    [InlineData("Description", "")]
     [InlineData("PatientId", "")]
     [InlineData("PatientId", "invalidGuid")]
     public async Task UpdatePrescriptionById_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
@@ -852,8 +872,6 @@ public class PrescriptionControllerTests : IntegrationTest
         var prescriptionToUpdate = new Prescription
         {
             Id = Guid.NewGuid(),
-            Title = "OldTitle",
-            Description = "OldDescription",
             PatientId = Guid.NewGuid(),
             DoctorId = authenticatedDoctorId,
         };
@@ -896,8 +914,6 @@ public class PrescriptionControllerTests : IntegrationTest
         var prescriptionToUpdate = new Prescription
         {
             Id = Guid.NewGuid(),
-            Title = "OldTitle",
-            Description = "OldDescription",
             PatientId = Guid.NewGuid(),
             DoctorId = authenticatedDoctorId,
         };
@@ -906,7 +922,7 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest
         {
-            DrugIds = Enumerable.Empty<Guid>().ToList()
+            DrugItems = Enumerable.Empty<CreateDrugItemRequest>().ToList()
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -927,10 +943,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest
         {
-            Title = "NewTitle",
-            Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);
@@ -954,10 +968,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var updatePrescriptionRequest = new UpdatePrescriptionRequest
         {
-            Title = "NewTitle",
-            Description = "NewDescription",
             PatientId = DbContext.Patients.First().Id,
-            DrugIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            DrugItems = new List<CreateDrugItemRequest> {new() {Rxcui = 1}, new() {Rxcui = 2}}
         };
 
         var serializedContent = JsonConvert.SerializeObject(updatePrescriptionRequest);

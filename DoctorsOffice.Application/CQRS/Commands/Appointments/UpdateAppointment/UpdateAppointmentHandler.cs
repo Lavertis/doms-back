@@ -41,7 +41,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         if (appointmentToUpdate is null)
         {
             return result
-                .WithError(new Error { Message = $"Appointment with id {request.AppointmentId} not found" })
+                .WithError(new Error {Message = $"Appointment with id {request.AppointmentId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -49,11 +49,11 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         {
             case Roles.Doctor when appointmentToUpdate.DoctorId != request.UserId:
                 return result
-                    .WithError(new Error { Message = "Trying to update appointment of another doctor" })
+                    .WithError(new Error {Message = "Trying to update appointment of another doctor"})
                     .WithStatusCode(StatusCodes.Status403Forbidden);
             case Roles.Patient when appointmentToUpdate.PatientId != request.UserId:
                 return result
-                    .WithError(new Error { Message = "Trying to update appointment of another patient" })
+                    .WithError(new Error {Message = "Trying to update appointment of another patient"})
                     .WithStatusCode(StatusCodes.Status403Forbidden);
         }
 
@@ -71,13 +71,17 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
 
         appointmentToUpdate.Date = request.Date ?? appointmentToUpdate.Date;
         appointmentToUpdate.Description = request.Description ?? appointmentToUpdate.Description;
+        appointmentToUpdate.Interview = request.Interview ?? appointmentToUpdate.Interview;
+        appointmentToUpdate.Diagnosis = request.Diagnosis ?? appointmentToUpdate.Diagnosis;
+        appointmentToUpdate.Recommendations = request.Recommendations ?? appointmentToUpdate.Recommendations;
+
         if (request.Type is not null)
         {
             var appointmentType = await _appointmentTypeRepository.GetByNameAsync(request.Type);
             if (appointmentType is null)
             {
                 return result
-                    .WithError(new Error { Message = $"AppointmentType with name {request.Type} not found" })
+                    .WithError(new Error {Message = $"AppointmentType with name {request.Type} not found"})
                     .WithStatusCode(StatusCodes.Status404NotFound);
             }
 
@@ -90,7 +94,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
             if (appointmentStatus is null)
             {
                 return result
-                    .WithError(new Error { Message = $"AppointmentStatus with name {request.Status} not found" })
+                    .WithError(new Error {Message = $"AppointmentStatus with name {request.Status} not found"})
                     .WithStatusCode(StatusCodes.Status404NotFound);
             }
 

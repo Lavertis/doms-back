@@ -30,10 +30,18 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
         var result = new HttpResult<AuthenticateResponse>();
 
         var findByNameResult = await _appUserManager.FindByNameAsync(request.UserName);
-        if (findByNameResult.IsFailed || findByNameResult.Value is null)
+        if (findByNameResult.IsError || findByNameResult.Value is null)
         {
             return result
-                .WithError(findByNameResult.Error)
+                .WithError(InvalidCredentialsError())
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var validatePasswordResult = await _appUserManager.ValidatePasswordAsync(request.UserName, request.Password);
+        if (validatePasswordResult.IsError || !validatePasswordResult.Value)
+        {
+            return result
+                .WithError(InvalidCredentialsError())
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -53,4 +61,6 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
             RefreshToken = refreshToken.Token
         });
     }
+
+    private static Error InvalidCredentialsError() => new() {Message = "Invalid credentials."};
 }

@@ -52,12 +52,12 @@ public class GetAppointmentByIdHandler : IRequestHandler<GetAppointmentByIdQuery
             appointmentPatientId: appointment.PatientId
         );
 
-        if (userCanAccessAppointment.IsFailed)
+        if (userCanAccessAppointment.IsError)
             return result
                 .WithError(userCanAccessAppointment.Error)
                 .WithStatusCode(StatusCodes.Status403Forbidden);
 
-        if (userCanAccessAppointment.IsSuccess && userCanAccessAppointment.Value)
+        if (!userCanAccessAppointment.IsError && userCanAccessAppointment.Value)
         {
             var appointmentResponse = _mapper.Map<AppointmentResponse>(appointment);
             return result.WithValue(appointmentResponse);

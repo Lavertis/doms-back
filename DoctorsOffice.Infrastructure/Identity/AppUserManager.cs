@@ -76,7 +76,7 @@ public class AppUserManager : UserManager<AppUser>
     {
         var result = new CommonResult<bool>();
         var findByIdResult = await FindByIdAsync(userId);
-        if (findByIdResult.IsFailed || findByIdResult.Value is null)
+        if (findByIdResult.IsError || findByIdResult.Value is null)
             return result.WithError(findByIdResult.Error);
 
         var user = findByIdResult.Value;
@@ -88,7 +88,7 @@ public class AppUserManager : UserManager<AppUser>
     {
         var result = new CommonResult<bool>();
         var findByNameResult = await FindByNameAsync(userName);
-        if (findByNameResult.IsFailed || findByNameResult.Value is null)
+        if (findByNameResult.IsError || findByNameResult.Value is null)
             return result.WithError(findByNameResult.Error);
 
         var user = findByNameResult.Value;
