@@ -99,7 +99,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser {FirstName = "", LastName = ""}});
 
         await DbContext.SaveChangesAsync();
 
@@ -175,7 +175,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser {FirstName = "", LastName = ""}});
 
         await DbContext.SaveChangesAsync();
 
@@ -205,7 +205,7 @@ public class DoctorControllerTests : IntegrationTest
         const int pageNumber = 2;
 
         for (var i = 0; i < 3; i++)
-            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser()});
+            DbContext.Doctors.Add(new Doctor {AppUser = new AppUser {FirstName = "", LastName = ""}});
 
         await DbContext.SaveChangesAsync();
 
@@ -242,7 +242,9 @@ public class DoctorControllerTests : IntegrationTest
             Email = "doctor@mail.com",
             UserName = "doctorUserName",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
+            Password = "Password1234#",
+            FirstName = "DoctorFirstName",
+            LastName = "DoctorLastName",
         };
 
         // act
@@ -312,7 +314,7 @@ public class DoctorControllerTests : IntegrationTest
             AppUser = new AppUser
             {
                 UserName = request.UserName,
-                NormalizedUserName = request.UserName.ToUpper()
+                NormalizedUserName = request.UserName.ToUpper(), FirstName = "", LastName = ""
             }
         };
         DbContext.Doctors.Add(conflictingDoctor);
@@ -345,7 +347,7 @@ public class DoctorControllerTests : IntegrationTest
             AppUser = new AppUser
             {
                 Email = request.Email,
-                NormalizedEmail = request.Email.ToUpper()
+                NormalizedEmail = request.Email.ToUpper(), FirstName = "", LastName = ""
             }
         };
         DbContext.Doctors.Add(conflictingDoctor);
@@ -415,7 +417,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         var authenticatedDoctorId =
@@ -468,7 +472,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         var authenticatedDoctorId =
@@ -530,7 +536,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -566,7 +574,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await CreateDoctorAsync(new CreateDoctorRequest
@@ -574,7 +584,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = conflictingUserName,
             Email = "mail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -608,7 +620,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await CreateDoctorAsync(new CreateDoctorRequest
@@ -616,7 +630,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "userName",
             Email = conflictingEmail,
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -650,6 +666,8 @@ public class DoctorControllerTests : IntegrationTest
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -682,7 +700,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword
+            Password = oldDoctorPassword,
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         });
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -764,6 +784,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = doctorId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash,
                 SecurityStamp = Guid.NewGuid().ToString()
@@ -814,8 +836,6 @@ public class DoctorControllerTests : IntegrationTest
         var patientId = Guid.NewGuid();
         var patient = new Patient
         {
-            FirstName = "FirstName",
-            LastName = "LastName",
             Address = "Address",
             NationalId = "",
             AppUser = new AppUser
@@ -823,6 +843,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = patientId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "FirstName",
+                LastName = "LastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -899,6 +921,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = doctorId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash,
                 SecurityStamp = Guid.NewGuid().ToString()
@@ -968,6 +992,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = doctorId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -1006,6 +1032,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = doctorId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -1018,7 +1046,9 @@ public class DoctorControllerTests : IntegrationTest
             {
                 Id = Guid.NewGuid(),
                 UserName = "confUserName",
-                NormalizedUserName = "confUserName".ToUpper()
+                NormalizedUserName = "confUserName".ToUpper(),
+                FirstName = "FirstName",
+                LastName = "LastName"
             }
         };
         DbContext.Doctors.Add(conflictingDoctor);
@@ -1057,6 +1087,8 @@ public class DoctorControllerTests : IntegrationTest
                 Id = doctorId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -1069,7 +1101,9 @@ public class DoctorControllerTests : IntegrationTest
             {
                 Id = Guid.NewGuid(),
                 Email = "conflictingMail@mail.com",
-                NormalizedEmail = "conflictingMail@mail.com".ToUpper()
+                NormalizedEmail = "conflictingMail@mail.com".ToUpper(),
+                FirstName = "FirstName",
+                LastName = "LastName"
             }
         };
         DbContext.Doctors.Add(conflictingDoctor);
@@ -1146,7 +1180,7 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
-        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId}};
+        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId, FirstName = "", LastName = ""}};
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
 
@@ -1170,11 +1204,9 @@ public class DoctorControllerTests : IntegrationTest
         var notDoctorId = Guid.NewGuid();
         var notDoctor = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = notDoctorId}
+            AppUser = new AppUser {Id = notDoctorId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(notDoctor);
         await DbContext.SaveChangesAsync();
@@ -1247,6 +1279,8 @@ public class DoctorControllerTests : IntegrationTest
                 NormalizedUserName = request.UserName.ToUpper(),
                 Email = request.Email,
                 NormalizedEmail = request.Email.ToUpper(),
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = hasher.HashPassword(null!, request.Password),
                 SecurityStamp = Guid.NewGuid().ToString()

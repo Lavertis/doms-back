@@ -40,11 +40,11 @@ public class UpdatePatientByIdHandler : IRequestHandler<UpdatePatientByIdCommand
         appUser.UserName = request.UserName ?? appUser.UserName;
         appUser.Email = request.Email ?? appUser.Email;
         appUser.PhoneNumber = request.PhoneNumber ?? appUser.PhoneNumber;
+        appUser.FirstName = request.FirstName ?? appUser.FirstName;
+        appUser.LastName = request.LastName ?? appUser.LastName;
         if (!string.IsNullOrEmpty(request.NewPassword))
             appUser.PasswordHash = _appUserManager.PasswordHasher.HashPassword(appUser, request.NewPassword);
 
-        patient.FirstName = request.FirstName ?? patient.FirstName;
-        patient.LastName = request.LastName ?? patient.LastName;
         patient.NationalId = request.NationalId ?? patient.NationalId;
         patient.Address = request.Address ?? patient.Address;
         patient.DateOfBirth = request.DateOfBirth ?? patient.DateOfBirth;

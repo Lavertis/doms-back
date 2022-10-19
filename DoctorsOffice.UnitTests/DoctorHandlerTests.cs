@@ -1,8 +1,8 @@
 ﻿using DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.DeleteDoctorById;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
-using DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
 using DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorById;
+using DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorsFiltered;
 using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
@@ -48,8 +48,8 @@ public class DoctorHandlerTests : UnitTest
         var doctorResponses = doctors.Select(d => Mapper.Map<DoctorResponse>(d));
         A.CallTo(() => _fakeDoctorRepository.GetAll()).Returns(doctors.AsQueryable().BuildMock());
 
-        var query = new GetAllDoctorsQuery();
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
+        var query = new GetDoctorsFilteredQuery();
+        var handler = new GetDoctorsFilteredHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -66,8 +66,8 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.GetAll())
             .Returns(A.CollectionOfDummy<Doctor>(0).AsQueryable().BuildMock());
 
-        var query = new GetAllDoctorsQuery();
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
+        var query = new GetDoctorsFilteredQuery();
+        var handler = new GetDoctorsFilteredHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -94,8 +94,8 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.GetAll())
             .Returns(doctors.AsQueryable().BuildMock());
 
-        var query = new GetAllDoctorsQuery();
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
+        var query = new GetDoctorsFilteredQuery();
+        var handler = new GetDoctorsFilteredHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -128,11 +128,11 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.GetAll())
             .Returns(doctors.AsQueryable().BuildMock());
 
-        var query = new GetAllDoctorsQuery
+        var query = new GetDoctorsFilteredQuery
         {
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
-        var handler = new GetAllDoctorsHandler(_fakeDoctorRepository, Mapper);
+        var handler = new GetDoctorsFilteredHandler(_fakeDoctorRepository, Mapper);
 
         // act
         var result = await handler.Handle(query, default);
@@ -149,9 +149,9 @@ public class DoctorHandlerTests : UnitTest
         var doctor = new Doctor
         {
             Id = doctorId,
-            AppUser = new AppUser { Id = doctorId }
+            AppUser = new AppUser {Id = doctorId}
         };
-        var doctorsQueryable = new List<Doctor> { doctor }.AsQueryable().BuildMock();
+        var doctorsQueryable = new List<Doctor> {doctor}.AsQueryable().BuildMock();
         A.CallTo(() => _fakeDoctorRepository.GetAll()).Returns(doctorsQueryable);
 
         var query = new GetDoctorByIdQuery(doctorId);
@@ -247,7 +247,7 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(doctorToUpdate);
         A.CallTo(() => _fakeAppUserManager.Users)
-            .Returns(new List<AppUser> { doctorToUpdate.AppUser }.AsQueryable().BuildMock());
+            .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
@@ -314,7 +314,7 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(doctorToUpdate);
         A.CallTo(() => _fakeAppUserManager.Users)
-            .Returns(new List<AppUser> { doctorToUpdate.AppUser }.AsQueryable().BuildMock());
+            .Returns(new List<AppUser> {doctorToUpdate.AppUser}.AsQueryable().BuildMock());
 
         var handler = new UpdateDoctorByIdHandler(_fakeDoctorRepository, _fakeAppUserManager, Mapper);
 
@@ -332,7 +332,7 @@ public class DoctorHandlerTests : UnitTest
         // arrange
         var doctorToDelete = new Doctor
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid()}
         };
 
         var command = new DeleteDoctorByIdCommand(doctorToDelete.AppUser.Id);

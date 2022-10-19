@@ -10,9 +10,9 @@ public class AppointmentSearchResponseMappingProfile : Profile
     {
         CreateMap<Appointment, AppointmentSearchResponse>()
             .ForMember(d => d.PatientFirstName, opt =>
-                opt.MapFrom(appointment => appointment.Patient.FirstName))
+                opt.MapFrom(appointment => appointment.Patient.AppUser.FirstName))
             .ForMember(d => d.PatientLastName, opt =>
-                opt.MapFrom(appointment => appointment.Patient.LastName))
+                opt.MapFrom(appointment => appointment.Patient.AppUser.LastName))
             .ForMember(d => d.PatientEmail, opt =>
                 opt.MapFrom(appointment => appointment.Patient.AppUser.Email))
             .ForMember(d => d.PatientPhoneNumber, opt =>

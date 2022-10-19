@@ -3,6 +3,7 @@ using System;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221016154150_AddEmailAndPhoneNumberToSeededUsers")]
+    partial class AddEmailAndPhoneNumberToSeededUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -536,6 +538,14 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("NationalId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -554,6 +564,8 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Address = "7865 Greenview St. Randallstown, MD 21133",
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             DateOfBirth = new DateTime(2000, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Patient",
+                            LastName = "Patient",
                             NationalId = "04233040549",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });

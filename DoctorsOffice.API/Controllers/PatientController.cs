@@ -2,9 +2,13 @@
 using DoctorsOffice.Application.CQRS.Commands.Patients.DeletePatientById;
 using DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 using DoctorsOffice.Application.CQRS.Queries.Patients.GetPatientById;
+using DoctorsOffice.Application.CQRS.Queries.Patients.GetPatientsFiltered;
+using DoctorsOffice.Domain.DTO.QueryParams;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Domain.Filters;
+using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +22,19 @@ public class PatientController : BaseController
     public PatientController(IMediator mediator) : base(mediator)
     {
     }
+
+    /// <summary>
+    /// Returns filtered patients matching search criteria. For admins and doctors.
+    /// </summary>
+    [HttpGet("")]
+    [Authorize(Roles = $"{Roles.Admin}, {Roles.Doctor}")]
+    public async Task<ActionResult<PagedResponse<PatientResponse>>> GetDoctorsFilteredAsync(
+        [FromQuery] PatientQueryParams queryParams, [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(await Mediator.Send(new GetPatientsFilteredQuery
+        {
+            PaginationFilter = paginationFilter,
+            QueryParams = queryParams
+        }));
 
     /// <summary>
     /// Get patient by id.

@@ -3,6 +3,7 @@ using System;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221016133014_AddFirstAndLastNameToAppUser")]
+    partial class AddFirstAndLastNameToAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,68 +75,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasIndex("TypeId");
 
                     b.ToTable("Appointments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("56a26dea-caf2-4a4b-a013-ed9e776d25dc"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "0",
-                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
-                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            Id = new Guid("9e1cf297-b90f-436a-8cd3-8ca95276872f"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "1000000",
-                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
-                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            Id = new Guid("4f319bc2-a6d9-4a52-9357-0772d0edd639"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 3, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "2000000",
-                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
-                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            Id = new Guid("f32e24af-265d-4748-be59-769db539cb07"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "3000000",
-                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
-                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            Id = new Guid("2cf674a8-9311-4515-a6bb-8d8094ade09c"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 5, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Description = "4000000",
-                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
-                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.AppointmentStatus", b =>
@@ -458,42 +398,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             SecurityStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
                             TwoFactorEnabled = false,
                             UserName = "admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
-                            Email = "doctor@doctor.com",
-                            EmailConfirmed = false,
-                            FirstName = "Doctor",
-                            LastName = "Doctor",
-                            NormalizedEmail = "DOCTOR@DOCTOR.COM",
-                            NormalizedUserName = "DOCTOR",
-                            PasswordHash = "AMbTv46BLUYaRTuuF5U53eDGMBRw4T7wQwaxSxTrM4mPB87g87fP+FW4n+ecgCXCdg==",
-                            PhoneNumber = "123456789",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
-                            TwoFactorEnabled = false,
-                            UserName = "doctor"
-                        },
-                        new
-                        {
-                            Id = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "4facc425-b1ef-416a-979f-56da897448c5",
-                            Email = "patient@patient.com",
-                            EmailConfirmed = false,
-                            FirstName = "Patient",
-                            LastName = "Patient",
-                            NormalizedEmail = "PATIENT@PATIENT.COM",
-                            NormalizedUserName = "PATIENT",
-                            PasswordHash = "AL9EaDGX0cdo1q6ldEn3SDtSYoYHcRpcEBXmM4TUfF+hOIT06L6ZfvndiURMFQEphw==",
-                            PhoneNumber = "123456789",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "4facc425-b1ef-416a-979f-56da897448c5",
-                            TwoFactorEnabled = false,
-                            UserName = "patient"
                         });
                 });
 
@@ -511,14 +415,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Doctors");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Patient", b =>
@@ -536,6 +432,14 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("NationalId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -546,17 +450,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Patients");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            Address = "7865 Greenview St. Randallstown, MD 21133",
-                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DateOfBirth = new DateTime(2000, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            NationalId = "04233040549",
-                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -647,16 +540,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             UserId = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
                             RoleId = new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4")
-                        },
-                        new
-                        {
-                            UserId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
-                            RoleId = new Guid("80389a16-fbd0-4db1-b655-05a29d202a75")
-                        },
-                        new
-                        {
-                            UserId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            RoleId = new Guid("d4349d0c-d18c-4324-be02-254ad1208004")
                         });
                 });
 

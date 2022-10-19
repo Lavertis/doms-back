@@ -39,6 +39,8 @@ public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, 
 
         appUser.UserName = request.UserName ?? appUser.UserName;
         appUser.Email = request.Email ?? appUser.Email;
+        appUser.FirstName = request.FirstName ?? appUser.FirstName;
+        appUser.LastName = request.LastName ?? appUser.LastName;
         appUser.PhoneNumber = request.PhoneNumber ?? appUser.PhoneNumber;
         if (!string.IsNullOrEmpty(request.NewPassword))
             appUser.PasswordHash = _appUserManager.PasswordHasher.HashPassword(appUser, request.NewPassword);

@@ -32,6 +32,8 @@ public class AuthControllerTests : IntegrationTest
         {
             UserName = testUserName,
             NormalizedUserName = testUserName.ToUpper(),
+            FirstName = "",
+            LastName = "",
             PasswordHash = hasher.HashPassword(null!, testPassword),
             SecurityStamp = Guid.NewGuid().ToString()
         });
@@ -84,7 +86,7 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(new AppUser
         {
             UserName = testUserName,
-            NormalizedUserName = testUserName.ToUpper(),
+            NormalizedUserName = testUserName.ToUpper(), FirstName = "", LastName = "",
             PasswordHash = hasher.HashPassword(null!, testPassword)
         });
         await DbContext.SaveChangesAsync();
@@ -112,7 +114,7 @@ public class AuthControllerTests : IntegrationTest
         var testUser = new AppUser
         {
             UserName = "testUser",
-            SecurityStamp = Guid.NewGuid().ToString()
+            SecurityStamp = Guid.NewGuid().ToString(), FirstName = "", LastName = ""
         };
         testUser.RefreshTokens.Add(new RefreshToken
         {
@@ -157,7 +159,7 @@ public class AuthControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser {UserName = "testUser"};
+        var testUser = new AppUser {UserName = "testUser", FirstName = "", LastName = ""};
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
@@ -186,7 +188,7 @@ public class AuthControllerTests : IntegrationTest
         var testUser = new AppUser
         {
             UserName = "testUser",
-            SecurityStamp = Guid.NewGuid().ToString()
+            SecurityStamp = Guid.NewGuid().ToString(), FirstName = "", LastName = ""
         };
         testUser.RefreshTokens.Add(new RefreshToken
         {
@@ -217,7 +219,7 @@ public class AuthControllerTests : IntegrationTest
         var testUser = new AppUser
         {
             UserName = "testUser",
-            SecurityStamp = Guid.NewGuid().ToString()
+            SecurityStamp = Guid.NewGuid().ToString(), FirstName = "", LastName = ""
         };
         testUser.RefreshTokens.AddRange(new[]
         {

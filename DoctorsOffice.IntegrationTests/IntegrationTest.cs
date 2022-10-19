@@ -75,7 +75,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         var testAdminUser = new AppUser
         {
-            UserName = TestAdminUserName
+            UserName = TestAdminUserName,
+            FirstName = "testAdminFirstName",
+            LastName = "testAdminLastName"
         };
         await CreateUserAsync(testAdminUser, TestAdminPassword, Roles.Admin);
         var testAdmin = new Admin {Id = testAdminUser.Id,};
@@ -83,7 +85,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         var testDoctorUser = new AppUser
         {
-            UserName = TestDoctorUserName
+            UserName = TestDoctorUserName,
+            FirstName = "testDoctorFirstName",
+            LastName = "testDoctorLastName"
         };
         await CreateUserAsync(testDoctorUser, TestDoctorPassword, Roles.Doctor);
         var testDoctor = new Doctor {Id = testDoctorUser.Id,};
@@ -94,13 +98,13 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             UserName = TestPatientUserName,
             Email = "testPatientEmail@mail.com",
             PhoneNumber = "1234567890",
+            FirstName = "testPatientFirstName",
+            LastName = "testPatientLastName"
         };
         await CreateUserAsync(testPatientUser, TestPatientPassword, Roles.Patient);
         var testPatient = new Patient
         {
             Id = testPatientUser.Id,
-            FirstName = "testPatientFirstName",
-            LastName = "testPatientLastName",
             NationalId = "1234567890",
             Address = "testPatientAddress"
         };

@@ -63,9 +63,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentType = DbContext.AppointmentTypes.First();
         var otherPatient = new Patient
         {
-            AppUser = new AppUser(),
-            FirstName = "",
-            LastName = "",
+            AppUser = new AppUser {FirstName = "", LastName = ""},
             Address = "",
             NationalId = ""
         };
@@ -125,7 +123,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentType = DbContext.AppointmentTypes.First();
         var otherDoctor = new Doctor
         {
-            AppUser = new AppUser()
+            AppUser = new AppUser {FirstName = "", LastName = ""}
         };
 
         const int appointmentsCount = 3;
@@ -318,9 +316,7 @@ public class AppointmentControllerTests : IntegrationTest
         await DbContext.Patients.FindAsync(authenticatedUserId);
         var otherPatient = new Patient
         {
-            AppUser = new AppUser(),
-            FirstName = "",
-            LastName = "",
+            AppUser = new AppUser {FirstName = "", LastName = ""},
             Address = "",
             NationalId = ""
         };
@@ -354,7 +350,11 @@ public class AppointmentControllerTests : IntegrationTest
         await AuthenticateAsDoctorAsync(client);
         var otherDoctor = new Doctor
         {
-            AppUser = new AppUser()
+            AppUser = new AppUser
+            {
+                FirstName = "FirstName",
+                LastName = "LastName"
+            }
         };
         var patient = DbContext.Patients.First();
         var appointment = new Appointment
@@ -471,16 +471,18 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
 
         var doctor1 = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
-        var doctor2 = new Doctor {AppUser = new AppUser()};
+        var doctor2 = new Doctor {AppUser = new AppUser {FirstName = "", LastName = ""}};
         DbContext.Doctors.Add(doctor2);
         var doctors = new List<Doctor> {doctor1, doctor2};
 
         var patient1 = DbContext.Patients.First();
         var patient2 = new Patient
         {
-            AppUser = new AppUser {Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e")},
-            FirstName = "",
-            LastName = "",
+            AppUser = new AppUser
+            {
+                Id = Guid.Parse("7945992e-3b96-4f0b-9143-f8db38cd8b5e"),
+                FirstName = "", LastName = ""
+            },
             Address = "",
             NationalId = ""
         };
@@ -561,7 +563,7 @@ public class AppointmentControllerTests : IntegrationTest
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
 
-        var otherDoctor = new Doctor {AppUser = new AppUser()};
+        var otherDoctor = new Doctor {AppUser = new AppUser {FirstName = "", LastName = ""}};
         DbContext.Doctors.Add(otherDoctor);
         var doctors = new List<Doctor> {doctor, otherDoctor};
 
@@ -680,6 +682,7 @@ public class AppointmentControllerTests : IntegrationTest
 
         const int expectedPageNumber = 1;
 
+        DbContext.Appointments.RemoveRange(DbContext.Appointments);
         var appointments = new List<Appointment>();
         for (var i = 0; i < 10; i++)
         {
@@ -891,6 +894,7 @@ public class AppointmentControllerTests : IntegrationTest
         const int pageNumber = 1;
         const int expectedPageNumber = 1;
 
+        DbContext.Appointments.RemoveRange(DbContext.Appointments);
         var appointments = new List<Appointment>();
         for (var i = 0; i < pageSize - 5; i++)
         {
@@ -993,9 +997,7 @@ public class AppointmentControllerTests : IntegrationTest
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
         var patient2 = new Patient
         {
-            AppUser = new AppUser(),
-            FirstName = "",
-            LastName = "",
+            AppUser = new AppUser {FirstName = "", LastName = ""},
             Address = "",
             NationalId = ""
         };
@@ -1067,9 +1069,7 @@ public class AppointmentControllerTests : IntegrationTest
         var patient1 = (await DbContext.Patients.FindAsync(authenticatedUserId))!;
         var patient2 = new Patient
         {
-            AppUser = new AppUser(),
-            FirstName = "",
-            LastName = "",
+            AppUser = new AppUser {FirstName = "", LastName = ""},
             Address = "",
             NationalId = ""
         };

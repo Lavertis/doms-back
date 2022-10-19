@@ -1,8 +1,9 @@
 ﻿using DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.DeleteDoctorById;
 using DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
-using DoctorsOffice.Application.CQRS.Queries.Doctors.GetAllDoctors;
 using DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorById;
+using DoctorsOffice.Application.CQRS.Queries.Doctors.GetDoctorsFiltered;
+using DoctorsOffice.Domain.DTO.QueryParams;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
@@ -23,21 +24,25 @@ public class DoctorController : BaseController
     }
 
     /// <summary>
+    /// Returns filtered doctors matching search criteria. Only for admins.
+    /// </summary>
+    [HttpGet("")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<ActionResult<PagedResponse<DoctorResponse>>> GetDoctorsFilteredAsync(
+        [FromQuery] DoctorQueryParams queryParams, [FromQuery] PaginationFilter paginationFilter)
+        => CreateResponse(await Mediator.Send(new GetDoctorsFilteredQuery
+        {
+            PaginationFilter = paginationFilter,
+            QueryParams = queryParams
+        }));
+
+    /// <summary>
     /// Returns authenticated doctor. Only for doctors
     /// </summary>
     [HttpGet("current")]
     [Authorize(Roles = Roles.Doctor)]
     public async Task<ActionResult<DoctorResponse>> GetAuthenticatedDoctorAsync()
         => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(JwtSubject())));
-
-    /// <summary>
-    /// Returns all doctors. Only for admins
-    /// </summary>
-    [HttpGet]
-    [Authorize(Roles = Roles.Admin)]
-    public async Task<ActionResult<PagedResponse<DoctorResponse>>> GetAllDoctorsAsync(
-        [FromQuery] PaginationFilter paginationFilter)
-        => CreateResponse(await Mediator.Send(new GetAllDoctorsQuery { PaginationFilter = paginationFilter }));
 
     /// <summary>
     /// Creates a new doctor. Only for admins

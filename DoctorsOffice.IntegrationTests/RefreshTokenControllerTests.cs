@@ -28,7 +28,9 @@ public class RefreshTokenControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
@@ -71,7 +73,9 @@ public class RefreshTokenControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         };
         var refreshTokens = new List<RefreshToken>
         {
@@ -119,7 +123,9 @@ public class RefreshTokenControllerTests : IntegrationTest
         var testUser = new AppUser
         {
             UserName = "testUser",
-            SecurityStamp = Guid.NewGuid().ToString()
+            SecurityStamp = Guid.NewGuid().ToString(),
+            FirstName = "oldFirstName",
+            LastName = "oldLastName"
         };
         testUser.RefreshTokens.Add(new RefreshToken
         {
@@ -165,7 +171,10 @@ public class RefreshTokenControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser {UserName = "testUser"};
+        var testUser = new AppUser
+        {
+            UserName = "testUser", FirstName = "oldFirstName", LastName = "oldLastName"
+        };
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,
@@ -191,7 +200,7 @@ public class RefreshTokenControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
 
         const string testToken = "testToken";
-        var testUser = new AppUser {UserName = "testUser"};
+        var testUser = new AppUser {UserName = "testUser", FirstName = "oldFirstName", LastName = "oldLastName"};
         testUser.RefreshTokens.Add(new RefreshToken
         {
             Token = testToken,

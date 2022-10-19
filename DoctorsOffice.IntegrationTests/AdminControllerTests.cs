@@ -91,7 +91,7 @@ public class AdminControllerTests : IntegrationTest
 
         var admin = new Admin
         {
-            AppUser = new AppUser { Id = Guid.NewGuid() }
+            AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}
         };
 
         DbContext.Admins.Add(admin);
@@ -165,9 +165,9 @@ public class AdminControllerTests : IntegrationTest
 
         var admins = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}}
         };
 
         DbContext.Admins.AddRange(admins);
@@ -181,7 +181,7 @@ public class AdminControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
 
         foreach (var admin in admins)
-            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
     }
 
     [Fact]
@@ -242,9 +242,9 @@ public class AdminControllerTests : IntegrationTest
 
         var admins = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}}
         };
 
         DbContext.Admins.AddRange(admins);
@@ -258,7 +258,7 @@ public class AdminControllerTests : IntegrationTest
         var responseContent = await response.Content.ReadAsAsync<PagedResponse<AdminResponse>>();
 
         foreach (var admin in admins)
-            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+            responseContent.Records.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
     }
 
     [Fact]
@@ -274,7 +274,7 @@ public class AdminControllerTests : IntegrationTest
         var admins = new List<Admin>();
         for (var i = 0; i < 20; i++)
         {
-            admins.Add(new Admin { AppUser = new AppUser { Id = Guid.NewGuid() } });
+            admins.Add(new Admin {AppUser = new AppUser {Id = Guid.NewGuid(), FirstName = "", LastName = ""}});
         }
 
         DbContext.Admins.AddRange(admins);

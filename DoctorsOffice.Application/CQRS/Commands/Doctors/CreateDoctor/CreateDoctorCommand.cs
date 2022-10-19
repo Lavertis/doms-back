@@ -8,6 +8,8 @@ namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 public class CreateDoctorCommand : IRequest<HttpResult<DoctorResponse>>
 {
     public readonly string Email;
+    public readonly string FirstName;
+    public readonly string LastName;
     public readonly string Password;
     public readonly string PhoneNumber;
     public readonly string UserName;
@@ -18,5 +20,7 @@ public class CreateDoctorCommand : IRequest<HttpResult<DoctorResponse>>
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
         Password = request.Password;
+        FirstName = request.FirstName;
+        LastName = request.LastName;
     }
 }

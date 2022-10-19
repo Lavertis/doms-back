@@ -124,8 +124,6 @@ public class PatientHandlerTests : UnitTest
         var patientToUpdate = new Patient
         {
             Id = patientId,
-            FirstName = "oldFirstName",
-            LastName = "oldLastName",
             Address = "oldAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
@@ -135,6 +133,8 @@ public class PatientHandlerTests : UnitTest
                 NormalizedUserName = "oldUserName".ToUpper(),
                 Email = "oldMail@mail.com",
                 NormalizedEmail = "oldMail@mail.com".ToUpper(),
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -187,8 +187,6 @@ public class PatientHandlerTests : UnitTest
         var patientToUpdate = new Patient
         {
             Id = patientId,
-            FirstName = "oldFirstName",
-            LastName = "oldLastName",
             Address = "oldAddress",
             DateOfBirth = DateTime.UtcNow.Subtract(5.Days()),
             AppUser = new AppUser
@@ -196,6 +194,8 @@ public class PatientHandlerTests : UnitTest
                 Id = patientId,
                 UserName = "oldUserName",
                 Email = "oldMail@mail.com",
+                FirstName = "oldFirstName",
+                LastName = "oldLastName",
                 PhoneNumber = "123456789",
                 PasswordHash = oldPasswordHash
             }
@@ -283,8 +283,6 @@ public class PatientHandlerTests : UnitTest
         // arrange
         var patientToDelete = new Patient
         {
-            FirstName = "firstName",
-            LastName = "lastName",
             Address = "address",
             AppUser = new AppUser {Id = Guid.NewGuid()}
         };

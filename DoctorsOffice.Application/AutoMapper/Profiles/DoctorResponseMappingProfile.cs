@@ -14,6 +14,10 @@ public class DoctorResponseMappingProfile : Profile
             .ForMember(d => d.Email, opt =>
                 opt.MapFrom(doctor => doctor.AppUser.Email))
             .ForMember(d => d.PhoneNumber, opt =>
-                opt.MapFrom(doctor => doctor.AppUser.PhoneNumber));
+                opt.MapFrom(doctor => doctor.AppUser.PhoneNumber))
+            .ForMember(d => d.FirstName, opt =>
+                opt.MapFrom(doctor => doctor.AppUser.FirstName))
+            .ForMember(d => d.LastName, opt =>
+                opt.MapFrom(doctor => doctor.AppUser.LastName));
     }
 }

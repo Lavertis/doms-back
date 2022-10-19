@@ -126,8 +126,8 @@ public class PatientControllerTests : IntegrationTest
 
         createdPatient.AppUser.UserName.Should().Be(createPatientRequest.UserName);
         createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientRequest.UserName.ToUpper());
-        createdPatient.FirstName.Should().Be(createPatientRequest.FirstName);
-        createdPatient.LastName.Should().Be(createPatientRequest.LastName);
+        createdPatient.AppUser.FirstName.Should().Be(createPatientRequest.FirstName);
+        createdPatient.AppUser.LastName.Should().Be(createPatientRequest.LastName);
         createdPatient.AppUser.Email.Should().Be(createPatientRequest.Email);
         createdPatient.AppUser.NormalizedEmail.Should().Be(createPatientRequest.Email.ToUpper());
         createdPatient.AppUser.PhoneNumber.Should().Be(createPatientRequest.PhoneNumber);
@@ -195,14 +195,14 @@ public class PatientControllerTests : IntegrationTest
 
         var conflictingPatient = new Patient
         {
-            FirstName = "firstName",
-            LastName = "lastName",
             Address = "address",
             NationalId = "",
             AppUser = new AppUser
             {
                 UserName = createPatientRequest.UserName,
-                NormalizedUserName = createPatientRequest.UserName.ToUpper()
+                NormalizedUserName = createPatientRequest.UserName.ToUpper(),
+                FirstName = "firstName",
+                LastName = "lastName"
             }
         };
 
@@ -238,15 +238,15 @@ public class PatientControllerTests : IntegrationTest
 
         var conflictingPatient = new Patient
         {
-            FirstName = "firstName",
-            LastName = "lastName",
             Address = "address",
             NationalId = "123456789",
             AppUser = new AppUser
             {
                 UserName = "conflictingPatient",
                 Email = createPatientRequest.Email,
-                NormalizedEmail = createPatientRequest.Email.ToUpper()
+                NormalizedEmail = createPatientRequest.Email.ToUpper(),
+                FirstName = "firstName",
+                LastName = "lastName"
             }
         };
 
@@ -403,8 +403,8 @@ public class PatientControllerTests : IntegrationTest
             .FirstOrDefault(p => p.Id == authenticatedPatientId)!;
         updatedPatient.AppUser.UserName.Should().Be(updatePatientRequest.UserName);
         updatedPatient.AppUser.NormalizedUserName.Should().Be(updatePatientRequest.UserName.ToUpper());
-        updatedPatient.FirstName.Should().Be(updatePatientRequest.FirstName);
-        updatedPatient.LastName.Should().Be(updatePatientRequest.LastName);
+        updatedPatient.AppUser.FirstName.Should().Be(updatePatientRequest.FirstName);
+        updatedPatient.AppUser.LastName.Should().Be(updatePatientRequest.LastName);
         updatedPatient.AppUser.Email.Should().Be(updatePatientRequest.Email);
         updatedPatient.AppUser.NormalizedEmail.Should().Be(updatePatientRequest.Email.ToUpper());
         updatedPatient.AppUser.PhoneNumber.Should().Be(updatePatientRequest.PhoneNumber);
@@ -752,10 +752,10 @@ public class PatientControllerTests : IntegrationTest
         switch (fieldName)
         {
             case "FirstName":
-                updatedPatient.FirstName.Should().Be(fieldValue);
+                updatedPatient.AppUser.FirstName.Should().Be(fieldValue);
                 break;
             case "LastName":
-                updatedPatient.LastName.Should().Be(fieldValue);
+                updatedPatient.AppUser.LastName.Should().Be(fieldValue);
                 break;
             case "Email":
                 updatedPatient.AppUser.Email.Should().Be(fieldValue);
@@ -843,10 +843,10 @@ public class PatientControllerTests : IntegrationTest
         switch (fieldName)
         {
             case "FirstName":
-                updatedPatient.FirstName.Should().NotBe(fieldValue);
+                updatedPatient.AppUser.FirstName.Should().NotBe(fieldValue);
                 break;
             case "LastName":
-                updatedPatient.LastName.Should().NotBe(fieldValue);
+                updatedPatient.AppUser.LastName.Should().NotBe(fieldValue);
                 break;
             case "Email":
                 updatedPatient.AppUser.Email.Should().NotBe(fieldValue);
@@ -981,8 +981,6 @@ public class PatientControllerTests : IntegrationTest
 
         var newPatient = new Patient
         {
-            FirstName = createPatientCommand.FirstName,
-            LastName = createPatientCommand.LastName,
             Address = createPatientCommand.Address,
             DateOfBirth = createPatientCommand.DateOfBirth,
             NationalId = createPatientCommand.NationalId,
@@ -992,6 +990,8 @@ public class PatientControllerTests : IntegrationTest
                 NormalizedUserName = createPatientCommand.UserName.ToUpper(),
                 Email = createPatientCommand.Email,
                 NormalizedEmail = createPatientCommand.Email.ToUpper(),
+                FirstName = createPatientCommand.FirstName,
+                LastName = createPatientCommand.LastName,
                 PhoneNumber = createPatientCommand.PhoneNumber,
                 PasswordHash = hasher.HashPassword(null!, createPatientCommand.Password),
                 SecurityStamp = Guid.NewGuid().ToString()

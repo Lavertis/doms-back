@@ -26,9 +26,9 @@ public class UserControllerTests : IntegrationTest
 
         var users = new List<AppUser>
         {
-            new() { Id = Guid.NewGuid(), UserName = "user1" },
-            new() { Id = Guid.NewGuid(), UserName = "user2" },
-            new() { Id = Guid.NewGuid(), UserName = "user3" }
+            new() {Id = Guid.NewGuid(), UserName = "user1", FirstName = "", LastName = ""},
+            new() {Id = Guid.NewGuid(), UserName = "user2", FirstName = "", LastName = ""},
+            new() {Id = Guid.NewGuid(), UserName = "user3", FirstName = "", LastName = ""}
         };
         DbContext.Users.AddRange(users);
         await DbContext.SaveChangesAsync();
@@ -77,7 +77,10 @@ public class UserControllerTests : IntegrationTest
         var users = new List<AppUser>();
         for (var i = 0; i < 10; i++)
         {
-            users.Add(new AppUser() { Id = Guid.NewGuid(), UserName = "user1" });
+            users.Add(new AppUser
+            {
+                Id = Guid.NewGuid(), UserName = "user1", FirstName = "oldFirstName", LastName = "oldLastName"
+            });
         }
 
         DbContext.Users.AddRange(users);
@@ -109,7 +112,7 @@ public class UserControllerTests : IntegrationTest
         var users = new List<AppUser>();
         for (var i = 0; i < 10; i++)
         {
-            users.Add(new AppUser() { Id = Guid.NewGuid(), UserName = "user1" });
+            users.Add(new AppUser() {Id = Guid.NewGuid(), UserName = "user1", FirstName = "", LastName = ""});
         }
 
         DbContext.Users.AddRange(users);
@@ -144,7 +147,9 @@ public class UserControllerTests : IntegrationTest
         var user = new AppUser
         {
             UserName = "user1",
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            FirstName = "",
+            LastName = ""
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();

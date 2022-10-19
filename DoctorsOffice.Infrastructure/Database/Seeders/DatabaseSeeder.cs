@@ -12,5 +12,6 @@ public static class DatabaseSeeder
         UserSeeder.SeedUsers(builder);
         AppointmentTypeSeeder.SeedAppointmentTypes(builder);
         AppointmentStatusSeeder.SeedAppointmentStatuses(builder);
+        AppointmentSeeder.SeedAppointments(builder);
     }
 }

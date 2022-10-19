@@ -3,6 +3,7 @@ using System;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221016153417_SeedDoctorPatientAndAppointments")]
+    partial class SeedDoctorPatientAndAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -464,14 +466,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Id = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
-                            Email = "doctor@doctor.com",
                             EmailConfirmed = false,
                             FirstName = "Doctor",
                             LastName = "Doctor",
-                            NormalizedEmail = "DOCTOR@DOCTOR.COM",
                             NormalizedUserName = "DOCTOR",
                             PasswordHash = "AMbTv46BLUYaRTuuF5U53eDGMBRw4T7wQwaxSxTrM4mPB87g87fP+FW4n+ecgCXCdg==",
-                            PhoneNumber = "123456789",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
                             TwoFactorEnabled = false,
@@ -482,14 +481,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Id = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "4facc425-b1ef-416a-979f-56da897448c5",
-                            Email = "patient@patient.com",
                             EmailConfirmed = false,
                             FirstName = "Patient",
                             LastName = "Patient",
-                            NormalizedEmail = "PATIENT@PATIENT.COM",
                             NormalizedUserName = "PATIENT",
                             PasswordHash = "AL9EaDGX0cdo1q6ldEn3SDtSYoYHcRpcEBXmM4TUfF+hOIT06L6ZfvndiURMFQEphw==",
-                            PhoneNumber = "123456789",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "4facc425-b1ef-416a-979f-56da897448c5",
                             TwoFactorEnabled = false,
@@ -536,6 +532,14 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("NationalId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -554,6 +558,8 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Address = "7865 Greenview St. Randallstown, MD 21133",
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
                             DateOfBirth = new DateTime(2000, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstName = "Patient",
+                            LastName = "Patient",
                             NationalId = "04233040549",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });

@@ -33,6 +33,8 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, HttpRe
         {
             UserName = request.UserName,
             Email = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             PhoneNumber = request.PhoneNumber,
             Password = request.Password,
             RoleName = Roles.Patient
@@ -47,8 +49,6 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, HttpRe
         var newAppUser = createUserResult.Value!;
         var newPatient = new Patient
         {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
             NationalId = request.NationalId,
             DateOfBirth = request.DateOfBirth,
             Address = request.Address,

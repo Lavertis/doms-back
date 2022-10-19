@@ -33,6 +33,8 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
         {
             UserName = request.UserName,
             Email = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             PhoneNumber = request.PhoneNumber,
             Password = request.Password,
             RoleName = Roles.Doctor

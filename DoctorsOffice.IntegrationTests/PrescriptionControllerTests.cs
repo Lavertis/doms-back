@@ -32,22 +32,18 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var patient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
         var otherPatientId = Guid.NewGuid();
         var otherPatient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = otherPatientId}
+            AppUser = new AppUser {Id = otherPatientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -112,10 +108,8 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var patient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(patient);
 
@@ -170,11 +164,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var patient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
@@ -218,11 +210,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var patient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = patientId}
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
@@ -271,11 +261,9 @@ public class PrescriptionControllerTests : IntegrationTest
         var otherPatientId = Guid.NewGuid();
         var otherPatient = new Patient
         {
-            FirstName = "",
-            LastName = "",
             Address = "",
             NationalId = "",
-            AppUser = new AppUser {Id = otherPatientId}
+            AppUser = new AppUser {Id = otherPatientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -459,7 +447,10 @@ public class PrescriptionControllerTests : IntegrationTest
         var otherDoctorId = Guid.NewGuid();
         var otherDoctor = new Doctor
         {
-            AppUser = new AppUser {Id = otherDoctorId}
+            AppUser = new AppUser
+            {
+                Id = otherDoctorId, FirstName = "oldFirstName", LastName = "oldLastName"
+            }
         };
         DbContext.Doctors.Add(otherDoctor);
 
