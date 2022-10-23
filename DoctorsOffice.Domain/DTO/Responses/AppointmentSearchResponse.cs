@@ -10,6 +10,8 @@ public class AppointmentSearchResponse
     public string PatientLastName { get; set; } = null!;
     public string PatientEmail { get; set; } = null!;
     public string PatientPhoneNumber { get; set; } = null!;
+    public string DoctorFirstName { get; set; } = null!;
+    public string DoctorLastName { get; set; } = null!;
     public string Status { get; set; } = null!;
     public string Type { get; set; } = null!;
 }

@@ -101,8 +101,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
             appointmentToUpdate.Status = appointmentStatus;
         }
 
-        var appointmentEntity =
-            await _appointmentRepository.UpdateAsync(appointmentToUpdate);
+        var appointmentEntity = await _appointmentRepository.UpdateAsync(appointmentToUpdate);
         var appointmentResponse = _mapper.Map<AppointmentResponse>(appointmentEntity);
         return result.WithValue(appointmentResponse);
     }

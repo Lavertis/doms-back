@@ -25,9 +25,11 @@ public class GetFilteredAppointmentsHandler
         CancellationToken cancellationToken)
     {
         var appointmentsQueryable = _appointmentRepository.GetAll()
+            .AsSplitQuery()
             .Include(a => a.Type)
             .Include(a => a.Status)
             .Include(a => a.Patient).ThenInclude(p => p.AppUser)
+            .Include(a => a.Doctor).ThenInclude(d => d.AppUser)
             .AsQueryable();
 
         if (request.DateStart is not null)

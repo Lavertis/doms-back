@@ -887,7 +887,7 @@ public class AppointmentControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
-        var doctor = (await DbContext.Doctors.FindAsync(authenticatedUserId))!;
+        var doctor = await DbContext.Doctors.Include(d => d.AppUser).FirstAsync(d => d.Id == authenticatedUserId);
         var patient = DbContext.Patients.Include(p => p.AppUser).First();
 
         const int pageSize = 10;
@@ -1116,6 +1116,8 @@ public class AppointmentControllerTests : IntegrationTest
             .Include(a => a.Type)
             .Include(a => a.Patient)
             .ThenInclude(p => p.AppUser)
+            .Include(a => a.Doctor)
+            .ThenInclude(d => d.AppUser)
             .Where(a => a.PatientId == authenticatedUserId).ToList();
         responseContent.Records.Should()
             .BeEquivalentTo(allAuthenticatedPatientAppointments.Select(a => Mapper.Map<AppointmentSearchResponse>(a)));
