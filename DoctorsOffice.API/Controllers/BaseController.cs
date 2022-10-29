@@ -20,7 +20,7 @@ public abstract class BaseController : ControllerBase
         return result.StatusCode switch
         {
             >= 200 and < 300 => StatusCode(result.StatusCode, result.Value),
-            _ when result.IsError => StatusCode(result.StatusCode, new {Error = new {result.Error?.Message}}),
+            _ when result.IsError => StatusCode(result.StatusCode, new {Error = result.Error?.Message}),
             _ when result.HasValidationErrors => StatusCode(result.StatusCode, new {Errors = result.ValidationErrors}),
             _ => throw new Exception("Failed to created response")
         };

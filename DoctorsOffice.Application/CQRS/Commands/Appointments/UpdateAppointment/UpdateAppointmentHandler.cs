@@ -1,11 +1,18 @@
 ﻿using AutoMapper;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
+using DoctorsOffice.SendGrid.DTO;
+using DoctorsOffice.SendGrid.DTO.TemplateData;
+using DoctorsOffice.SendGrid.Service;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 
@@ -15,17 +22,29 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
     private readonly IMapper _mapper;
+    private readonly ISendGridService _sendGridService;
+    private readonly SendGridTemplateSettings _sendGridTemplateSettings;
+    private readonly UrlSettings _urlSettings;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
     public UpdateAppointmentHandler(
         IAppointmentRepository appointmentRepository,
         IAppointmentStatusRepository appointmentStatusRepository,
         IAppointmentTypeRepository appointmentTypeRepository,
-        IMapper mapper)
+        IMapper mapper,
+        ISendGridService sendGridService,
+        IOptions<UrlSettings> urlSettings,
+        IOptions<SendGridTemplateSettings> sendGridTemplateSettings,
+        IWebHostEnvironment webHostEnvironment)
     {
         _appointmentRepository = appointmentRepository;
         _appointmentStatusRepository = appointmentStatusRepository;
         _appointmentTypeRepository = appointmentTypeRepository;
         _mapper = mapper;
+        _sendGridService = sendGridService;
+        _webHostEnvironment = webHostEnvironment;
+        _sendGridTemplateSettings = sendGridTemplateSettings.Value;
+        _urlSettings = urlSettings.Value;
     }
 
     public async Task<HttpResult<AppointmentResponse>> Handle(
@@ -36,6 +55,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         var appointmentToUpdate = await _appointmentRepository.GetAll()
             .Include(appointment => appointment.Status)
             .Include(appointment => appointment.Type)
+            .Include(appointment => appointment.Patient.AppUser)
             .FirstOrDefaultAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
 
         if (appointmentToUpdate is null)
@@ -98,11 +118,51 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
                     .WithStatusCode(StatusCodes.Status404NotFound);
             }
 
+            var previousStatus = appointmentToUpdate.Status.Name;
+            if (_webHostEnvironment.EnvironmentName != "Development")
+            {
+                await SendAppointmentStatusUpdateEmailAsync(
+                    doctor: appointmentToUpdate.Doctor,
+                    patient: appointmentToUpdate.Patient,
+                    date: appointmentToUpdate.Date,
+                    previousStatus: previousStatus,
+                    currentStatus: request.Status,
+                    websiteAddress: _urlSettings.FrontendDomain
+                );
+            }
+
             appointmentToUpdate.Status = appointmentStatus;
         }
 
         var appointmentEntity = await _appointmentRepository.UpdateAsync(appointmentToUpdate);
         var appointmentResponse = _mapper.Map<AppointmentResponse>(appointmentEntity);
         return result.WithValue(appointmentResponse);
+    }
+
+    private async Task SendAppointmentStatusUpdateEmailAsync(
+        Doctor doctor,
+        Patient patient,
+        DateTime date,
+        string previousStatus,
+        string currentStatus,
+        string websiteAddress)
+    {
+        var doctorName = $"{doctor.AppUser.FirstName} {doctor.AppUser.LastName}";
+        var dateString = $"{date.ToShortDateString()} {date.ToShortTimeString()}";
+        var email = new SingleEmailDto
+        {
+            RecipientEmail = patient.AppUser.Email,
+            RecipientName = patient.AppUser.FirstName,
+            TemplateId = _sendGridTemplateSettings.AppointmentStatusChange,
+            TemplateData = new AppointmentStatusUpdateTemplateData
+            {
+                DoctorName = doctorName,
+                Date = dateString,
+                PreviousStatus = previousStatus,
+                CurrentStatus = currentStatus,
+                WebsiteAddress = websiteAddress
+            }
+        };
+        await _sendGridService.SendSingleEmailAsync(email);
     }
 }

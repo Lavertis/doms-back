@@ -3,7 +3,7 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Appointments.CreateAppointment;
 
 public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppointmentRequest>
 {

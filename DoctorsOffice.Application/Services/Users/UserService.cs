@@ -31,6 +31,7 @@ public class UserService : IUserService
             return result.WithValidationErrors(validationResult.Errors);
 
         var user = _mapper.Map<AppUser>(request);
+        user.EmailConfirmed = request.EmailConfirmed;
 
         var createUserIdentityResult = await _appUserManager.CreateAsync(user, request.Password);
         if (!createUserIdentityResult.Succeeded)

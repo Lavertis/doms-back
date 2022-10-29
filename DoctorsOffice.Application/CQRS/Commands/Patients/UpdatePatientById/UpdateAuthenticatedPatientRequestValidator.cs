@@ -4,7 +4,7 @@ using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Patients.UpdatePatientById;
 
 public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<UpdateAuthenticatedPatientRequest>
 {

@@ -2,7 +2,7 @@
 using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Doctors.UpdateDoctorById;
 
 public class UpdateDoctorRequestValidator : AbstractValidator<UpdateDoctorRequest>
 {

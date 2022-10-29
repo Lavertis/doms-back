@@ -49,7 +49,7 @@ public class DoctorController : BaseController
     /// </summary>
     [HttpPost]
     [Authorize(Roles = Roles.Admin)]
-    public async Task<ActionResult<DoctorResponse>> CreateDoctorAsync(CreateDoctorRequest request)
+    public async Task<ActionResult<CreateDoctorResponse>> CreateDoctorAsync(CreateDoctorRequest request)
         => CreateResponse(await Mediator.Send(new CreateDoctorCommand(request)));
 
     /// <summary>

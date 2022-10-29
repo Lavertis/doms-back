@@ -17,6 +17,7 @@
     <ItemGroup>
         <ProjectReference Include="..\DoctorsOffice.Domain\DoctorsOffice.Domain.csproj"/>
         <ProjectReference Include="..\DoctorsOffice.Infrastructure\DoctorsOffice.Infrastructure.csproj"/>
+        <ProjectReference Include="..\DoctorsOffice.SendGrid\DoctorsOffice.SendGrid.csproj"/>
     </ItemGroup>
 
 </Project>

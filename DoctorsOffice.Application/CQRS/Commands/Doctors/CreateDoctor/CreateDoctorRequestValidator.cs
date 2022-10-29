@@ -2,7 +2,7 @@
 using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
 
 public class CreateDoctorRequestValidator : AbstractValidator<CreateDoctorRequest>
 {
@@ -31,13 +31,5 @@ public class CreateDoctorRequestValidator : AbstractValidator<CreateDoctorReques
         RuleFor(e => e.PhoneNumber)
             .NotEmpty()
             .WithMessage("Phone number is required");
-
-        RuleFor(e => e.Password)
-            .NotEmpty()
-            .WithMessage("NewPassword is required")
-            .MinimumLength(8)
-            .WithMessage("NewPassword must be at least 8 characters long")
-            .MaximumLength(50)
-            .WithMessage("NewPassword must be at most 50 characters long");
     }
 }

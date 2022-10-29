@@ -9,6 +9,7 @@ using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Database;
 using DoctorsOffice.Infrastructure.Identity;
 using DoctorsOffice.Infrastructure.Repositories;
+using DoctorsOffice.SendGrid;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.AddFluentValidationModule();
 builder.Services.AddIdentityModule(builder.Configuration);
 builder.Services.AddDatabaseModule(builder.Configuration);
 builder.Services.AddAppSettingsModule(builder.Configuration);
+builder.Services.AddSendGrid(builder.Configuration);
 
 var app = builder.Build();
 

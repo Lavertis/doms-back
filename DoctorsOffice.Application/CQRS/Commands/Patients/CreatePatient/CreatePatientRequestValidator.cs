@@ -2,7 +2,7 @@
 using DoctorsOffice.Infrastructure.Identity;
 using FluentValidation;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
 
 public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequest>
 {

@@ -35,13 +35,14 @@ public class AuthControllerTests : IntegrationTest
             FirstName = "",
             LastName = "",
             PasswordHash = hasher.HashPassword(null!, testPassword),
-            SecurityStamp = Guid.NewGuid().ToString()
+            SecurityStamp = Guid.NewGuid().ToString(),
+            EmailConfirmed = true
         });
         await DbContext.SaveChangesAsync();
 
         var request = new AuthenticateRequest
         {
-            UserName = testUserName,
+            Login = testUserName,
             Password = testPassword
         };
 
@@ -63,7 +64,7 @@ public class AuthControllerTests : IntegrationTest
 
         var request = new AuthenticateRequest
         {
-            UserName = "nonExistingUser",
+            Login = "nonExistingUser",
             Password = "dummyPassword"
         };
 
@@ -93,7 +94,7 @@ public class AuthControllerTests : IntegrationTest
 
         var request = new AuthenticateRequest
         {
-            UserName = testUserName,
+            Login = testUserName,
             Password = "incorrectPassword"
         };
 

@@ -77,20 +77,22 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         {
             UserName = TestAdminUserName,
             FirstName = "testAdminFirstName",
-            LastName = "testAdminLastName"
+            LastName = "testAdminLastName",
+            EmailConfirmed = true
         };
         await CreateUserAsync(testAdminUser, TestAdminPassword, Roles.Admin);
-        var testAdmin = new Admin {Id = testAdminUser.Id,};
+        var testAdmin = new Admin {Id = testAdminUser.Id};
         await DbContext.Admins.AddAsync(testAdmin);
 
         var testDoctorUser = new AppUser
         {
             UserName = TestDoctorUserName,
             FirstName = "testDoctorFirstName",
-            LastName = "testDoctorLastName"
+            LastName = "testDoctorLastName",
+            EmailConfirmed = true
         };
         await CreateUserAsync(testDoctorUser, TestDoctorPassword, Roles.Doctor);
-        var testDoctor = new Doctor {Id = testDoctorUser.Id,};
+        var testDoctor = new Doctor {Id = testDoctorUser.Id};
         await DbContext.Doctors.AddAsync(testDoctor);
 
         var testPatientUser = new AppUser
@@ -99,7 +101,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
             Email = "testPatientEmail@mail.com",
             PhoneNumber = "1234567890",
             FirstName = "testPatientFirstName",
-            LastName = "testPatientLastName"
+            LastName = "testPatientLastName",
+            EmailConfirmed = true
         };
         await CreateUserAsync(testPatientUser, TestPatientPassword, Roles.Patient);
         var testPatient = new Patient
@@ -154,7 +157,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     {
         var result = await client.PostAsJsonAsync(AuthenticateUrl, new AuthenticateRequest
         {
-            UserName = userName,
+            Login = userName,
             Password = password
         });
 

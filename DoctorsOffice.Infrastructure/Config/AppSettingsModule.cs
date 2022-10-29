@@ -7,6 +7,9 @@ public static class JwtSettingsModule
 {
     public static void AddAppSettingsModule(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<SendGridTemplateSettings>(configuration.GetSection("SendGridTemplates"));
+        services.Configure<UrlSettings>(configuration.GetSection("Url"));
+        services.Configure<IdentitySettings>(configuration.GetSection("Identity"));
     }
 }

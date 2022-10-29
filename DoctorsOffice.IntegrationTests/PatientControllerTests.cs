@@ -989,6 +989,7 @@ public class PatientControllerTests : IntegrationTest
                 UserName = createPatientCommand.UserName,
                 NormalizedUserName = createPatientCommand.UserName.ToUpper(),
                 Email = createPatientCommand.Email,
+                EmailConfirmed = true,
                 NormalizedEmail = createPatientCommand.Email.ToUpper(),
                 FirstName = createPatientCommand.FirstName,
                 LastName = createPatientCommand.LastName,
@@ -1002,7 +1003,7 @@ public class PatientControllerTests : IntegrationTest
         DbContext.IdentityUserRole.Add(new IdentityUserRole<Guid>
         {
             UserId = newPatient.AppUser.Id,
-            RoleId = patientRoleId,
+            RoleId = patientRoleId
         });
         await DbContext.SaveChangesAsync();
 

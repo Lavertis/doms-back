@@ -5,7 +5,7 @@ using DoctorsOffice.Domain.Repositories;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Appointments.UpdateAppointment;
 
 public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppointmentRequest>
 {

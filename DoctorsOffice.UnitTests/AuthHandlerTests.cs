@@ -42,12 +42,13 @@ public class AuthHandlerTests : UnitTest
         A.CallTo(() =>
                 _fakeRefreshTokenService.GenerateRefreshTokenAsync(A<string?>.Ignored, A<CancellationToken>.Ignored))
             .Returns(dummyRefreshToken);
+        A.CallTo(() => _fakeAppUserManager.IsEmailConfirmedAsync(A<AppUser>.Ignored)).Returns(true);
 
         const string ipAddress = "dummyIpAddress";
 
         var request = new AuthenticateRequest
         {
-            UserName = "dummyUserName",
+            Login = "dummyUserName",
             Password = "dummyPassword"
         };
         var command = new AuthenticateCommand(request, ipAddress);

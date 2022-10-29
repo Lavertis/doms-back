@@ -12,10 +12,14 @@ using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Filters;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
+using DoctorsOffice.SendGrid.Service;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -29,6 +33,7 @@ public class AppointmentHandlerTests : UnitTest
     private readonly IAppointmentTypeRepository _fakeAppointmentTypeRepository;
     private readonly IDoctorRepository _fakeDoctorRepository;
     private readonly IPatientRepository _fakePatientRepository;
+    private readonly IWebHostEnvironment _fakeWebHostEnvironment;
 
     public AppointmentHandlerTests()
     {
@@ -38,6 +43,7 @@ public class AppointmentHandlerTests : UnitTest
         _fakeDoctorRepository = A.Fake<IDoctorRepository>();
         _fakePatientRepository = A.Fake<IPatientRepository>();
         _fakeAppointmentService = A.Fake<IAppointmentService>();
+        _fakeWebHostEnvironment = A.Fake<IWebHostEnvironment>();
     }
 
     [Fact]
@@ -1011,11 +1017,16 @@ public class AppointmentHandlerTests : UnitTest
             RoleName = string.Empty
         };
 
+        A.CallTo(() => _fakeWebHostEnvironment.EnvironmentName).Returns("Development");
         var handler = new UpdateAppointmentHandler(
             _fakeAppointmentRepository,
             _fakeAppointmentStatusRepository,
             _fakeAppointmentTypeRepository,
-            Mapper
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<UrlSettings>>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            _fakeWebHostEnvironment
         );
 
         // act
@@ -1050,7 +1061,11 @@ public class AppointmentHandlerTests : UnitTest
             _fakeAppointmentRepository,
             _fakeAppointmentStatusRepository,
             _fakeAppointmentTypeRepository,
-            Mapper
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<UrlSettings>>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            A.Dummy<IWebHostEnvironment>()
         );
 
         // act
@@ -1092,11 +1107,16 @@ public class AppointmentHandlerTests : UnitTest
             .Returns(newAppointmentStatus);
         A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
 
+        A.CallTo(() => _fakeWebHostEnvironment.EnvironmentName).Returns("Development");
         var handler = new UpdateAppointmentHandler(
             _fakeAppointmentRepository,
             _fakeAppointmentStatusRepository,
             _fakeAppointmentTypeRepository,
-            Mapper
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<UrlSettings>>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            _fakeWebHostEnvironment
         );
 
         // act
@@ -1136,7 +1156,11 @@ public class AppointmentHandlerTests : UnitTest
             _fakeAppointmentRepository,
             _fakeAppointmentStatusRepository,
             _fakeAppointmentTypeRepository,
-            Mapper
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<UrlSettings>>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            A.Dummy<IWebHostEnvironment>()
         );
 
         // act
@@ -1175,7 +1199,11 @@ public class AppointmentHandlerTests : UnitTest
             _fakeAppointmentRepository,
             _fakeAppointmentStatusRepository,
             _fakeAppointmentTypeRepository,
-            Mapper
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<UrlSettings>>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            A.Dummy<IWebHostEnvironment>()
         );
 
         // act

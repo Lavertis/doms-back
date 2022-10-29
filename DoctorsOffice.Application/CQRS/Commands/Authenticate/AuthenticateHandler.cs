@@ -29,15 +29,18 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
     {
         var result = new HttpResult<AuthenticateResponse>();
 
-        var findByNameResult = await _appUserManager.FindByNameAsync(request.UserName);
-        if (findByNameResult.IsError || findByNameResult.Value is null)
+        var findByNameResult = await _appUserManager.FindByNameAsync(request.Login);
+        var findByEmailResult = await _appUserManager.FindByEmailAsync(request.Login);
+        if (findByNameResult.IsError && findByEmailResult.IsError &&
+            findByNameResult.Value == null && findByEmailResult.Value == null)
         {
             return result
                 .WithError(InvalidCredentialsError())
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        var validatePasswordResult = await _appUserManager.ValidatePasswordAsync(request.UserName, request.Password);
+        var user = findByNameResult.Value ?? findByEmailResult.Value;
+        var validatePasswordResult = await _appUserManager.ValidatePasswordAsync(user!.UserName, request.Password);
         if (validatePasswordResult.IsError || !validatePasswordResult.Value)
         {
             return result
@@ -45,7 +48,14 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        var user = findByNameResult.Value;
+        var emailIsConfirmed = await _appUserManager.IsEmailConfirmedAsync(user);
+        if (!emailIsConfirmed)
+        {
+            return result
+                .WithError(new Error {Message = "Email address not confirmed"})
+                .WithStatusCode(StatusCodes.Status400BadRequest);
+        }
+
         var userClaims = await _jwtService.GetUserClaimsAsync(user);
         var jwtToken = _jwtService.GenerateJwtToken(userClaims);
         var refreshToken = await _refreshTokenService.GenerateRefreshTokenAsync(request.IpAddress, cancellationToken);

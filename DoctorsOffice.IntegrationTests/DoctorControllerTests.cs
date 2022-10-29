@@ -242,7 +242,6 @@ public class DoctorControllerTests : IntegrationTest
             Email = "doctor@mail.com",
             UserName = "doctorUserName",
             PhoneNumber = "123456789",
-            Password = "Password1234#",
             FirstName = "DoctorFirstName",
             LastName = "DoctorLastName",
         };
@@ -269,8 +268,6 @@ public class DoctorControllerTests : IntegrationTest
     [InlineData("Email", "")]
     [InlineData("Email", "a")]
     [InlineData("PhoneNumber", "")]
-    [InlineData("Password", "")]
-    [InlineData("Password", "pass")]
     public async Task CreateDoctor_SingleFieldInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
@@ -282,7 +279,6 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
 
         typeof(CreateDoctorRequest).GetProperty(fieldName)!.SetValue(request, fieldValue);
@@ -306,7 +302,6 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
 
         var conflictingDoctor = new Doctor
@@ -339,7 +334,6 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
 
         var conflictingDoctor = new Doctor
@@ -371,7 +365,6 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
 
         // act
@@ -395,7 +388,6 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
 
         // act
@@ -417,10 +409,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         var authenticatedDoctorId =
             await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -472,10 +463,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         var authenticatedDoctorId =
             await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
@@ -536,10 +526,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
@@ -574,20 +563,18 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = conflictingUserName,
             Email = "mail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
@@ -620,20 +607,18 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await CreateDoctorAsync(new CreateDoctorRequest
         {
             UserName = "userName",
             Email = conflictingEmail,
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
@@ -665,10 +650,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
@@ -700,10 +684,9 @@ public class DoctorControllerTests : IntegrationTest
             UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
-            Password = oldDoctorPassword,
             FirstName = "oldFirstName",
             LastName = "oldLastName"
-        });
+        }, oldDoctorPassword);
 
         await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
 
@@ -1267,7 +1250,7 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    private async Task<Doctor> CreateDoctorAsync(CreateDoctorRequest request)
+    private async Task<Doctor> CreateDoctorAsync(CreateDoctorRequest request, string password)
     {
         var hasher = new PasswordHasher<AppUser>();
 
@@ -1278,11 +1261,12 @@ public class DoctorControllerTests : IntegrationTest
                 UserName = request.UserName,
                 NormalizedUserName = request.UserName.ToUpper(),
                 Email = request.Email,
+                EmailConfirmed = true,
                 NormalizedEmail = request.Email.ToUpper(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,
-                PasswordHash = hasher.HashPassword(null!, request.Password),
+                PasswordHash = hasher.HashPassword(null!, password),
                 SecurityStamp = Guid.NewGuid().ToString()
             }
         };

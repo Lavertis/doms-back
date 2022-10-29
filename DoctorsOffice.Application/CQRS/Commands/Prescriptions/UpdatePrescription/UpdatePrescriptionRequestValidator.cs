@@ -2,7 +2,7 @@
 using DoctorsOffice.Domain.Repositories;
 using FluentValidation;
 
-namespace DoctorsOffice.Application.Validation;
+namespace DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
 
 public class UpdatePrescriptionRequestValidator : AbstractValidator<UpdatePrescriptionRequest>
 {

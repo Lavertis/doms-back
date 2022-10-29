@@ -24,9 +24,12 @@ public static class UserSeeder
             Id = Guid.Parse(AdminUserId),
             UserName = "admin",
             NormalizedUserName = "ADMIN",
+            Email = "admin@doms.com",
+            NormalizedEmail = "ADMIN@DOMS.COM",
             FirstName = "Admin",
             LastName = "Admin",
             PasswordHash = "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==", // admin
+            EmailConfirmed = true,
             SecurityStamp = AdminUserId,
             ConcurrencyStamp = AdminUserId
         };
@@ -59,6 +62,7 @@ public static class UserSeeder
             FirstName = "Doctor",
             LastName = "Doctor",
             PasswordHash = "AMbTv46BLUYaRTuuF5U53eDGMBRw4T7wQwaxSxTrM4mPB87g87fP+FW4n+ecgCXCdg==", // doctor
+            EmailConfirmed = true,
             SecurityStamp = DoctorUserId,
             ConcurrencyStamp = DoctorUserId
         };
@@ -91,6 +95,7 @@ public static class UserSeeder
             FirstName = "Patient",
             LastName = "Patient",
             PasswordHash = "AL9EaDGX0cdo1q6ldEn3SDtSYoYHcRpcEBXmM4TUfF+hOIT06L6ZfvndiURMFQEphw==", // patient
+            EmailConfirmed = true,
             SecurityStamp = PatientUserId,
             ConcurrencyStamp = PatientUserId
         };

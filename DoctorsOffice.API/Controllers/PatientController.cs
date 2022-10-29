@@ -57,7 +57,7 @@ public class PatientController : BaseController
     /// </summary>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<ActionResult<PatientResponse>> CreatePatientAsync(CreatePatientRequest request)
+    public async Task<ActionResult<CreatePatientResponse>> CreatePatientAsync(CreatePatientRequest request)
         => CreateResponse(await Mediator.Send(new CreatePatientCommand(request)));
 
     /// <summary>

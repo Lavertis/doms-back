@@ -22,6 +22,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\DoctorsOffice.Application\DoctorsOffice.Application.csproj"/>
+        <ProjectReference Include="..\DoctorsOffice.SendGrid\DoctorsOffice.SendGrid.csproj"/>
     </ItemGroup>
 
 </Project>

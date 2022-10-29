@@ -10,10 +10,14 @@ using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Filters;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
+using DoctorsOffice.SendGrid.Service;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -23,13 +27,17 @@ public class DoctorHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IDoctorRepository _fakeDoctorRepository;
+    private readonly IOptions<UrlSettings> _fakeUrlSettings;
     private readonly IUserService _fakeUserService;
+    private readonly IWebHostEnvironment _fakeWebHostEnvironment;
 
     public DoctorHandlerTests()
     {
         _fakeDoctorRepository = A.Fake<IDoctorRepository>();
         _fakeUserService = A.Fake<IUserService>();
         _fakeAppUserManager = A.Fake<AppUserManager>();
+        _fakeWebHostEnvironment = A.Fake<IWebHostEnvironment>();
+        _fakeUrlSettings = A.Fake<IOptions<UrlSettings>>();
     }
 
     [Fact]
@@ -191,7 +199,6 @@ public class DoctorHandlerTests : UnitTest
             UserName = "userName",
             Email = "mail@mail.com",
             PhoneNumber = "123456789",
-            Password = "Password1234#"
         };
         var command = new CreateDoctorCommand(request);
 
@@ -202,10 +209,21 @@ public class DoctorHandlerTests : UnitTest
             Email = command.Email,
             NormalizedEmail = command.Email.ToUpper(),
             PhoneNumber = command.PhoneNumber,
-            PasswordHash = command.Password
+            PasswordHash = Guid.NewGuid().ToString()
         };
 
-        var handler = new CreateDoctorHandler(_fakeDoctorRepository, _fakeUserService, Mapper);
+        A.CallTo(() => _fakeUrlSettings.Value).Returns(new UrlSettings {FrontendDomain = "http://localhost:3000"});
+        var handler = new CreateDoctorHandler(
+            _fakeDoctorRepository,
+            _fakeUserService,
+            Mapper,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            A.Dummy<IOptions<IdentitySettings>>(),
+            _fakeWebHostEnvironment,
+            _fakeAppUserManager,
+            _fakeUrlSettings
+        );
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
             .Returns(new HttpResult<AppUser>().WithValue(appUser));
 

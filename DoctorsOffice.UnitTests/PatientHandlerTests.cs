@@ -8,12 +8,16 @@ using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
+using DoctorsOffice.SendGrid.Service;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -23,6 +27,7 @@ public class PatientHandlerTests : UnitTest
 {
     private readonly AppUserManager _fakeAppUserManager;
     private readonly IPatientRepository _fakePatientRepository;
+    private readonly IOptions<UrlSettings> _fakeUrlSettings;
     private readonly IUserService _fakeUserService;
 
     public PatientHandlerTests()
@@ -30,6 +35,7 @@ public class PatientHandlerTests : UnitTest
         _fakePatientRepository = A.Fake<IPatientRepository>();
         _fakeUserService = A.Fake<IUserService>();
         _fakeAppUserManager = A.Fake<AppUserManager>();
+        _fakeUrlSettings = A.Fake<IOptions<UrlSettings>>();
     }
 
     [Fact]
@@ -102,9 +108,18 @@ public class PatientHandlerTests : UnitTest
 
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
             .Returns(new HttpResult<AppUser>().WithValue(newAppUser));
+        A.CallTo(() => _fakeUrlSettings.Value).Returns(new UrlSettings {FrontendDomain = "http://localhost:3000"});
 
-
-        var handler = new CreatePatientHandler(_fakePatientRepository, _fakeUserService, Mapper);
+        var handler = new CreatePatientHandler(
+            _fakePatientRepository,
+            _fakeUserService,
+            _fakeAppUserManager,
+            _fakeUrlSettings,
+            A.Dummy<ISendGridService>(),
+            A.Dummy<IOptions<SendGridTemplateSettings>>(),
+            A.Dummy<IOptions<IdentitySettings>>(),
+            A.Dummy<IWebHostEnvironment>()
+        );
 
         // act
         await handler.Handle(command, default);

@@ -9,4 +9,5 @@ public class CreateUserRequest
     public string Password { get; set; } = null!;
     public string PhoneNumber { get; set; } = null!;
     public string RoleName { get; set; } = null!;
+    public bool EmailConfirmed { get; set; }
 }

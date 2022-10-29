@@ -2,6 +2,7 @@
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Infrastructure.Database;
+using DoctorsOffice.Infrastructure.Identity.TokenProviders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +18,7 @@ public static class IdentityModule
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                var key = Encoding.ASCII.GetBytes(configuration.GetSection("JwtSettings:SecretKey").Value);
+                var key = Encoding.ASCII.GetBytes(configuration.GetSection("Jwt:SecretKey").Value);
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -39,11 +40,26 @@ public static class IdentityModule
                     RequiredUniqueChars = 0,
                     RequireNonAlphanumeric = false,
                 };
+                options.SignIn.RequireConfirmedEmail = true;
+                options.Tokens.EmailConfirmationTokenProvider = "email_confirmation";
+                options.Tokens.PasswordResetTokenProvider = "password_reset";
             })
             .AddRoles<AppRole>()
             .AddRoleManager<AppRoleManager>()
             .AddUserManager<AppUserManager>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddTokenProvider<EmailConfirmationTokenProvider<AppUser>>("email_confirmation")
+            .AddTokenProvider<PasswordResetTokenProvider<AppUser>>("password_reset");
+
+        var emailConfirmationTokenLifeSpanInHours =
+            int.Parse(configuration.GetSection("Identity:EmailConfirmationTokenLifeSpanInHours").Value);
+        services.Configure<EmailConfirmationTokenProviderOptions>(opt =>
+            opt.TokenLifespan = TimeSpan.FromHours(emailConfirmationTokenLifeSpanInHours));
+
+        var passwordResetTokenLifeSpanInHours =
+            int.Parse(configuration.GetSection("Identity:PasswordResetTokenLifeSpanInHours").Value);
+        services.Configure<PasswordResetTokenProviderOptions>(opt =>
+            opt.TokenLifespan = TimeSpan.FromHours(passwordResetTokenLifeSpanInHours));
     }
 }
