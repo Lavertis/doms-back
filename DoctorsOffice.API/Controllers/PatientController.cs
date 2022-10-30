@@ -40,7 +40,7 @@ public class PatientController : BaseController
     /// Get patient by id.
     /// </summary>
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = Roles.Doctor)]
+    [Authorize(Roles = $"{Roles.Admin}, {Roles.Doctor}")]
     public async Task<ActionResult<PatientResponse>> GetPatientByIdAsync(Guid id)
         => CreateResponse(await Mediator.Send(new GetPatientByIdQuery(id)));
 
@@ -82,6 +82,6 @@ public class PatientController : BaseController
     /// </summary>
     [HttpDelete("{patientId:guid}")]
     [Authorize(Roles = Roles.Admin)]
-    public async Task<ActionResult<Unit>> DeleteDoctorByIdAsync(Guid patientId)
+    public async Task<ActionResult<Unit>> DeletePatientByIdAsync(Guid patientId)
         => CreateResponse(await Mediator.Send(new DeletePatientByIdCommand(patientId)));
 }

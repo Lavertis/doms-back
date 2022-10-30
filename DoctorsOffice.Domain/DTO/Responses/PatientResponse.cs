@@ -11,4 +11,5 @@ public class PatientResponse
     public string PhoneNumber { get; set; } = null!;
     public string Address { get; set; } = null!;
     public DateTime DateOfBirth { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

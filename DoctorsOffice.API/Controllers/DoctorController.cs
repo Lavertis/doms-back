@@ -45,6 +45,14 @@ public class DoctorController : BaseController
         => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(JwtSubject())));
 
     /// <summary>
+    /// Returns doctor by id. Only for doctors
+    /// </summary>
+    [HttpGet("{doctorId:guid}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<ActionResult<DoctorResponse>> GetDoctorByIdAsync(Guid doctorId)
+        => CreateResponse(await Mediator.Send(new GetDoctorByIdQuery(doctorId)));
+
+    /// <summary>
     /// Creates a new doctor. Only for admins
     /// </summary>
     [HttpPost]
