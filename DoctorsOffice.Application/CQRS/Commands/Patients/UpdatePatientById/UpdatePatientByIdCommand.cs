@@ -17,12 +17,10 @@ public class UpdatePatientByIdCommand : IRequest<HttpResult<PatientResponse>>
     public readonly string? NewPassword;
     public readonly Guid PatientId;
     public readonly string? PhoneNumber;
-    public readonly string? UserName;
 
     public UpdatePatientByIdCommand(UpdateAuthenticatedPatientRequest request, Guid patientId)
     {
         PatientId = patientId;
-        UserName = request.UserName;
         FirstName = request.FirstName;
         LastName = request.LastName;
         NationalId = request.NationalId;

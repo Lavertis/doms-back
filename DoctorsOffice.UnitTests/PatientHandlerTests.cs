@@ -86,7 +86,6 @@ public class PatientHandlerTests : UnitTest
         // arrange
         var request = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "John",
             LastName = "Doe",
             Email = "mail@mail.com",
@@ -99,8 +98,8 @@ public class PatientHandlerTests : UnitTest
 
         var newAppUser = new AppUser
         {
-            UserName = command.UserName,
-            NormalizedUserName = command.UserName.ToUpper(),
+            UserName = command.Email,
+            NormalizedUserName = command.Email.ToUpper(),
             Email = command.Email,
             NormalizedEmail = command.Email.ToUpper(),
             PhoneNumber = command.PhoneNumber
@@ -162,7 +161,6 @@ public class PatientHandlerTests : UnitTest
 
         var request = new UpdateAuthenticatedPatientRequest
         {
-            UserName = "newUserName",
             FirstName = "newFirstName",
             LastName = "newLastName",
             Email = "newMail@mail.com",
@@ -184,7 +182,6 @@ public class PatientHandlerTests : UnitTest
     }
 
     [Theory]
-    [InlineData("UserName", "newUserName")]
     [InlineData("FirstName", "newFirstName")]
     [InlineData("LastName", "newLastName")]
     [InlineData("Email", "newMail@mail.com")]
@@ -301,16 +298,17 @@ public class PatientHandlerTests : UnitTest
             Address = "address",
             AppUser = new AppUser {Id = Guid.NewGuid()}
         };
-
+        A.CallTo(() => _fakeAppUserManager.FindByIdAsync(A<Guid>.Ignored))
+            .Returns(new CommonResult<AppUser>().WithValue(patientToDelete.AppUser));
+        A.CallTo(() => _fakeAppUserManager.IsInRoleAsync(A<AppUser>.Ignored, A<string>.Ignored)).Returns(true);
         var command = new DeletePatientByIdCommand(patientToDelete.Id);
-        var handler = new DeletePatientByIdHandler(_fakePatientRepository);
+        var handler = new DeletePatientByIdHandler(_fakeAppUserManager);
 
         // act
         await handler.Handle(command, default);
 
         // assert
-        A.CallTo(() => _fakePatientRepository.DeleteByIdAsync(A<Guid>.Ignored))
-            .MustHaveHappenedOnceExactly();
+        A.CallTo(() => _fakeAppUserManager.DeleteByIdAsync(A<Guid>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -321,7 +319,7 @@ public class PatientHandlerTests : UnitTest
         var patientId = Guid.NewGuid();
 
         var command = new DeletePatientByIdCommand(patientId);
-        var handler = new DeletePatientByIdHandler(_fakePatientRepository);
+        var handler = new DeletePatientByIdHandler(_fakeAppUserManager);
 
         // act
         var result = await handler.Handle(command, default);

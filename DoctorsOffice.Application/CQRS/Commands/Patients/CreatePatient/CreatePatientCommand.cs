@@ -15,11 +15,9 @@ public class CreatePatientCommand : IRequest<HttpResult<CreatePatientResponse>>
     public readonly string NationalId;
     public readonly string Password;
     public readonly string PhoneNumber;
-    public readonly string UserName;
 
     public CreatePatientCommand(CreatePatientRequest request)
     {
-        UserName = request.UserName;
         FirstName = request.FirstName;
         LastName = request.LastName;
         NationalId = request.NationalId;

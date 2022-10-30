@@ -10,16 +10,6 @@ public class CreatePatientRequestValidator : AbstractValidator<CreatePatientRequ
     {
         CascadeMode = CascadeMode.Stop;
 
-        RuleFor(e => e.UserName)
-            .NotEmpty()
-            .WithMessage("Username is required")
-            .MinimumLength(4)
-            .WithMessage("Username must be at least 4 characters long")
-            .MaximumLength(16)
-            .WithMessage("Username must be at most 16 characters long")
-            .MustAsync(async (userName, _) => !await appUserManager.ExistsByUserNameAsync(userName))
-            .WithMessage("Username already exists");
-
         RuleFor(e => e.FirstName)
             .NotEmpty()
             .WithMessage("First name is required")

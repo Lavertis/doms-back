@@ -196,7 +196,6 @@ public class DoctorHandlerTests : UnitTest
         // arrange
         var request = new CreateDoctorRequest
         {
-            UserName = "userName",
             Email = "mail@mail.com",
             PhoneNumber = "123456789",
         };
@@ -204,8 +203,8 @@ public class DoctorHandlerTests : UnitTest
 
         var appUser = new AppUser
         {
-            UserName = command.UserName,
-            NormalizedUserName = command.UserName.ToUpper(),
+            UserName = command.Email,
+            NormalizedUserName = command.Email.ToUpper(),
             Email = command.Email,
             NormalizedEmail = command.Email.ToUpper(),
             PhoneNumber = command.PhoneNumber,
@@ -255,7 +254,6 @@ public class DoctorHandlerTests : UnitTest
 
         var request = new UpdateDoctorRequest
         {
-            UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
             NewPassword = "newPassword1234#"
@@ -284,7 +282,6 @@ public class DoctorHandlerTests : UnitTest
     {
         var request = new UpdateDoctorRequest
         {
-            UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "123456789",
             NewPassword = "newPassword1234#"
@@ -304,7 +301,6 @@ public class DoctorHandlerTests : UnitTest
     }
 
     [Theory]
-    [InlineData("UserName", "newUserName")]
     [InlineData("Email", "newMail@mail.com")]
     [InlineData("PhoneNumber", "987654321")]
     [InlineData("NewPassword", "newPassword1234#")]
@@ -352,15 +348,17 @@ public class DoctorHandlerTests : UnitTest
         {
             AppUser = new AppUser {Id = Guid.NewGuid()}
         };
-
+        A.CallTo(() => _fakeAppUserManager.FindByIdAsync(A<Guid>.Ignored))
+            .Returns(new CommonResult<AppUser>().WithValue(doctorToDelete.AppUser));
+        A.CallTo(() => _fakeAppUserManager.IsInRoleAsync(A<AppUser>.Ignored, A<string>.Ignored)).Returns(true);
         var command = new DeleteDoctorByIdCommand(doctorToDelete.AppUser.Id);
-        var handler = new DeleteDoctorByIdHandler(_fakeDoctorRepository);
+        var handler = new DeleteDoctorByIdHandler(_fakeAppUserManager);
 
         // act
         await handler.Handle(command, default);
 
         // assert
-        A.CallTo(() => _fakeDoctorRepository.DeleteByIdAsync(A<Guid>.Ignored)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => _fakeAppUserManager.DeleteByIdAsync(A<Guid>.Ignored)).MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -371,7 +369,7 @@ public class DoctorHandlerTests : UnitTest
         A.CallTo(() => _fakeDoctorRepository.DeleteByIdAsync(A<Guid>.Ignored)).Returns(false);
 
         var command = new DeleteDoctorByIdCommand(doctorId);
-        var handler = new DeleteDoctorByIdHandler(_fakeDoctorRepository);
+        var handler = new DeleteDoctorByIdHandler(_fakeAppUserManager);
 
         // act
         var result = await handler.Handle(command, default);

@@ -78,7 +78,6 @@ public class UserServiceTests : UnitTest
     }
 
     [Theory]
-    [InlineData("UserName", "")]
     [InlineData("Email", "")]
     [InlineData("Email", "invalidEmail")]
     [InlineData("PhoneNumber", "")]
@@ -136,7 +135,6 @@ public class UserServiceTests : UnitTest
 
         var updateUserRequest = new UpdateUserRequest
         {
-            UserName = "newUerName",
             Email = "mail@mail.com",
             PhoneNumber = "newPhoneNumber",
             NewPassword = "newPassword",
@@ -147,8 +145,8 @@ public class UserServiceTests : UnitTest
         var result = await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
-        result.Value!.UserName.Should().Be(updateUserRequest.UserName);
-        result.Value.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
+        result.Value!.UserName.Should().Be(updateUserRequest.Email);
+        result.Value.NormalizedUserName.Should().Be(updateUserRequest.Email.ToUpper());
         result.Value.Email.Should().Be(updateUserRequest.Email);
         result.Value.NormalizedEmail.Should().Be(updateUserRequest.Email.ToUpper());
         result.Value.PhoneNumber.Should().Be(updateUserRequest.PhoneNumber);
@@ -160,7 +158,6 @@ public class UserServiceTests : UnitTest
     }
 
     [Theory]
-    [InlineData("UserName", "newUerName")]
     [InlineData("Email", "mail@mail.com")]
     [InlineData("PhoneNumber", "newPhoneNumber")]
     [InlineData("NewPassword", "newPassword")]
@@ -170,14 +167,14 @@ public class UserServiceTests : UnitTest
         // arrange
         var hasher = new PasswordHasher<AppUser>();
         var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        const string testUserName = "testUserName";
+        const string testEmail = "testMail@mail.com";
         var appUser = new AppUser
         {
             Id = Guid.NewGuid(),
-            UserName = testUserName,
-            NormalizedUserName = testUserName.ToUpper(),
-            Email = "mail@mail.com",
-            NormalizedEmail = "MAIL@MAIL.COM",
+            UserName = testEmail,
+            NormalizedUserName = testEmail.ToUpper(),
+            Email = testEmail,
+            NormalizedEmail = testEmail.ToUpper(),
             EmailConfirmed = true,
             PhoneNumber = "123456789",
             PhoneNumberConfirmed = true,
@@ -201,12 +198,14 @@ public class UserServiceTests : UnitTest
         var result = await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
 
         // assert
-        if (updateUserRequest.UserName is not null) result.Value!.UserName.Should().Be(updateUserRequest.UserName);
-        if (updateUserRequest.UserName is not null)
-            result.Value!.NormalizedUserName.Should().Be(updateUserRequest.UserName.ToUpper());
-        if (updateUserRequest.Email is not null) result.Value!.Email.Should().Be(updateUserRequest.Email);
         if (updateUserRequest.Email is not null)
+        {
+            result.Value!.UserName.Should().Be(updateUserRequest.Email);
+            result.Value!.NormalizedUserName.Should().Be(updateUserRequest.Email.ToUpper());
+            result.Value!.Email.Should().Be(updateUserRequest.Email);
             result.Value!.NormalizedEmail.Should().Be(updateUserRequest.Email.ToUpper());
+        }
+
         if (updateUserRequest.PhoneNumber is not null)
             result.Value!.PhoneNumber.Should().Be(updateUserRequest.PhoneNumber);
         if (updateUserRequest.Email is not null) result.Value!.EmailConfirmed.Should().Be(true);
@@ -216,7 +215,6 @@ public class UserServiceTests : UnitTest
     }
 
     [Theory]
-    [InlineData("UserName", "a")]
     [InlineData("Email", "mail_mail.com")]
     public async void UpdateUserByIdAsync_SingleInvalidField_ReturnsBadRequest400StatusCode(string fieldName,
         string fieldValue)
@@ -242,7 +240,6 @@ public class UserServiceTests : UnitTest
 
         var updateUserRequest = new UpdateUserRequest
         {
-            UserName = "newUerName",
             Email = "newEmail",
             PhoneNumber = "newPhoneNumber",
             NewPassword = "newPassword",
@@ -274,28 +271,6 @@ public class UserServiceTests : UnitTest
 
         // assert
         result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-    }
-
-    [Fact]
-    public async void UpdateUserByIdAsync_RequestedUserNameIsAlreadyTaken_ReturnsBadRequest400StatusCode()
-    {
-        // arrange
-        var hasher = new PasswordHasher<AppUser>();
-        var oldPasswordHash = hasher.HashPassword(A.Dummy<AppUser>(), "oldPassword");
-        var appUser = new AppUser {Id = Guid.NewGuid(), UserName = "testUserName", PasswordHash = oldPasswordHash};
-        var conflictingUser = new AppUser {Id = Guid.NewGuid(), UserName = "conflictingUserName"};
-        var usersQueryable = new List<AppUser> {appUser, conflictingUser}.AsQueryable().BuildMock();
-
-        A.CallTo(() => _fakeAppUserManager.FindByIdAsync(A<string>.Ignored)).Returns(appUser);
-        A.CallTo(() => _fakeAppUserManager.Users).Returns(usersQueryable);
-
-        var updateUserRequest = new UpdateUserRequest {UserName = "conflictingUserName"};
-
-        // act
-        var result = await _userService.UpdateUserByIdAsync(Guid.NewGuid(), updateUserRequest);
-
-        // assert
-        result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
     }
 
     [Fact]

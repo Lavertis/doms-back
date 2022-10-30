@@ -100,7 +100,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -122,10 +121,10 @@ public class PatientControllerTests : IntegrationTest
         var createdPatient = DbContext.Patients
             .Include(p => p.AppUser)
             .ToList()
-            .First(p => p.AppUser.UserName == createPatientRequest.UserName);
+            .First(p => p.AppUser.Email == createPatientRequest.Email);
 
-        createdPatient.AppUser.UserName.Should().Be(createPatientRequest.UserName);
-        createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientRequest.UserName.ToUpper());
+        createdPatient.AppUser.UserName.Should().Be(createPatientRequest.Email);
+        createdPatient.AppUser.NormalizedUserName.Should().Be(createPatientRequest.Email.ToUpper());
         createdPatient.AppUser.FirstName.Should().Be(createPatientRequest.FirstName);
         createdPatient.AppUser.LastName.Should().Be(createPatientRequest.LastName);
         createdPatient.AppUser.Email.Should().Be(createPatientRequest.Email);
@@ -136,8 +135,6 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData("UserName", "")]
-    [InlineData("UserName", "aa")]
     [InlineData("FirstName", "")]
     [InlineData("LastName", "")]
     [InlineData("Email", "not_correct_email")]
@@ -153,7 +150,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -174,49 +170,6 @@ public class PatientControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task CreatePatient_UserNameAlreadyExists_ReturnsBadRequest()
-    {
-        // arrange
-        var client = await GetHttpClientAsync();
-        await AuthenticateAsPatientAsync(client);
-
-        var createPatientRequest = new CreatePatientRequest
-        {
-            UserName = "testUserName",
-            FirstName = "testFirstName",
-            LastName = "testLastName",
-            Email = "test@test.com",
-            PhoneNumber = "123456789",
-            Address = "testAddress",
-            DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
-            Password = "testPassword12345#",
-            ConfirmPassword = "testPassword12345#"
-        };
-
-        var conflictingPatient = new Patient
-        {
-            Address = "address",
-            NationalId = "",
-            AppUser = new AppUser
-            {
-                UserName = createPatientRequest.UserName,
-                NormalizedUserName = createPatientRequest.UserName.ToUpper(),
-                FirstName = "firstName",
-                LastName = "lastName"
-            }
-        };
-
-        DbContext.Patients.Add(conflictingPatient);
-        await DbContext.SaveChangesAsync();
-
-        // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", createPatientRequest);
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
     public async Task CreatePatient_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
@@ -225,7 +178,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -269,7 +221,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -296,7 +247,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -322,7 +272,6 @@ public class PatientControllerTests : IntegrationTest
 
         var createPatientRequest = new CreatePatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -344,7 +293,7 @@ public class PatientControllerTests : IntegrationTest
         DbContext.Patients
             .Include(p => p.AppUser)
             .ToList()
-            .First(p => p.AppUser.UserName == createPatientRequest.UserName).DateOfBirth
+            .First(p => p.AppUser.Email == createPatientRequest.Email).DateOfBirth
             .Should().Be(DateTime.Parse("2020-07-10"));
     }
 
@@ -360,7 +309,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -376,7 +324,6 @@ public class PatientControllerTests : IntegrationTest
 
         var updatePatientRequest = new UpdateAuthenticatedPatientRequest
         {
-            UserName = "testUserName",
             FirstName = "testFirstName",
             LastName = "testLastName",
             Email = "test@test.com",
@@ -401,8 +348,8 @@ public class PatientControllerTests : IntegrationTest
         var updatedPatient = DbContext.Patients
             .Include(p => p.AppUser)
             .FirstOrDefault(p => p.Id == authenticatedPatientId)!;
-        updatedPatient.AppUser.UserName.Should().Be(updatePatientRequest.UserName);
-        updatedPatient.AppUser.NormalizedUserName.Should().Be(updatePatientRequest.UserName.ToUpper());
+        updatedPatient.AppUser.UserName.Should().Be(updatePatientRequest.Email);
+        updatedPatient.AppUser.NormalizedUserName.Should().Be(updatePatientRequest.Email.ToUpper());
         updatedPatient.AppUser.FirstName.Should().Be(updatePatientRequest.FirstName);
         updatedPatient.AppUser.LastName.Should().Be(updatePatientRequest.LastName);
         updatedPatient.AppUser.Email.Should().Be(updatePatientRequest.Email);
@@ -411,59 +358,6 @@ public class PatientControllerTests : IntegrationTest
         updatedPatient.Address.Should().Be(updatePatientRequest.Address);
         updatedPatient.DateOfBirth.Should().Be(updatePatientRequest.DateOfBirth.Value.Date);
         updatedPatient.AppUser.PasswordHash.Should().NotBe(oldPasswordHash);
-    }
-
-    [Fact]
-    public async Task UpdateAuthenticatedPatient_UserNameAlreadyExists_ReturnsBadRequest()
-    {
-        var client = await GetHttpClientAsync();
-
-        var hasher = new PasswordHasher<AppUser>();
-        const string patientPassword = "oldPassword12345#";
-        hasher.HashPassword(new AppUser(), patientPassword);
-
-        var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
-        {
-            UserName = "oldUserName",
-            FirstName = "oldFirstName",
-            LastName = "oldLastName",
-            Email = "oldEmail@mail.com",
-            NationalId = "123456789",
-            Address = "oldAddress",
-            PhoneNumber = "123456789",
-            DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
-            Password = patientPassword
-        });
-
-        var conflictPatient = await CreatePatient(new CreatePatientRequest
-        {
-            UserName = "oldUserName2",
-            FirstName = "oldFirstName2",
-            LastName = "oldLastName2",
-            Email = "oldEmail2@mail.com",
-            NationalId = "987654321",
-            Address = "oldAddress2",
-            PhoneNumber = "123455789",
-            DateOfBirth = DateTime.UtcNow.Subtract(10.Days()),
-            Password = patientPassword
-        });
-
-        await AuthenticateAsAsync(client, patientToBeUpdated.AppUser.UserName, patientPassword);
-
-        var updatePatientRequest = new UpdateAuthenticatedPatientRequest
-        {
-            UserName = conflictPatient.AppUser.UserName,
-            CurrentPassword = patientPassword
-        };
-
-        var serializedContent = JsonConvert.SerializeObject(updatePatientRequest);
-        var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-
-        // act
-        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -477,7 +371,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -490,7 +383,6 @@ public class PatientControllerTests : IntegrationTest
 
         var conflictPatient = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName2",
             FirstName = "oldFirstName2",
             LastName = "oldLastName2",
             Email = "oldEmail2@mail.com",
@@ -529,7 +421,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -568,7 +459,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -654,7 +544,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -693,7 +582,6 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("DateOfBirth", "2002-07-10")]
     [InlineData("NewPassword", "NewPassword12345#")]
     [InlineData("PhoneNumber", "999999999")]
-    [InlineData("UserName", "newUserName")]
     [InlineData("Email", "newMail@mail.com")]
     [InlineData("NationalId", "123456789")]
     public async Task UpdateAuthenticatedPatient_SingleFiledPresent_UpdatesField(string fieldName, string fieldValue)
@@ -706,7 +594,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -760,6 +647,8 @@ public class PatientControllerTests : IntegrationTest
             case "Email":
                 updatedPatient.AppUser.Email.Should().Be(fieldValue);
                 updatedPatient.AppUser.NormalizedEmail.Should().Be(fieldValue.ToUpper());
+                updatedPatient.AppUser.UserName.Should().Be(fieldValue);
+                updatedPatient.AppUser.NormalizedUserName.Should().Be(fieldValue.ToUpper());
                 break;
             case "NationalId":
                 updatedPatient.NationalId.Should().Be(fieldValue);
@@ -769,10 +658,6 @@ public class PatientControllerTests : IntegrationTest
                 break;
             case "DateOfBirth":
                 updatedPatient.DateOfBirth.Should().Be(DateTime.Parse(fieldValue));
-                break;
-            case "UserName":
-                updatedPatient.AppUser.UserName.Should().Be(fieldValue);
-                updatedPatient.AppUser.NormalizedUserName.Should().Be(fieldValue.ToUpper());
                 break;
             case "PhoneNumber":
                 updatedPatient.AppUser.PhoneNumber.Should().Be(fieldValue);
@@ -789,7 +674,6 @@ public class PatientControllerTests : IntegrationTest
     [InlineData("Address", "aa")]
     [InlineData("NewPassword", "")]
     [InlineData("PhoneNumber", "")]
-    [InlineData("UserName", "")]
     [InlineData("Email", "")]
     [InlineData("Email", "aaa")]
     [InlineData("NationalId", "")]
@@ -804,7 +688,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -850,6 +733,7 @@ public class PatientControllerTests : IntegrationTest
                 break;
             case "Email":
                 updatedPatient.AppUser.Email.Should().NotBe(fieldValue);
+                updatedPatient.AppUser.UserName.Should().NotBe(fieldValue);
                 break;
             case "NationalId":
                 updatedPatient.NationalId.Should().NotBe(fieldValue);
@@ -859,9 +743,6 @@ public class PatientControllerTests : IntegrationTest
                 break;
             case "DateOfBirth":
                 updatedPatient.DateOfBirth.Should().NotBe(DateTime.Parse(fieldValue));
-                break;
-            case "UserName":
-                updatedPatient.AppUser.UserName.Should().NotBe(fieldValue);
                 break;
             case "PhoneNumber":
                 updatedPatient.AppUser.PhoneNumber.Should().NotBe(fieldValue);
@@ -879,7 +760,6 @@ public class PatientControllerTests : IntegrationTest
 
         var patientToBeUpdated = await CreatePatient(new CreatePatientRequest
         {
-            UserName = "oldUserName",
             FirstName = "oldFirstName",
             LastName = "oldLastName",
             Email = "oldEmail@mail.com",
@@ -926,7 +806,7 @@ public class PatientControllerTests : IntegrationTest
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
-        (await DbContext.Patients.AnyAsync(p => p.Id == authenticatedPatientId)).Should().BeFalse();
+        (await DbContext.Users.AnyAsync(p => p.Id == authenticatedPatientId)).Should().BeFalse();
     }
 
     [Theory]
@@ -965,7 +845,7 @@ public class PatientControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
         var authenticatedPatientId = await AuthenticateAsPatientAsync(client);
 
-        DbContext.Patients.Remove(DbContext.Patients.First(p => p.Id == authenticatedPatientId));
+        DbContext.Users.Remove(DbContext.Users.First(p => p.Id == authenticatedPatientId));
         await DbContext.SaveChangesAsync();
 
         // act
@@ -986,11 +866,11 @@ public class PatientControllerTests : IntegrationTest
             NationalId = createPatientCommand.NationalId,
             AppUser = new AppUser
             {
-                UserName = createPatientCommand.UserName,
-                NormalizedUserName = createPatientCommand.UserName.ToUpper(),
+                UserName = createPatientCommand.Email,
+                NormalizedUserName = createPatientCommand.Email.ToUpper(),
                 Email = createPatientCommand.Email,
-                EmailConfirmed = true,
                 NormalizedEmail = createPatientCommand.Email.ToUpper(),
+                EmailConfirmed = true,
                 FirstName = createPatientCommand.FirstName,
                 LastName = createPatientCommand.LastName,
                 PhoneNumber = createPatientCommand.PhoneNumber,

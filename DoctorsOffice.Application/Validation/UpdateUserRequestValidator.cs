@@ -8,18 +8,6 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
 {
     public UpdateUserRequestValidator(AppUserManager appUserManager)
     {
-        RuleFor(u => u.UserName)
-            .MinimumLength(4)
-            .WithMessage("Username must be at least 4 characters long")
-            .When(u => !string.IsNullOrEmpty(u.UserName))
-            .MaximumLength(16)
-            .WithMessage("Username must be at most 16 characters long")
-            .When(u => !string.IsNullOrEmpty(u.UserName))
-            .MustAsync(async (userName, _) =>
-                !await appUserManager.ExistsByUserNameAsync(userName))
-            .WithMessage("Username already exists")
-            .When(u => !string.IsNullOrEmpty(u.UserName));
-
         RuleFor(u => u.Email)
             .EmailAddress()
             .WithMessage("Email must be a valid email address")

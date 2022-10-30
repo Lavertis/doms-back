@@ -37,7 +37,7 @@ public class UpdateDoctorByIdHandler : IRequestHandler<UpdateDoctorByIdCommand, 
 
         var appUser = await _appUserManager.Users.FirstAsync(x => x.Id == doctor.Id, cancellationToken);
 
-        appUser.UserName = request.UserName ?? appUser.UserName;
+        appUser.UserName = request.Email ?? appUser.UserName;
         appUser.Email = request.Email ?? appUser.Email;
         appUser.FirstName = request.FirstName ?? appUser.FirstName;
         appUser.LastName = request.LastName ?? appUser.LastName;

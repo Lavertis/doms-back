@@ -32,6 +32,9 @@ public class UserService : IUserService
 
         var user = _mapper.Map<AppUser>(request);
         user.EmailConfirmed = request.EmailConfirmed;
+        user.UserName = request.Email;
+        user.NormalizedUserName = request.Email.ToUpper();
+        user.NormalizedEmail = request.Email.ToUpper();
 
         var createUserIdentityResult = await _appUserManager.CreateAsync(user, request.Password);
         if (!createUserIdentityResult.Succeeded)
@@ -69,16 +72,12 @@ public class UserService : IUserService
         }
 
         var user = findByIdResult.Value;
-        if (request.UserName is not null)
-        {
-            user.UserName = request.UserName;
-            user.NormalizedUserName = request.UserName.ToUpper();
-        }
-
         if (request.Email is not null)
         {
             user.Email = request.Email;
             user.NormalizedEmail = request.Email.ToUpper();
+            user.UserName = request.Email;
+            user.NormalizedUserName = request.Email.ToUpper();
         }
 
         if (request.PhoneNumber is not null)

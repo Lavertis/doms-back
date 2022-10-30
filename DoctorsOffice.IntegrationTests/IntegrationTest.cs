@@ -21,9 +21,9 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     private const string AuthenticateUrl = "/api/auth/authenticate";
     private const string TestAdminUserName = "testAdmin";
     private const string TestAdminPassword = "AdminPassword123!";
-    private const string TestDoctorUserName = "testDoctor";
+    private const string TestDoctorEmail = "testDoctor@email.com";
     private const string TestDoctorPassword = "DoctorPassword123!";
-    private const string TestPatientUserName = "testPatient";
+    private const string TestPatientEmail = "testPatient@email.com";
     private const string TestPatientPassword = "PatientPassword123!";
 
     private readonly WebApplicationFactory<Program> _factory;
@@ -76,6 +76,7 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         var testAdminUser = new AppUser
         {
             UserName = TestAdminUserName,
+            Email = TestAdminUserName,
             FirstName = "testAdminFirstName",
             LastName = "testAdminLastName",
             EmailConfirmed = true
@@ -86,7 +87,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         var testDoctorUser = new AppUser
         {
-            UserName = TestDoctorUserName,
+            UserName = TestDoctorEmail,
+            Email = TestDoctorEmail,
             FirstName = "testDoctorFirstName",
             LastName = "testDoctorLastName",
             EmailConfirmed = true
@@ -97,8 +99,8 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         var testPatientUser = new AppUser
         {
-            UserName = TestPatientUserName,
-            Email = "testPatientEmail@mail.com",
+            UserName = TestPatientEmail,
+            Email = TestPatientEmail,
             PhoneNumber = "1234567890",
             FirstName = "testPatientFirstName",
             LastName = "testPatientLastName",
@@ -145,12 +147,12 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
     protected static async Task<Guid> AuthenticateAsDoctorAsync(HttpClient client)
     {
-        return await AuthenticateAsAsync(client, TestDoctorUserName, TestDoctorPassword);
+        return await AuthenticateAsAsync(client, TestDoctorEmail, TestDoctorPassword);
     }
 
     protected static async Task<Guid> AuthenticateAsPatientAsync(HttpClient client)
     {
-        return await AuthenticateAsAsync(client, TestPatientUserName, TestPatientPassword);
+        return await AuthenticateAsAsync(client, TestPatientEmail, TestPatientPassword);
     }
 
     protected static async Task<Guid> AuthenticateAsAsync(HttpClient client, string userName, string password)

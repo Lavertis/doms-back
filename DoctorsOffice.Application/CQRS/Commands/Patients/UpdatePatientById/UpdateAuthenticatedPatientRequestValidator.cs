@@ -18,17 +18,6 @@ public class UpdateAuthenticatedPatientRequestValidator : AbstractValidator<Upda
         var authenticatedUserId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var authenticatedUser = appUserManager.FindByIdAsync(authenticatedUserId).Result;
 
-        When(req => req.UserName is not null, () =>
-        {
-            RuleFor(e => e.UserName)
-                .MinimumLength(4)
-                .WithMessage("Username must be at least 4 characters long")
-                .MaximumLength(16)
-                .WithMessage("Username must be at most 16 characters long")
-                .MustAsync(async (userName, _) => (await appUserManager.FindByNameAsync(userName)).IsError)
-                .WithMessage("Username already exists");
-        });
-
         RuleFor(e => e.FirstName)
             .MinimumLength(4)
             .WithMessage("First name must be at least 4 characters long")

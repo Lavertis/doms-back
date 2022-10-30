@@ -11,11 +11,9 @@ public class CreateDoctorCommand : IRequest<HttpResult<CreateDoctorResponse>>
     public readonly string FirstName;
     public readonly string LastName;
     public readonly string PhoneNumber;
-    public readonly string UserName;
 
     public CreateDoctorCommand(CreateDoctorRequest request)
     {
-        UserName = request.UserName;
         Email = request.Email;
         PhoneNumber = request.PhoneNumber;
         FirstName = request.FirstName;

@@ -5,6 +5,7 @@ using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Wrappers;
+using DoctorsOffice.Infrastructure.Database.Seeders;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -240,7 +241,6 @@ public class DoctorControllerTests : IntegrationTest
         var request = new CreateDoctorRequest
         {
             Email = "doctor@mail.com",
-            UserName = "doctorUserName",
             PhoneNumber = "123456789",
             FirstName = "DoctorFirstName",
             LastName = "DoctorLastName",
@@ -254,17 +254,14 @@ public class DoctorControllerTests : IntegrationTest
         RefreshDbContext();
 
         var createdDoctor = (await DbContext.Doctors
-                .Include(d => d.AppUser)
-                .ToListAsync())
-            .First(d => d.AppUser.UserName == request.UserName);
+            .Include(d => d.AppUser)
+            .ToListAsync()).First(d => d.AppUser.Email == request.Email);
         createdDoctor.Should().NotBeNull();
         createdDoctor.AppUser.Email.Should().Be(request.Email);
         createdDoctor.AppUser.PhoneNumber.Should().Be(request.PhoneNumber);
     }
 
     [Theory]
-    [InlineData("UserName", "")]
-    [InlineData("UserName", "a")]
     [InlineData("Email", "")]
     [InlineData("Email", "a")]
     [InlineData("PhoneNumber", "")]
@@ -276,44 +273,11 @@ public class DoctorControllerTests : IntegrationTest
 
         var request = new CreateDoctorRequest
         {
-            UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
         };
 
         typeof(CreateDoctorRequest).GetProperty(fieldName)!.SetValue(request, fieldValue);
-
-        // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}", request);
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task CreateDoctor_UserNameAlreadyExists_ReturnsBadRequest()
-    {
-        // arrange
-        var client = await GetHttpClientAsync();
-        await AuthenticateAsAdminAsync(client);
-
-        var request = new CreateDoctorRequest
-        {
-            UserName = "doctorUserName",
-            Email = "doctor@mail.com",
-            PhoneNumber = "123456789",
-        };
-
-        var conflictingDoctor = new Doctor
-        {
-            AppUser = new AppUser
-            {
-                UserName = request.UserName,
-                NormalizedUserName = request.UserName.ToUpper(), FirstName = "", LastName = ""
-            }
-        };
-        DbContext.Doctors.Add(conflictingDoctor);
-        await DbContext.SaveChangesAsync();
 
         // act
         var response = await client.PostAsJsonAsync($"{UrlPrefix}", request);
@@ -331,7 +295,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var request = new CreateDoctorRequest
         {
-            UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
         };
@@ -362,7 +325,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var request = new CreateDoctorRequest
         {
-            UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
         };
@@ -385,7 +347,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var request = new CreateDoctorRequest
         {
-            UserName = "doctorUserName",
             Email = "doctor@mail.com",
             PhoneNumber = "123456789",
         };
@@ -406,7 +367,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -418,7 +378,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
-            UserName = "newDocUserName",
             Email = "newDoctorEmail@mail.com",
             PhoneNumber = "123456789",
             NewPassword = "newPassword1234#",
@@ -442,13 +401,12 @@ public class DoctorControllerTests : IntegrationTest
             .First(d => d.Id == authenticatedDoctorId);
 
         updatedDoctor.Should().NotBeNull();
-        updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.UserName);
+        updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.Email);
         updatedDoctor.AppUser.Email.Should().Be(updateDoctorRequest.Email);
         updatedDoctor.AppUser.PhoneNumber.Should().Be(updateDoctorRequest.PhoneNumber);
     }
 
     [Theory]
-    [InlineData("UserName", "newDocUserName")]
     [InlineData("Email", "newDoctorEmail@mail.com")]
     [InlineData("PhoneNumber", "987654321")]
     public async Task UpdateAuthenticatedDoctor_SingleFieldProvided_UpdatesProvidedField(
@@ -460,7 +418,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -494,11 +451,9 @@ public class DoctorControllerTests : IntegrationTest
 
         switch (fieldName)
         {
-            case "UserName":
-                updatedDoctor.AppUser.UserName.Should().Be(fieldValue);
-                break;
             case "Email":
                 updatedDoctor.AppUser.Email.Should().Be(fieldValue);
+                updatedDoctor.AppUser.UserName.Should().Be(fieldValue);
                 break;
             case "PhoneNumber":
                 updatedDoctor.AppUser.PhoneNumber.Should().Be(fieldValue);
@@ -509,8 +464,6 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData("UserName", "")]
-    [InlineData("UserName", "a")]
     [InlineData("Email", "")]
     [InlineData("Email", "a")]
     [InlineData("PhoneNumber", "")]
@@ -523,7 +476,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -550,50 +502,6 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Fact]
-    public async Task UpdateAuthenticatedDoctor_UserNameAlreadyExists_ReturnsBadRequest()
-    {
-        // arrange
-        var client = await GetHttpClientAsync();
-
-        const string conflictingUserName = "username123";
-
-        const string oldDoctorPassword = "oldPassword1234#";
-        var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
-        {
-            UserName = "oldUserName",
-            Email = "oldMail@mail.com",
-            PhoneNumber = "123456789",
-            FirstName = "oldFirstName",
-            LastName = "oldLastName"
-        }, oldDoctorPassword);
-
-        await CreateDoctorAsync(new CreateDoctorRequest
-        {
-            UserName = conflictingUserName,
-            Email = "mail@mail.com",
-            PhoneNumber = "123456789",
-            FirstName = "oldFirstName",
-            LastName = "oldLastName"
-        }, oldDoctorPassword);
-
-        await AuthenticateAsAsync(client, doctorToUpdate.AppUser.UserName, oldDoctorPassword);
-
-        var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
-        {
-            UserName = conflictingUserName,
-            CurrentPassword = oldDoctorPassword
-        };
-        var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
-        var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-
-        // act
-        var response = await client.PatchAsync($"{UrlPrefix}/current", content);
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
     public async Task UpdateAuthenticatedDoctor_EmailAlreadyExists_ReturnsBadRequest()
     {
         // arrange
@@ -604,7 +512,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -613,7 +520,6 @@ public class DoctorControllerTests : IntegrationTest
 
         await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "userName",
             Email = conflictingEmail,
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -647,7 +553,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -681,7 +586,6 @@ public class DoctorControllerTests : IntegrationTest
         const string oldDoctorPassword = "oldPassword1234#";
         var doctorToUpdate = await CreateDoctorAsync(new CreateDoctorRequest
         {
-            UserName = "oldUserName",
             Email = "oldMail@mail.com",
             PhoneNumber = "123456789",
             FirstName = "oldFirstName",
@@ -692,7 +596,7 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
-            UserName = "newUserName",
+            Email = "newMail@mail.com",
             CurrentPassword = "incorrectPassword"
         };
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
@@ -713,7 +617,7 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
-            UserName = "newUserName",
+            Email = "newMail@mail.com",
             CurrentPassword = "incorrectPassword"
         };
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
@@ -737,7 +641,7 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateAuthenticatedDoctorRequest
         {
-            UserName = "newUserName",
+            Email = "newMail@mail.com",
             CurrentPassword = "password"
         };
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
@@ -780,7 +684,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateDoctorRequest
         {
-            UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
             NewPassword = "newPassword1234$"
@@ -801,7 +704,7 @@ public class DoctorControllerTests : IntegrationTest
             .First(d => d.AppUser.Id == doctorId);
 
         updatedDoctor.Should().NotBeNull();
-        updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.UserName);
+        updatedDoctor.AppUser.UserName.Should().Be(updateDoctorRequest.Email);
         updatedDoctor.AppUser.Email.Should().Be(updateDoctorRequest.Email);
         updatedDoctor.AppUser.PhoneNumber.Should().Be(updateDoctorRequest.PhoneNumber);
         updatedDoctor.AppUser.PasswordHash.Should().NotBe(oldPasswordHash);
@@ -838,7 +741,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateDoctorRequest
         {
-            UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
             NewPassword = "newPassword1234$"
@@ -867,7 +769,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateDoctorRequest
         {
-            UserName = "newUserName",
             Email = "newMail@mail.com",
             PhoneNumber = "987654321",
             NewPassword = "newPassword1234$"
@@ -884,7 +785,6 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData("UserName", "newUserName")]
     [InlineData("Email", "oldMail@mail.com")]
     [InlineData("PhoneNumber", "123456789")]
     [InlineData("NewPassword", "newPassword1234$")]
@@ -935,11 +835,9 @@ public class DoctorControllerTests : IntegrationTest
 
         switch (fieldName)
         {
-            case "UserName":
-                updatedDoctor.AppUser.UserName.Should().Be(fieldValue);
-                break;
             case "Email":
                 updatedDoctor.AppUser.Email.Should().Be(fieldValue);
+                updatedDoctor.AppUser.UserName.Should().Be(fieldValue);
                 break;
             case "PhoneNumber":
                 updatedDoctor.AppUser.PhoneNumber.Should().Be(fieldValue);
@@ -953,8 +851,6 @@ public class DoctorControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData("UserName", "")]
-    [InlineData("UserName", "a")]
     [InlineData("Email", "")]
     [InlineData("Email", "a")]
     [InlineData("PhoneNumber", "")]
@@ -987,61 +883,6 @@ public class DoctorControllerTests : IntegrationTest
 
         var updateDoctorRequest = new UpdateDoctorRequest();
         typeof(UpdateDoctorRequest).GetProperty(fieldName)!.SetValue(updateDoctorRequest, fieldValue);
-
-        var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
-        var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-
-        // act
-        var response = await client.PatchAsync($"{UrlPrefix}/{doctorId}", content);
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task UpdateDoctorById_UserNameAlreadyExists_ReturnsBadRequest()
-    {
-        // arrange
-        var client = await GetHttpClientAsync();
-        await AuthenticateAsAdminAsync(client);
-
-        const string oldDoctorPassword = "oldPassword1234#";
-        var oldPasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, oldDoctorPassword);
-        var doctorId = Guid.NewGuid();
-        var doctorToUpdate = new Doctor
-        {
-            AppUser = new AppUser
-            {
-                Id = doctorId,
-                UserName = "oldUserName",
-                Email = "oldMail@mail.com",
-                FirstName = "oldFirstName",
-                LastName = "oldLastName",
-                PhoneNumber = "123456789",
-                PasswordHash = oldPasswordHash
-            }
-        };
-        DbContext.Doctors.Add(doctorToUpdate);
-
-        var conflictingDoctor = new Doctor
-        {
-            AppUser = new AppUser
-            {
-                Id = Guid.NewGuid(),
-                UserName = "confUserName",
-                NormalizedUserName = "confUserName".ToUpper(),
-                FirstName = "FirstName",
-                LastName = "LastName"
-            }
-        };
-        DbContext.Doctors.Add(conflictingDoctor);
-
-        await DbContext.SaveChangesAsync();
-
-        var updateDoctorRequest = new UpdateDoctorRequest
-        {
-            UserName = conflictingDoctor.AppUser.UserName
-        };
 
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
@@ -1117,7 +958,7 @@ public class DoctorControllerTests : IntegrationTest
         var doctorId = Guid.NewGuid();
         var updateDoctorRequest = new UpdateDoctorRequest
         {
-            UserName = "newUserName"
+            Email = "newEmail@mail.com"
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
@@ -1142,7 +983,7 @@ public class DoctorControllerTests : IntegrationTest
         var doctorId = Guid.NewGuid();
         var updateDoctorRequest = new UpdateDoctorRequest
         {
-            UserName = "newUserName"
+            Email = "newEmail@mail.com"
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateDoctorRequest);
@@ -1163,7 +1004,18 @@ public class DoctorControllerTests : IntegrationTest
         await AuthenticateAsAdminAsync(client);
 
         var doctorId = Guid.NewGuid();
-        var doctorToDelete = new Doctor {AppUser = new AppUser {Id = doctorId, FirstName = "", LastName = ""}};
+        var appUser = new AppUser
+        {
+            Id = doctorId,
+            UserName = Guid.NewGuid().ToString(),
+            Email = $"{Guid.NewGuid().ToString()}@email.com",
+            FirstName = "",
+            LastName = ""
+        };
+        var doctorToDelete = new Doctor {Id = doctorId, AppUser = appUser};
+        var userRole = new IdentityUserRole<Guid> {UserId = doctorId, RoleId = Guid.Parse(RoleSeeder.DoctorRoleId)};
+        DbContext.Users.Add(appUser);
+        DbContext.UserRoles.Add(userRole);
         DbContext.Doctors.Add(doctorToDelete);
         await DbContext.SaveChangesAsync();
 
@@ -1174,7 +1026,7 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         RefreshDbContext();
 
-        DbContext.Doctors.Should().NotContain(d => d.Id == doctorId);
+        DbContext.Users.Should().NotContain(u => u.Id == doctorId);
     }
 
     [Fact]
@@ -1258,11 +1110,11 @@ public class DoctorControllerTests : IntegrationTest
         {
             AppUser = new AppUser
             {
-                UserName = request.UserName,
-                NormalizedUserName = request.UserName.ToUpper(),
+                UserName = request.Email,
+                NormalizedUserName = request.Email.ToUpper(),
                 Email = request.Email,
-                EmailConfirmed = true,
                 NormalizedEmail = request.Email.ToUpper(),
+                EmailConfirmed = true,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,

@@ -1,5 +1,5 @@
-﻿using DoctorsOffice.Domain.Repositories;
-using DoctorsOffice.Domain.Utils;
+﻿using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -7,21 +7,37 @@ namespace DoctorsOffice.Application.CQRS.Commands.Doctors.DeleteDoctorById;
 
 public class DeleteDoctorByIdHandler : IRequestHandler<DeleteDoctorByIdCommand, HttpResult<Unit>>
 {
-    private readonly IDoctorRepository _doctorRepository;
+    private readonly AppUserManager _appUserManager;
 
-    public DeleteDoctorByIdHandler(IDoctorRepository doctorRepository)
+    public DeleteDoctorByIdHandler(AppUserManager appUserManager)
     {
-        _doctorRepository = doctorRepository;
+        _appUserManager = appUserManager;
     }
 
     public async Task<HttpResult<Unit>> Handle(DeleteDoctorByIdCommand request, CancellationToken cancellationToken)
     {
         var result = new HttpResult<Unit>();
-        var doctorDeleted = await _doctorRepository.DeleteByIdAsync(request.DoctorId);
-        if (!doctorDeleted)
+        var findUserResult = await _appUserManager.FindByIdAsync(request.DoctorId);
+        if (findUserResult.IsError || findUserResult.Value == null)
+        {
+            return result
+                .WithError(findUserResult.Error)
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var userIsDoctor = await _appUserManager.IsInRoleAsync(findUserResult.Value, "Doctor");
+        if (!userIsDoctor)
         {
             return result
                 .WithError(new Error {Message = $"Doctor with id {request.DoctorId} not found"})
+                .WithStatusCode(StatusCodes.Status404NotFound);
+        }
+
+        var deleteUserResult = await _appUserManager.DeleteByIdAsync(request.DoctorId);
+        if (deleteUserResult.IsError)
+        {
+            return result
+                .WithError(deleteUserResult.Error)
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 

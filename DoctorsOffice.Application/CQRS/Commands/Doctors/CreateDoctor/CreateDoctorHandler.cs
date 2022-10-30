@@ -59,7 +59,7 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
 
         var createUserResult = await _userService.CreateUserAsync(new CreateUserRequest
         {
-            UserName = request.UserName,
+            UserName = request.Email,
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,

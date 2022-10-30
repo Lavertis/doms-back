@@ -76,4 +76,12 @@ public class PatientController : BaseController
     [Authorize(Roles = Roles.Patient)]
     public async Task<ActionResult<Unit>> DeleteAuthenticatedPatientAsync()
         => CreateResponse(await Mediator.Send(new DeletePatientByIdCommand(JwtSubject())));
+
+    /// <summary>
+    /// Deletes patient by id. Only for admins
+    /// </summary>
+    [HttpDelete("{patientId:guid}")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<ActionResult<Unit>> DeleteDoctorByIdAsync(Guid patientId)
+        => CreateResponse(await Mediator.Send(new DeletePatientByIdCommand(patientId)));
 }
