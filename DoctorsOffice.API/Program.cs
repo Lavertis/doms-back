@@ -5,6 +5,7 @@ using DoctorsOffice.Application.CQRS;
 using DoctorsOffice.Application.Middleware;
 using DoctorsOffice.Application.Services;
 using DoctorsOffice.Application.Validation;
+using DoctorsOffice.Application.Workers;
 using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Database;
 using DoctorsOffice.Infrastructure.Identity;
@@ -13,6 +14,7 @@ using DoctorsOffice.SendGrid;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddWorkers();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerModule();
 builder.Services.AddServiceModule();

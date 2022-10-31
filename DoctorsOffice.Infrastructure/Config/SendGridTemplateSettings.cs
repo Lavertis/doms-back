@@ -6,4 +6,5 @@ public class SendGridTemplateSettings
     public string PasswordReset { get; set; } = null!;
     public string DoctorPasswordSetup { get; set; } = null!;
     public string AppointmentStatusChange { get; set; } = null!;
+    public string AppointmentReminder { get; set; } = null!;
 }

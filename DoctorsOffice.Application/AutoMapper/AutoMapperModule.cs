@@ -23,12 +23,13 @@ public static class AutoMapperModule
             options.CreateMap<CreateUserRequest, AppUser>();
             options.CreateMap<AppUser, UserResponse>();
             options.CreateMap<DrugItem, DrugItemResponse>();
-            options.AddProfile(new AdminResponseMappingProfile());
-            options.AddProfile(new DoctorResponseMappingProfile());
-            options.AddProfile(new PatientResponseMappingProfile());
-            options.AddProfile(new AppointmentResponseMappingProfile());
-            options.AddProfile(new AppointmentSearchResponseMappingProfile());
-            options.AddProfile(new PrescriptionResponseMappingProfile());
+
+            options.AddProfile<AdminResponseMappingProfile>();
+            options.AddProfile<DoctorResponseMappingProfile>();
+            options.AddProfile<PatientResponseMappingProfile>();
+            options.AddProfile<AppointmentResponseMappingProfile>();
+            options.AddProfile<AppointmentSearchResponseMappingProfile>();
+            options.AddProfile<PrescriptionResponseMappingProfile>();
         });
 
         var mapper = mapperConfiguration.CreateMapper();
