@@ -35,18 +35,18 @@ public class RefreshTokenServiceTests : UnitTest
                 new()
                 {
                     Token = refreshToken,
-                    ExpiresAt = DateTime.Now.AddDays(1)
+                    ExpiresAt = DateTime.UtcNow.AddDays(1)
                 },
                 new()
                 {
                     Token = refreshToken,
-                    ExpiresAt = DateTime.Now.AddDays(1),
-                    RevokedAt = DateTime.Now.Subtract(1.Days())
+                    ExpiresAt = DateTime.UtcNow.AddDays(1),
+                    RevokedAt = DateTime.UtcNow.Subtract(1.Days())
                 },
                 new()
                 {
                     Token = refreshToken,
-                    ExpiresAt = DateTime.Now.Subtract(1.Days())
+                    ExpiresAt = DateTime.UtcNow.Subtract(1.Days())
                 }
             }
         };
@@ -66,7 +66,7 @@ public class RefreshTokenServiceTests : UnitTest
         var token = new RefreshToken
         {
             Token = refreshToken,
-            ExpiresAt = DateTime.Now.AddDays(1)
+            ExpiresAt = DateTime.UtcNow.AddDays(1)
         };
         const string reasonRevoked = "reason";
         const string ipAddress = "ipAddress";

@@ -26,4 +26,6 @@ public class Appointment : BaseEntity
     public virtual Guid TypeId { get; set; }
 
     public List<Prescription> Prescriptions { get; set; } = new();
+
+    public List<SickLeave> SickLeaves { get; set; } = new();
 }

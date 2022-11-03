@@ -23,7 +23,8 @@ public static class AutoMapperModule
             options.CreateMap<CreateUserRequest, AppUser>();
             options.CreateMap<AppUser, UserResponse>();
             options.CreateMap<DrugItem, DrugItemResponse>();
-
+            options.CreateMap<SickLeave, SickLeaveResponse>();
+            
             options.AddProfile<AdminResponseMappingProfile>();
             options.AddProfile<DoctorResponseMappingProfile>();
             options.AddProfile<PatientResponseMappingProfile>();

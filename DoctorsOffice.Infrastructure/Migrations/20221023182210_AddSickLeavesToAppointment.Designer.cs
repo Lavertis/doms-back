@@ -3,6 +3,7 @@ using System;
 using DoctorsOffice.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221023182210_AddSickLeavesToAppointment")]
+    partial class AddSickLeavesToAppointment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -495,11 +497,9 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Id = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
-                            Email = "admin@doms.com",
-                            EmailConfirmed = true,
+                            EmailConfirmed = false,
                             FirstName = "Admin",
                             LastName = "Admin",
-                            NormalizedEmail = "ADMIN@DOMS.COM",
                             NormalizedUserName = "ADMIN",
                             PasswordHash = "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==",
                             PhoneNumberConfirmed = false,
@@ -513,7 +513,7 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
                             Email = "doctor@doctor.com",
-                            EmailConfirmed = true,
+                            EmailConfirmed = false,
                             FirstName = "Doctor",
                             LastName = "Doctor",
                             NormalizedEmail = "DOCTOR@DOCTOR.COM",
@@ -531,7 +531,7 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "4facc425-b1ef-416a-979f-56da897448c5",
                             Email = "patient@patient.com",
-                            EmailConfirmed = true,
+                            EmailConfirmed = false,
                             FirstName = "Patient",
                             LastName = "Patient",
                             NormalizedEmail = "PATIENT@PATIENT.COM",

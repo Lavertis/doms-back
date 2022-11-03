@@ -58,7 +58,7 @@ public class AppointmentReminderWorkerService : BackgroundService
         var appointmentsIn24Hours = await appointmentRepository.GetAll()
             .Include(appointment => appointment.Patient.AppUser)
             .Include(appointment => appointment.Doctor.AppUser)
-            .Where(a => a.Date >= DateTime.Now && a.Date <= DateTime.Now.AddHours(24))
+            .Where(a => a.Date >= DateTime.UtcNow && a.Date <= DateTime.UtcNow.AddHours(24))
             .ToListAsync();
 
         foreach (var appointment in appointmentsIn24Hours)
@@ -81,6 +81,6 @@ public class AppointmentReminderWorkerService : BackgroundService
 
     private static TimeSpan TimeSpanTillNearestHour()
     {
-        return TimeSpan.FromMinutes(60 - DateTime.Now.Minute);
+        return TimeSpan.FromMinutes(60 - DateTime.UtcNow.Minute);
     }
 }
