@@ -3,10 +3,12 @@ using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Domain.Enums;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace DoctorsOffice.IntegrationTests;
@@ -50,10 +52,11 @@ public class AuthControllerTests : IntegrationTest
         var response = await client.PostAsJsonAsync($"{UrlPrefix}/authenticate", request);
 
         // assert
-        var responseContent = await response.Content.ReadAsAsync<AuthenticateResponse>();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<AuthenticateResponse>();
         responseContent.JwtToken.Should().NotBeNullOrEmpty();
-        responseContent.RefreshToken.Should().NotBeNullOrEmpty();
+        var setCookieValue = response.Headers.GetValues("Set-Cookie").First();
+        setCookieValue.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -110,7 +113,6 @@ public class AuthControllerTests : IntegrationTest
     {
         // arrange
         var client = await GetHttpClientAsync();
-
         const string testToken = "testToken";
         var testUser = new AppUser
         {
@@ -126,16 +128,17 @@ public class AuthControllerTests : IntegrationTest
         DbContext.Users.Add(testUser);
         await DbContext.SaveChangesAsync();
 
-        var request = new RefreshTokenRequest {RefreshToken = testToken};
+        client.DefaultRequestHeaders.Add("Cookie", $"{Cookies.RefreshToken}={Uri.EscapeDataString(testToken)}");
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
+        var response = await client.PostAsync($"{UrlPrefix}/refresh-token", null);
 
         // assert
-        var responseContent = await response.Content.ReadAsAsync<AuthenticateResponse>();
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseContent = await response.Content.ReadAsAsync<AuthenticateResponse>();
         responseContent.JwtToken.Should().NotBeNullOrEmpty();
-        responseContent.RefreshToken.Should().NotBeNullOrEmpty();
+        var setCookieValue = response.Headers.GetValues("Set-Cookie").First();
+        setCookieValue.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -143,11 +146,10 @@ public class AuthControllerTests : IntegrationTest
     {
         // arrange
         var client = await GetHttpClientAsync();
-
-        var request = new RefreshTokenRequest {RefreshToken = "nonExistingToken"};
+        client.DefaultRequestHeaders.Add("Cookie", $"{Cookies.RefreshToken}=nonExistingToken");
 
         // act
-        var response = await client.PostAsJsonAsync($"{UrlPrefix}/refresh-token", request);
+        var response = await client.PostAsync($"{UrlPrefix}/refresh-token", null);
 
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -250,8 +252,9 @@ public class AuthControllerTests : IntegrationTest
         RefreshDbContext();
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await DbContext.Users.FindAsync(testUser.Id))!
-            .RefreshTokens.SingleOrDefault(token => token.Token == descendantToken)!
-            .RevokedAt.Should().NotBeNull();
+        var user = await DbContext.Users
+            .Include(user => user.RefreshTokens)
+            .FirstAsync(user => user.Id == testUser.Id);
+        user.RefreshTokens.Single(token => token.Token == descendantToken).Should().NotBeNull();
     }
 }

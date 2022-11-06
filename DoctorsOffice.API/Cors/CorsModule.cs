@@ -10,6 +10,7 @@ public static class CorsModule
             .AllowAnyHeader()
             .AllowAnyMethod()
             .WithOrigins(corsSettings.AllowedOrigins)
+            .AllowCredentials()
         );
     }
 }

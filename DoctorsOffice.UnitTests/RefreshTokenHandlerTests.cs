@@ -7,11 +7,13 @@ using DoctorsOffice.Application.Services.RefreshTokens;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using MockQueryable.FakeItEasy;
 using Xunit;
 
@@ -29,7 +31,6 @@ public class RefreshTokenHandlerTests : UnitTest
         _fakeRefreshTokenService = A.Fake<IRefreshTokenService>();
         _fakeJwtService = A.Fake<IJwtService>();
     }
-
 
     [Fact]
     public async Task GetRefreshTokensByUserIdHandler_UserIdExists_ReturnsRefreshTokens()
@@ -89,8 +90,12 @@ public class RefreshTokenHandlerTests : UnitTest
             .Returns(newRefreshToken);
 
         var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
-        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
-        var handler = new RefreshTokenHandler(_fakeAppUserManager, _fakeJwtService, _fakeRefreshTokenService);
+        var command = new RefreshTokenCommand {RefreshToken = request.RefreshToken, IpAddress = "dummyIpAddress"};
+        var handler = new RefreshTokenHandler(
+            _fakeAppUserManager,
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -114,8 +119,12 @@ public class RefreshTokenHandlerTests : UnitTest
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var request = new RefreshTokenRequest {RefreshToken = "nonExistingRefreshToken"};
-        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
-        var handler = new RefreshTokenHandler(_fakeAppUserManager, _fakeJwtService, _fakeRefreshTokenService);
+        var command = new RefreshTokenCommand {RefreshToken = request.RefreshToken, IpAddress = "dummyIpAddress"};
+        var handler = new RefreshTokenHandler(
+            _fakeAppUserManager,
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -141,8 +150,12 @@ public class RefreshTokenHandlerTests : UnitTest
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
-        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
-        var handler = new RefreshTokenHandler(_fakeAppUserManager, _fakeJwtService, _fakeRefreshTokenService);
+        var command = new RefreshTokenCommand {RefreshToken = request.RefreshToken, IpAddress = "dummyIpAddress"};
+        var handler = new RefreshTokenHandler(
+            _fakeAppUserManager,
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -192,8 +205,12 @@ public class RefreshTokenHandlerTests : UnitTest
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
-        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
-        var handler = new RefreshTokenHandler(_fakeAppUserManager, _fakeJwtService, _fakeRefreshTokenService);
+        var command = new RefreshTokenCommand {RefreshToken = request.RefreshToken, IpAddress = "dummyIpAddress"};
+        var handler = new RefreshTokenHandler(
+            _fakeAppUserManager,
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         try
@@ -226,8 +243,12 @@ public class RefreshTokenHandlerTests : UnitTest
         A.CallTo(() => _fakeAppUserManager.Users).Returns(fakeAppUserQueryable);
 
         var request = new RefreshTokenRequest {RefreshToken = oldRefreshToken.Token};
-        var command = new RefreshTokenCommand(request: request, ipAddress: "dummyIpAddress");
-        var handler = new RefreshTokenHandler(_fakeAppUserManager, _fakeJwtService, _fakeRefreshTokenService);
+        var command = new RefreshTokenCommand {RefreshToken = request.RefreshToken, IpAddress = "dummyIpAddress"};
+        var handler = new RefreshTokenHandler(
+            _fakeAppUserManager,
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         var result = await handler.Handle(command, CancellationToken.None);

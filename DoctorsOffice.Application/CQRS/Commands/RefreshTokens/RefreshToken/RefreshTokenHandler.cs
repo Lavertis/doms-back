@@ -3,10 +3,12 @@ using DoctorsOffice.Application.Services.RefreshTokens;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.CQRS.Commands.RefreshTokens.RefreshToken;
 
@@ -16,22 +18,32 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
 {
     private readonly AppUserManager _appUserManager;
     private readonly IJwtService _jwtService;
+    private readonly JwtSettings _jwtSettings;
     private readonly IRefreshTokenService _refreshTokenService;
 
     public RefreshTokenHandler(
         AppUserManager appUserManager,
         IJwtService jwtService,
-        IRefreshTokenService refreshTokenService)
+        IRefreshTokenService refreshTokenService,
+        IOptions<JwtSettings> jwtSettings)
     {
         _appUserManager = appUserManager;
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
+        _jwtSettings = jwtSettings.Value;
     }
 
     public async Task<HttpResult<AuthenticateResponse>> Handle(
         RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var result = new HttpResult<AuthenticateResponse>();
+
+        if (request.RefreshToken == null)
+        {
+            return result
+                .WithError(new Error {Message = "Refresh token not found in cookie."})
+                .WithStatusCode(StatusCodes.Status400BadRequest);
+        }
 
         var user = await _appUserManager.Users
             .Include(user => user.RefreshTokens)
@@ -79,7 +91,15 @@ public class RefreshTokenHandler : IRequestHandler<RefreshTokenCommand, HttpResu
         return result.WithValue(new AuthenticateResponse
         {
             JwtToken = jwtToken,
-            RefreshToken = newRefreshToken.Token
+            RefreshToken = newRefreshToken.Token,
+            CookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenLifetimeInMinutes),
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                IsEssential = true
+            }
         });
     }
 

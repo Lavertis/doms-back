@@ -2,9 +2,11 @@
 using DoctorsOffice.Application.Services.RefreshTokens;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Authenticate;
 
@@ -12,16 +14,19 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
 {
     private readonly AppUserManager _appUserManager;
     private readonly IJwtService _jwtService;
+    private readonly JwtSettings _jwtSettings;
     private readonly IRefreshTokenService _refreshTokenService;
 
     public AuthenticateHandler(
         IJwtService jwtService,
         IRefreshTokenService refreshTokenService,
-        AppUserManager appUserManager)
+        AppUserManager appUserManager,
+        IOptions<JwtSettings> jwtSettings)
     {
         _jwtService = jwtService;
         _refreshTokenService = refreshTokenService;
         _appUserManager = appUserManager;
+        _jwtSettings = jwtSettings.Value;
     }
 
     public async Task<HttpResult<AuthenticateResponse>> Handle(
@@ -68,7 +73,15 @@ public class AuthenticateHandler : IRequestHandler<AuthenticateCommand, HttpResu
         return result.WithValue(new AuthenticateResponse
         {
             JwtToken = jwtToken,
-            RefreshToken = refreshToken.Token
+            RefreshToken = refreshToken.Token,
+            CookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenLifetimeInMinutes),
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                IsEssential = true
+            }
         });
     }
 

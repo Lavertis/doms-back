@@ -56,10 +56,11 @@ public class RefreshTokenService : IRefreshTokenService
         do
         {
             token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-            tokenIsUnique = !await _appUserManager.Users.AnyAsync(
-                u => u.RefreshTokens.Any(t => t.Token == token),
-                cancellationToken: cancellationToken
-            );
+            tokenIsUnique = !await _appUserManager.Users
+                .Include(user => user.RefreshTokens)
+                .AnyAsync(u => u.RefreshTokens.Any(t => t.Token == token),
+                    cancellationToken: cancellationToken
+                );
         } while (!tokenIsUnique);
 
         return token;

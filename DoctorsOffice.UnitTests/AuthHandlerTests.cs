@@ -6,9 +6,11 @@ using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Utils;
+using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Identity;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DoctorsOffice.UnitTests;
@@ -52,7 +54,11 @@ public class AuthHandlerTests : UnitTest
             Password = "dummyPassword"
         };
         var command = new AuthenticateCommand(request, ipAddress);
-        var handler = new AuthenticateHandler(_fakeJwtService, _fakeRefreshTokenService, _fakeAppUserManager);
+        var handler = new AuthenticateHandler(
+            _fakeJwtService,
+            _fakeRefreshTokenService,
+            _fakeAppUserManager,
+            A.Dummy<IOptions<JwtSettings>>());
 
         // act
         var result = await handler.Handle(command, CancellationToken.None);
