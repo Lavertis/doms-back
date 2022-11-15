@@ -38,6 +38,21 @@ public class PrescriptionController : BaseController
         }));
 
     /// <summary>
+    /// Returns all prescriptions for specified appointment of authenticated patient.
+    /// </summary>
+    [HttpGet("patient/current/appointment/{appointmentId:guid}")]
+    [Authorize(Roles = Roles.Patient)]
+    public async Task<ActionResult<PagedResponse<PrescriptionResponse>>>
+        GetPrescriptionsByAuthenticatedPatientAppointmentIdAsync(
+            Guid appointmentId, [FromQuery] PaginationFilter filter)
+        => CreateResponse(await Mediator.Send(new GetPrescriptionsByAppointmentIdQuery
+        {
+            AppointmentId = appointmentId,
+            PatientId = JwtSubject(),
+            PaginationFilter = filter
+        }));
+
+    /// <summary>
     /// Returns all prescriptions for specified patient. Only for doctors.
     /// </summary>
     [HttpGet("patient/{patientId:guid}")]

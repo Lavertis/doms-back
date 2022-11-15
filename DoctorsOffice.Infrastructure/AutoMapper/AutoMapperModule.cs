@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using DoctorsOffice.Application.AutoMapper.Profiles;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
+using DoctorsOffice.Infrastructure.AutoMapper.Profiles;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DoctorsOffice.Application.AutoMapper;
+namespace DoctorsOffice.Infrastructure.AutoMapper;
 
 public static class AutoMapperModule
 {
@@ -24,7 +24,8 @@ public static class AutoMapperModule
             options.CreateMap<AppUser, UserResponse>();
             options.CreateMap<DrugItem, DrugItemResponse>();
             options.CreateMap<SickLeave, SickLeaveResponse>();
-            
+            options.CreateMap<QuickButton, QuickButtonResponse>();
+
             options.AddProfile<AdminResponseMappingProfile>();
             options.AddProfile<DoctorResponseMappingProfile>();
             options.AddProfile<PatientResponseMappingProfile>();

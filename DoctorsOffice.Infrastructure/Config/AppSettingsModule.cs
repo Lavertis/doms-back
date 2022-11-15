@@ -11,5 +11,6 @@ public static class JwtSettingsModule
         services.Configure<SendGridTemplateSettings>(configuration.GetSection("SendGridTemplates"));
         services.Configure<UrlSettings>(configuration.GetSection("Url"));
         services.Configure<IdentitySettings>(configuration.GetSection("Identity"));
+        services.Configure<QuickButtonSettings>(configuration.GetSection("QuickButton"));
     }
 }

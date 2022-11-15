@@ -232,9 +232,9 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var expectedResponseContent = prescriptions
             .Select(prescription => Mapper.Map<PrescriptionResponse>(prescription))
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize);
-
 
         var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
         queryString.Add("pageSize", pageSize.ToString());
@@ -419,6 +419,7 @@ public class PrescriptionControllerTests : IntegrationTest
 
         var expectedResponseContent = prescriptions
             .Select(p => Mapper.Map<PrescriptionResponse>(p))
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize);
 
@@ -600,6 +601,7 @@ public class PrescriptionControllerTests : IntegrationTest
         await DbContext.SaveChangesAsync();
 
         var expectedPrescriptions = prescriptions
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(p => Mapper.Map<PrescriptionResponse>(p));

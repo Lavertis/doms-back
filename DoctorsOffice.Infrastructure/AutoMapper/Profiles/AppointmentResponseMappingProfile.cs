@@ -2,7 +2,7 @@
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
 
-namespace DoctorsOffice.Application.AutoMapper.Profiles;
+namespace DoctorsOffice.Infrastructure.AutoMapper.Profiles;
 
 public class AppointmentResponseMappingProfile : Profile
 {

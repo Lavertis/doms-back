@@ -1,10 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using AutoMapper;
-using DoctorsOffice.Application.AutoMapper;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
+using DoctorsOffice.Infrastructure.AutoMapper;
 using DoctorsOffice.Infrastructure.Database;
 using DoctorsOffice.Infrastructure.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;

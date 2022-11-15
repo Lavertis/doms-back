@@ -353,6 +353,515 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.ToTable("Prescriptions");
                 });
 
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.QuickButton", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("QuickButtons");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("df3f8ee7-a5e2-4c2a-a2f8-e598b560947d"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Cough"
+                        },
+                        new
+                        {
+                            Id = new Guid("cc53e419-d5c6-4131-b77a-4040e279c83b"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Fever"
+                        },
+                        new
+                        {
+                            Id = new Guid("b0437003-e8c6-4cd5-858e-bc9cfe12357f"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Headache"
+                        },
+                        new
+                        {
+                            Id = new Guid("814e13d2-0e02-4380-bc7f-692280ea68e2"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Sore throat"
+                        },
+                        new
+                        {
+                            Id = new Guid("2c9c5afa-9331-4d23-87da-ac59217ac1fb"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Fatigue"
+                        },
+                        new
+                        {
+                            Id = new Guid("d548b5e1-6f9b-44ec-bc33-0ed7f3f0e460"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Loss of smell"
+                        },
+                        new
+                        {
+                            Id = new Guid("30101274-f6d5-4b7e-9d06-b9e816c801b5"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Loss of taste"
+                        },
+                        new
+                        {
+                            Id = new Guid("aca1f0bc-25f6-463f-aa93-45cb64cc5d7c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Diarrhea"
+                        },
+                        new
+                        {
+                            Id = new Guid("521affee-54ee-48a5-ba36-0217e0bbb5d0"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Nausea"
+                        },
+                        new
+                        {
+                            Id = new Guid("9d7dd8b1-9cd9-4673-8900-6240a27d1847"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vomiting"
+                        },
+                        new
+                        {
+                            Id = new Guid("7026dc95-3957-4779-bdc3-59294b8d8faa"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Shortness of breath"
+                        },
+                        new
+                        {
+                            Id = new Guid("1deba9b9-0eeb-43d7-a95a-768a32a86f26"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Chest pain"
+                        },
+                        new
+                        {
+                            Id = new Guid("0b6747a5-9eea-4484-a192-6ad927025b84"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Muscle pain"
+                        },
+                        new
+                        {
+                            Id = new Guid("963dc7c0-fb0e-44b8-bf59-7048d241f807"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Interview",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Confusion"
+                        },
+                        new
+                        {
+                            Id = new Guid("2ea7fa99-42c7-4b75-a673-2435a2c50584"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "COVID-19"
+                        },
+                        new
+                        {
+                            Id = new Guid("9dd0b024-e5dd-4169-bd91-391d6fbb615c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Influenza"
+                        },
+                        new
+                        {
+                            Id = new Guid("e6d6e719-f349-417a-83e5-f9ef4c41543f"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Common cold"
+                        },
+                        new
+                        {
+                            Id = new Guid("cf407c2a-cf8a-404a-b07a-91f871e4a8cc"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Pneumonia"
+                        },
+                        new
+                        {
+                            Id = new Guid("32368078-8d03-4ad2-8bc1-d683a94e82ed"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Bronchitis"
+                        },
+                        new
+                        {
+                            Id = new Guid("8a9ee513-9ff5-4b40-bb09-59730a829c77"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Tuberculosis"
+                        },
+                        new
+                        {
+                            Id = new Guid("179dfb23-44f4-49ec-bf10-159ef4ca6954"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Chronic obstructive pulmonary disease"
+                        },
+                        new
+                        {
+                            Id = new Guid("75c22761-f498-4973-86fb-cf1b13dd729e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute bronchitis"
+                        },
+                        new
+                        {
+                            Id = new Guid("a86c35ee-f3a0-4c18-8494-3e9c201dfcf0"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute sinusitis"
+                        },
+                        new
+                        {
+                            Id = new Guid("6f72df4d-d279-4fc4-bd22-67d3ba33cadc"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute pharyngitis"
+                        },
+                        new
+                        {
+                            Id = new Guid("48ff8e51-0164-4194-90c5-9e0dd87b864d"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute tonsillitis"
+                        },
+                        new
+                        {
+                            Id = new Guid("e53c4fab-e86a-4c03-9ad4-431846ff8467"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute otitis media"
+                        },
+                        new
+                        {
+                            Id = new Guid("60898d97-32e0-4841-bec0-6ffd3f15cb9c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Diagnosis",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Acute bronchiti"
+                        },
+                        new
+                        {
+                            Id = new Guid("41589b18-4df9-4f02-a101-af827964b3e3"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antibiotics"
+                        },
+                        new
+                        {
+                            Id = new Guid("5aa836ee-00c1-4f7b-8c5e-b74d7162fe3c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antiviral drugs"
+                        },
+                        new
+                        {
+                            Id = new Guid("9bb77950-3379-4c77-9213-b43950976939"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antifungal drugs"
+                        },
+                        new
+                        {
+                            Id = new Guid("650c86c0-c74e-4101-9777-4598873e1050"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antiparasitic drugs"
+                        },
+                        new
+                        {
+                            Id = new Guid("1e310e93-070b-4202-8dc3-f514fce5a3b9"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antihistamines"
+                        },
+                        new
+                        {
+                            Id = new Guid("3652b57a-07e4-4915-b22a-581e76f58448"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Corticosteroids"
+                        },
+                        new
+                        {
+                            Id = new Guid("57581436-4e1b-4856-bc53-d52c24c2fd65"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Bronchodilators"
+                        },
+                        new
+                        {
+                            Id = new Guid("9390cf8d-f52a-4527-9f17-d785d281637e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Decongestants"
+                        },
+                        new
+                        {
+                            Id = new Guid("7a46084f-288c-4bbe-8da1-5ea97ca48ea6"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Expectorants"
+                        },
+                        new
+                        {
+                            Id = new Guid("2027a099-57ce-4fbe-9d38-1c7c337a8e50"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Mucolytics"
+                        },
+                        new
+                        {
+                            Id = new Guid("7ff91ada-1ec7-46e4-b2d6-435e5cbbf38d"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antitussives"
+                        },
+                        new
+                        {
+                            Id = new Guid("a3c3d331-21c9-48eb-aace-ddffcd3d9331"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antiemetics"
+                        },
+                        new
+                        {
+                            Id = new Guid("4a87b3bd-5877-4388-9239-69f4e83bc322"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antipyretics"
+                        },
+                        new
+                        {
+                            Id = new Guid("e3a88a80-5c6d-4060-a8d7-7af07db8e3e4"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Analgesics"
+                        },
+                        new
+                        {
+                            Id = new Guid("7582bbb7-9ecb-47d5-a742-891b514d60de"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antacids"
+                        },
+                        new
+                        {
+                            Id = new Guid("c10ae801-7042-485f-a528-539503c568b7"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antispasmodics"
+                        },
+                        new
+                        {
+                            Id = new Guid("5da4cdd1-9923-4cc9-aa08-eaf0e4003e0b"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Antidiarrheals"
+                        },
+                        new
+                        {
+                            Id = new Guid("7d80a7b1-599d-457f-b8a3-7f963f0fed98"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Rest"
+                        },
+                        new
+                        {
+                            Id = new Guid("53e76e9d-6093-41f3-8de9-8d6c33434f71"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Fluids"
+                        },
+                        new
+                        {
+                            Id = new Guid("8ea7023f-f79b-4dc7-965a-890cdd68ba9c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin C"
+                        },
+                        new
+                        {
+                            Id = new Guid("a2c32b19-cd8f-495c-a11e-1c34eec818fe"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin D"
+                        },
+                        new
+                        {
+                            Id = new Guid("47a50b1f-e874-4964-831b-d677941e9ecf"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin E"
+                        },
+                        new
+                        {
+                            Id = new Guid("e015b806-ea24-4741-853c-2628d1393ad7"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin B6"
+                        },
+                        new
+                        {
+                            Id = new Guid("0eeb68fc-ccdf-4102-b6da-2f9dd939bc3e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin B12"
+                        },
+                        new
+                        {
+                            Id = new Guid("dcb02f21-0ed8-4c97-8f2f-2b58a42c6de3"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin K"
+                        },
+                        new
+                        {
+                            Id = new Guid("074dacb8-0264-4a3b-8627-1581cf14ec3a"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            Type = "Recommendations",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Value = "Vitamin A"
+                        });
+                });
+
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.SickLeave", b =>
                 {
                     b.Property<Guid>("Id")
@@ -798,6 +1307,17 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.QuickButton", b =>
+                {
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
+                        .WithMany("QuickButtons")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.SickLeave", b =>
                 {
                     b.HasOne("DoctorsOffice.Domain.Entities.Appointment", "Appointment")
@@ -969,6 +1489,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
                     b.Navigation("DrugItems");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Doctor", b =>
+                {
+                    b.Navigation("QuickButtons");
                 });
 #pragma warning restore 612, 618
         }

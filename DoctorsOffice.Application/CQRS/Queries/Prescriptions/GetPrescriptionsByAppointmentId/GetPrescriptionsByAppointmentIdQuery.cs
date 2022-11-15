@@ -8,7 +8,8 @@ namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsB
 
 public class GetPrescriptionsByAppointmentIdQuery : IRequest<HttpResult<PagedResponse<PrescriptionResponse>>>
 {
-    public Guid DoctorId { get; set; }
+    public Guid? DoctorId { get; set; }
+    public Guid? PatientId { get; set; }
     public Guid AppointmentId { get; set; }
     public PaginationFilter PaginationFilter { get; set; } = null!;
 }

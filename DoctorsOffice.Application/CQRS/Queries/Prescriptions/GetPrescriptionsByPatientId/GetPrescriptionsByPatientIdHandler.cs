@@ -8,8 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
 
-public class
-    GetPrescriptionsByPatientIdHandler
+public class GetPrescriptionsByPatientIdHandler
     : IRequestHandler<GetPrescriptionsByPatientIdQuery, HttpResult<PagedResponse<PrescriptionResponse>>>
 {
     private readonly IMapper _mapper;
@@ -27,6 +26,7 @@ public class
         var prescriptionResponsesQueryable = _prescriptionRepository.GetAll()
             .Include(p => p.DrugItems)
             .Where(p => p.PatientId == request.PatientId)
+            .OrderByDescending(p => p.CreatedAt)
             .Select(p => _mapper.Map<PrescriptionResponse>(p));
 
         return Task.FromResult(

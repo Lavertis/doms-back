@@ -13,6 +13,7 @@ using DoctorsOffice.SendGrid.Service;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Patients.CreatePatient;
@@ -84,11 +85,12 @@ public class CreatePatientHandler : IRequestHandler<CreatePatientCommand, HttpRe
         var uriBuilder = new UriBuilder(_urlSettings.FrontendDomain)
         {
             Path = "confirm-email",
-            Query = $"token={Uri.EscapeDataString(emailConfirmationToken)}&email={newAppUser.Email}"
+            Query =
+                $"token={Uri.EscapeDataString(emailConfirmationToken)}&email={Uri.EscapeDataString(newAppUser.Email)}"
         };
         var confirmationLink = uriBuilder.Uri.ToString();
 
-        if (_webHostEnvironment.EnvironmentName != "Development")
+        if (!_webHostEnvironment.IsDevelopment())
         {
             await SendConfirmationEmailAsync(
                 emailAddress: request.Email,

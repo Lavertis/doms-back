@@ -57,6 +57,8 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -204,8 +206,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FirstName = table.Column<string>(type: "text", nullable: false),
-                    LastName = table.Column<string>(type: "text", nullable: false),
                     NationalId = table.Column<string>(type: "text", nullable: false),
                     Address = table.Column<string>(type: "text", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -246,6 +246,28 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         name: "FK_RefreshTokens_AspNetUsers_AppUserId",
                         column: x => x.AppUserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuickButtons",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuickButtons", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuickButtons_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -331,6 +353,43 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SickLeaves",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PatientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AppointmentId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DateStart = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DateEnd = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Diagnosis = table.Column<string>(type: "text", nullable: false),
+                    Purpose = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SickLeaves", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SickLeaves_Appointments_AppointmentId",
+                        column: x => x.AppointmentId,
+                        principalTable: "Appointments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_SickLeaves_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SickLeaves_Patients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "Patients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DrugItems",
                 columns: table => new
                 {
@@ -387,8 +446,13 @@ namespace DoctorsOffice.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"), 0, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", null, false, null, "ADMIN", "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==", null, false, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", false, "admin" });
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[,]
+                {
+                    { new Guid("4facc425-b1ef-416a-979f-56da897448c5"), 0, "4facc425-b1ef-416a-979f-56da897448c5", "patient@patient.com", true, "Patient", "Patient", "PATIENT@PATIENT.COM", "PATIENT", "AL9EaDGX0cdo1q6ldEn3SDtSYoYHcRpcEBXmM4TUfF+hOIT06L6ZfvndiURMFQEphw==", "123456789", false, "4facc425-b1ef-416a-979f-56da897448c5", false, "patient" },
+                    { new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), 0, "c8934fff-2f5a-4198-893f-26023d8f4107", "doctor@doctor.com", true, "Doctor", "Doctor", "DOCTOR@DOCTOR.COM", "DOCTOR", "AMbTv46BLUYaRTuuF5U53eDGMBRw4T7wQwaxSxTrM4mPB87g87fP+FW4n+ecgCXCdg==", "123456789", false, "c8934fff-2f5a-4198-893f-26023d8f4107", false, "doctor" },
+                    { new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"), 0, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", "admin@doms.com", true, "Admin", "Admin", "ADMIN@DOMS.COM", "ADMIN", "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==", null, false, "f2f0ccba-ce3c-4ce4-8167-b79d88117c05", false, "admin" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Admins",
@@ -398,7 +462,34 @@ namespace DoctorsOffice.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4"), new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05") });
+                values: new object[,]
+                {
+                    { new Guid("d4349d0c-d18c-4324-be02-254ad1208004"), new Guid("4facc425-b1ef-416a-979f-56da897448c5") },
+                    { new Guid("80389a16-fbd0-4db1-b655-05a29d202a75"), new Guid("c8934fff-2f5a-4198-893f-26023d8f4107") },
+                    { new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4"), new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05") }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Doctors",
+                columns: new[] { "Id", "CreatedAt", "UpdatedAt" },
+                values: new object[] { new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) });
+
+            migrationBuilder.InsertData(
+                table: "Patients",
+                columns: new[] { "Id", "Address", "CreatedAt", "DateOfBirth", "NationalId", "UpdatedAt" },
+                values: new object[] { new Guid("4facc425-b1ef-416a-979f-56da897448c5"), "7865 Greenview St. Randallstown, MD 21133", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2000, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), "04233040549", new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) });
+
+            migrationBuilder.InsertData(
+                table: "Appointments",
+                columns: new[] { "Id", "CreatedAt", "Date", "Description", "Diagnosis", "DoctorId", "Interview", "PatientId", "Recommendations", "StatusId", "TypeId", "UpdatedAt" },
+                values: new object[,]
+                {
+                    { new Guid("2cf674a8-9311-4515-a6bb-8d8094ade09c"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 11, 5, 0, 0, 0, 0, DateTimeKind.Utc), "4000000", null, new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), null, new Guid("4facc425-b1ef-416a-979f-56da897448c5"), null, new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("4f319bc2-a6d9-4a52-9357-0772d0edd639"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 11, 3, 0, 0, 0, 0, DateTimeKind.Utc), "2000000", null, new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), null, new Guid("4facc425-b1ef-416a-979f-56da897448c5"), null, new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("56a26dea-caf2-4a4b-a013-ed9e776d25dc"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc), "0", null, new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), null, new Guid("4facc425-b1ef-416a-979f-56da897448c5"), null, new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("9e1cf297-b90f-436a-8cd3-8ca95276872f"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc), "1000000", null, new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), null, new Guid("4facc425-b1ef-416a-979f-56da897448c5"), null, new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid("f32e24af-265d-4748-be59-769db539cb07"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2022, 11, 4, 0, 0, 0, 0, DateTimeKind.Utc), "3000000", null, new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"), null, new Guid("4facc425-b1ef-416a-979f-56da897448c5"), null, new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"), new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"), new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc) }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_DoctorId",
@@ -478,9 +569,29 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuickButtons_DoctorId",
+                table: "QuickButtons",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_AppUserId",
                 table: "RefreshTokens",
                 column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SickLeaves_AppointmentId",
+                table: "SickLeaves",
+                column: "AppointmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SickLeaves_DoctorId",
+                table: "SickLeaves",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SickLeaves_PatientId",
+                table: "SickLeaves",
+                column: "PatientId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -504,7 +615,13 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 name: "DrugItems");
 
             migrationBuilder.DropTable(
+                name: "QuickButtons");
+
+            migrationBuilder.DropTable(
                 name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "SickLeaves");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

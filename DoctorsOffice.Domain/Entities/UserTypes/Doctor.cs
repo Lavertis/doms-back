@@ -8,4 +8,6 @@ public class Doctor : BaseEntity
 {
     [Key] [ForeignKey(nameof(AppUser))] public new Guid Id { get; set; }
     public AppUser AppUser { get; set; } = default!;
+
+    public List<QuickButton> QuickButtons { get; set; } = new();
 }

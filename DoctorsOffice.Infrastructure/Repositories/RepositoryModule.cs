@@ -16,5 +16,6 @@ public static class RepositoryModule
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
         services.AddScoped<IDrugItemRepository, DrugItemRepository>();
         services.AddScoped<ISickLeaveRepository, SickLeaveRepository>();
+        services.AddScoped<IQuickButtonRepository, QuickButtonRepository>();
     }
 }

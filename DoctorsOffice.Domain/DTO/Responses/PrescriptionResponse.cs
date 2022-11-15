@@ -7,5 +7,6 @@ public class PrescriptionResponse
     public Guid PatientId { get; set; }
     public Guid? AppointmentId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime FulfillmentDeadline { get; set; }
     public IEnumerable<DrugItemResponse> DrugItems { get; set; } = null!;
 }

@@ -23,10 +23,16 @@ public class GetPrescriptionsByAppointmentIdHandler : IRequestHandler<GetPrescri
     public Task<HttpResult<PagedResponse<PrescriptionResponse>>> Handle(GetPrescriptionsByAppointmentIdQuery request,
         CancellationToken cancellationToken)
     {
-        var prescriptionResponsesQueryable = _prescriptionRepository.GetAll()
+        var prescriptionsQueryable = _prescriptionRepository.GetAll()
             .Include(p => p.DrugItems)
-            .Where(p => p.DoctorId == request.DoctorId && p.AppointmentId == request.AppointmentId)
-            .Select(p => _mapper.Map<PrescriptionResponse>(p));
+            .Where(p => p.AppointmentId == request.AppointmentId);
+
+        if (request.DoctorId != null)
+            prescriptionsQueryable = prescriptionsQueryable.Where(p => p.DoctorId == request.DoctorId);
+        if (request.PatientId != null)
+            prescriptionsQueryable = prescriptionsQueryable.Where(p => p.PatientId == request.PatientId);
+
+        var prescriptionResponsesQueryable = prescriptionsQueryable.Select(p => _mapper.Map<PrescriptionResponse>(p));
 
         return Task.FromResult(
             PaginationUtils.CreatePagedHttpResult(prescriptionResponsesQueryable, request.PaginationFilter)

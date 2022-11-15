@@ -27,6 +27,7 @@ public class
         var prescriptionResponsesQueryable = _prescriptionRepository.GetAll()
             .Include(p => p.DrugItems)
             .Where(p => p.DoctorId == request.DoctorId)
+            .OrderByDescending(p => p.CreatedAt)
             .Select(p => _mapper.Map<PrescriptionResponse>(p));
 
         return Task.FromResult(

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DoctorsOffice.Application.AutoMapper;
+using DoctorsOffice.Infrastructure.AutoMapper;
 
 namespace DoctorsOffice.UnitTests;
 

@@ -2,6 +2,7 @@
 using DoctorsOffice.Application.Services.Users;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
+using DoctorsOffice.Domain.Entities;
 using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Repositories;
@@ -14,6 +15,7 @@ using DoctorsOffice.SendGrid.Service;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace DoctorsOffice.Application.CQRS.Commands.Doctors.CreateDoctor;
@@ -24,6 +26,8 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
     private readonly IDoctorRepository _doctorRepository;
     private readonly IdentitySettings _identitySettings;
     private readonly IMapper _mapper;
+    private readonly IQuickButtonRepository _quickButtonRepository;
+    private readonly QuickButtonSettings _quickButtonSettings;
     private readonly ISendGridService _sendGridService;
     private readonly SendGridTemplateSettings _sendGridTemplateSettings;
     private readonly UrlSettings _urlSettings;
@@ -39,7 +43,8 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
         IOptions<IdentitySettings> identitySettings,
         IWebHostEnvironment webHostEnvironment,
         AppUserManager appUserManager,
-        IOptions<UrlSettings> urlSettings)
+        IOptions<UrlSettings> urlSettings,
+        IOptions<QuickButtonSettings> quickButtonSettings, IQuickButtonRepository quickButtonRepository)
     {
         _doctorRepository = doctorRepository;
         _userService = userService;
@@ -47,6 +52,8 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
         _sendGridService = sendGridService;
         _webHostEnvironment = webHostEnvironment;
         _appUserManager = appUserManager;
+        _quickButtonRepository = quickButtonRepository;
+        _quickButtonSettings = quickButtonSettings.Value;
         _urlSettings = urlSettings.Value;
         _identitySettings = identitySettings.Value;
         _sendGridTemplateSettings = sendGridTemplateSettings.Value;
@@ -80,14 +87,16 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
         var doctorEntity = await _doctorRepository.CreateAsync(newDoctor);
         var doctorResponse = _mapper.Map<DoctorResponse>(doctorEntity);
 
+        await AssignDefaultQuickButtonsToDoctorAsync(doctorEntity);
+
         var passwordResetToken = await _appUserManager.GeneratePasswordResetTokenAsync(newAppUser);
         var uriBuilder = new UriBuilder(_urlSettings.FrontendDomain)
         {
             Path = "password-reset/new",
-            Query = $"email={newAppUser.Email}&token={Uri.EscapeDataString(passwordResetToken)}"
+            Query = $"email={Uri.EscapeDataString(newAppUser.Email)}&token={Uri.EscapeDataString(passwordResetToken)}"
         };
         var passwordResetLink = uriBuilder.Uri.ToString();
-        if (_webHostEnvironment.EnvironmentName != "Development")
+        if (!_webHostEnvironment.IsDevelopment())
         {
             await SendDoctorPasswordSetupEmailAsync(newAppUser, passwordResetLink);
         }
@@ -118,5 +127,22 @@ public class CreateDoctorHandler : IRequestHandler<CreateDoctorCommand, HttpResu
             }
         };
         await _sendGridService.SendSingleEmailAsync(email);
+    }
+
+    private async Task AssignDefaultQuickButtonsToDoctorAsync(Doctor doctor)
+    {
+        var interviewQuickButtons = _quickButtonSettings.DefaultInterviewQuickButtons
+            .Select(x => new QuickButton {DoctorId = doctor.Id, Value = x, Type = QuickButtonTypes.Interview})
+            .ToList();
+        var diagnosisQuickButtons = _quickButtonSettings.DefaultDiagnosisQuickButtons
+            .Select(x => new QuickButton {DoctorId = doctor.Id, Value = x, Type = QuickButtonTypes.Diagnosis})
+            .ToList();
+        var recommendationsQuickButtons = _quickButtonSettings.DefaultRecommendationsQuickButtons
+            .Select(x => new QuickButton {DoctorId = doctor.Id, Value = x, Type = QuickButtonTypes.Recommendations})
+            .ToList();
+
+        await _quickButtonRepository.CreateRangeAsync(interviewQuickButtons);
+        await _quickButtonRepository.CreateRangeAsync(diagnosisQuickButtons);
+        await _quickButtonRepository.CreateRangeAsync(recommendationsQuickButtons);
     }
 }

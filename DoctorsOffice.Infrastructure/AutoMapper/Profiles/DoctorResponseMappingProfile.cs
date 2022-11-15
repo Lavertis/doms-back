@@ -2,19 +2,19 @@
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities.UserTypes;
 
-namespace DoctorsOffice.Application.AutoMapper.Profiles;
+namespace DoctorsOffice.Infrastructure.AutoMapper.Profiles;
 
-public class PatientResponseMappingProfile : Profile
+public class DoctorResponseMappingProfile : Profile
 {
-    public PatientResponseMappingProfile()
+    public DoctorResponseMappingProfile()
     {
-        CreateMap<Patient, PatientResponse>()
+        CreateMap<Doctor, DoctorResponse>()
             .ForMember(d => d.UserName, opt =>
-                opt.MapFrom(patient => patient.AppUser.UserName))
+                opt.MapFrom(doctor => doctor.AppUser.UserName))
             .ForMember(d => d.Email, opt =>
-                opt.MapFrom(patient => patient.AppUser.Email))
+                opt.MapFrom(doctor => doctor.AppUser.Email))
             .ForMember(d => d.PhoneNumber, opt =>
-                opt.MapFrom(patient => patient.AppUser.PhoneNumber))
+                opt.MapFrom(doctor => doctor.AppUser.PhoneNumber))
             .ForMember(d => d.FirstName, opt =>
                 opt.MapFrom(doctor => doctor.AppUser.FirstName))
             .ForMember(d => d.LastName, opt =>

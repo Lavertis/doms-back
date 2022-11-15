@@ -221,7 +221,9 @@ public class DoctorHandlerTests : UnitTest
             A.Dummy<IOptions<IdentitySettings>>(),
             _fakeWebHostEnvironment,
             _fakeAppUserManager,
-            _fakeUrlSettings
+            _fakeUrlSettings,
+            A.Dummy<IOptions<QuickButtonSettings>>(),
+            A.Dummy<IQuickButtonRepository>()
         );
         A.CallTo(() => _fakeUserService.CreateUserAsync(A<CreateUserRequest>.Ignored))
             .Returns(new HttpResult<AppUser>().WithValue(appUser));

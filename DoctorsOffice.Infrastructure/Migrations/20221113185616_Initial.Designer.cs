@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221009205221_Initial")]
+    [Migration("20221113185616_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,6 +75,68 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasIndex("TypeId");
 
                     b.ToTable("Appointments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("56a26dea-caf2-4a4b-a013-ed9e776d25dc"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "0",
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("9e1cf297-b90f-436a-8cd3-8ca95276872f"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "1000000",
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("4f319bc2-a6d9-4a52-9357-0772d0edd639"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "2000000",
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("f32e24af-265d-4748-be59-769db539cb07"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "3000000",
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("2cf674a8-9311-4515-a6bb-8d8094ade09c"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "4000000",
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.AppointmentStatus", b =>
@@ -293,6 +355,82 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.ToTable("Prescriptions");
                 });
 
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.QuickButton", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("QuickButtons");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.SickLeave", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DateEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DateStart")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Diagnosis")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("SickLeaves");
+                });
+
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Admin", b =>
                 {
                     b.Property<Guid>("Id")
@@ -336,6 +474,14 @@ namespace DoctorsOffice.Infrastructure.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -381,13 +527,53 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Id = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
-                            EmailConfirmed = false,
+                            Email = "admin@doms.com",
+                            EmailConfirmed = true,
+                            FirstName = "Admin",
+                            LastName = "Admin",
+                            NormalizedEmail = "ADMIN@DOMS.COM",
                             NormalizedUserName = "ADMIN",
                             PasswordHash = "ACwoXDy/z+O6bjrLgviDbsZ036YrMsYj/fMPviVIsW1welLPf0g9dCgRkUTW3JOSpA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "f2f0ccba-ce3c-4ce4-8167-b79d88117c05",
                             TwoFactorEnabled = false,
                             UserName = "admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
+                            Email = "doctor@doctor.com",
+                            EmailConfirmed = true,
+                            FirstName = "Doctor",
+                            LastName = "Doctor",
+                            NormalizedEmail = "DOCTOR@DOCTOR.COM",
+                            NormalizedUserName = "DOCTOR",
+                            PasswordHash = "AMbTv46BLUYaRTuuF5U53eDGMBRw4T7wQwaxSxTrM4mPB87g87fP+FW4n+ecgCXCdg==",
+                            PhoneNumber = "123456789",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "c8934fff-2f5a-4198-893f-26023d8f4107",
+                            TwoFactorEnabled = false,
+                            UserName = "doctor"
+                        },
+                        new
+                        {
+                            Id = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "4facc425-b1ef-416a-979f-56da897448c5",
+                            Email = "patient@patient.com",
+                            EmailConfirmed = true,
+                            FirstName = "Patient",
+                            LastName = "Patient",
+                            NormalizedEmail = "PATIENT@PATIENT.COM",
+                            NormalizedUserName = "PATIENT",
+                            PasswordHash = "AL9EaDGX0cdo1q6ldEn3SDtSYoYHcRpcEBXmM4TUfF+hOIT06L6ZfvndiURMFQEphw==",
+                            PhoneNumber = "123456789",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "4facc425-b1ef-416a-979f-56da897448c5",
+                            TwoFactorEnabled = false,
+                            UserName = "patient"
                         });
                 });
 
@@ -405,6 +591,14 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Doctors");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Patient", b =>
@@ -422,14 +616,6 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("NationalId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -440,6 +626,17 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Patients");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            Address = "7865 Greenview St. Randallstown, MD 21133",
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DateOfBirth = new DateTime(2000, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            NationalId = "04233040549",
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -530,6 +727,16 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             UserId = new Guid("f2f0ccba-ce3c-4ce4-8167-b79d88117c05"),
                             RoleId = new Guid("6506ab69-c793-4d0a-87d4-6565e98523d4")
+                        },
+                        new
+                        {
+                            UserId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            RoleId = new Guid("80389a16-fbd0-4db1-b655-05a29d202a75")
+                        },
+                        new
+                        {
+                            UserId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
+                            RoleId = new Guid("d4349d0c-d18c-4324-be02-254ad1208004")
                         });
                 });
 
@@ -602,6 +809,42 @@ namespace DoctorsOffice.Infrastructure.Migrations
                 {
                     b.HasOne("DoctorsOffice.Domain.Entities.Appointment", "Appointment")
                         .WithMany("Prescriptions")
+                        .HasForeignKey("AppointmentId");
+
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.QuickButton", b =>
+                {
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
+                        .WithMany("QuickButtons")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.SickLeave", b =>
+                {
+                    b.HasOne("DoctorsOffice.Domain.Entities.Appointment", "Appointment")
+                        .WithMany("SickLeaves")
                         .HasForeignKey("AppointmentId");
 
                     b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
@@ -762,11 +1005,18 @@ namespace DoctorsOffice.Infrastructure.Migrations
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.Appointment", b =>
                 {
                     b.Navigation("Prescriptions");
+
+                    b.Navigation("SickLeaves");
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
                     b.Navigation("DrugItems");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Doctor", b =>
+                {
+                    b.Navigation("QuickButtons");
                 });
 #pragma warning restore 612, 618
         }

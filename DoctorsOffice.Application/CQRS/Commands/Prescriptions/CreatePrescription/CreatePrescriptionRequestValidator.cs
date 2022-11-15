@@ -18,7 +18,7 @@ public class CreatePrescriptionRequestValidator : AbstractValidator<CreatePrescr
 
         RuleFor(x => x.FulfillmentDeadline)
             .NotEmpty()
-            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.AddDays(-1))
             .WithMessage("Fulfillment deadline cannot be in the past");
 
         RuleFor(x => x.DrugItems)

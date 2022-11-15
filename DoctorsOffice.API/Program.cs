@@ -1,11 +1,11 @@
 using DoctorsOffice.API.Cors;
 using DoctorsOffice.API.Swagger;
-using DoctorsOffice.Application.AutoMapper;
 using DoctorsOffice.Application.CQRS;
 using DoctorsOffice.Application.Middleware;
 using DoctorsOffice.Application.Services;
 using DoctorsOffice.Application.Validation;
 using DoctorsOffice.Application.Workers;
+using DoctorsOffice.Infrastructure.AutoMapper;
 using DoctorsOffice.Infrastructure.Config;
 using DoctorsOffice.Infrastructure.Database;
 using DoctorsOffice.Infrastructure.Identity;
