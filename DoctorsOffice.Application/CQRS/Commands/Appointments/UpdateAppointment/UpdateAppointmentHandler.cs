@@ -56,6 +56,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
             .Include(appointment => appointment.Status)
             .Include(appointment => appointment.Type)
             .Include(appointment => appointment.Patient.AppUser)
+            .Include(appointment => appointment.Doctor.AppUser)
             .FirstOrDefaultAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
 
         if (appointmentToUpdate is null)
