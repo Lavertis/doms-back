@@ -18,7 +18,7 @@ public class DocumentGenerator : IDocumentGenerator
     private static async Task<MemoryStream> ConvertHtmlToPdfAsync(string html)
     {
         using var browserFetcher = new BrowserFetcher();
-        await browserFetcher.DownloadAsync();
+        await browserFetcher.DownloadAsync(BrowserFetcher.DefaultChromiumRevision);
         await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
         {
             Headless = true,

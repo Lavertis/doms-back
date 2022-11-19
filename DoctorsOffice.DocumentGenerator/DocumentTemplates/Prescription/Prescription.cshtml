@@ -16,20 +16,20 @@
         crossorigin="anonymous"></script>
     <style>
         html {
-          font-size: 10px;
+          font-size: 62.5%;
         }
     </style>
 </head>
 <body>
 <div class="container mt-2">
     <h1 class="mb-5 text-center">Prescription</h1>
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-around text-center">
         <span>
-            <strong>Issue date:</strong>
+            <strong>Issue date</strong><br/>
             @Model.CreationDate.ToShortDateString() @Model.CreationDate.ToShortTimeString()
         </span>
         <span>
-            <strong>Fulfillment deadline:</strong>
+            <strong>Fulfillment deadline</strong><br/>
             @Model.FulfillmentDeadline.ToShortDateString()
         </span>
     </div>
@@ -38,13 +38,13 @@
         <tbody>
         <tr>
             <td>
-                <strong>Doctor:</strong>
+                <strong>Doctor</strong>
             </td>
             <td>@Model.DoctorFullName</td>
         </tr>
         <tr>
             <td class="align-top">
-                <strong>Patient:</strong>
+                <strong>Patient</strong>
             </td>
             <td>
                 <p class="mb-0">@Model.PatientFullName</p>
