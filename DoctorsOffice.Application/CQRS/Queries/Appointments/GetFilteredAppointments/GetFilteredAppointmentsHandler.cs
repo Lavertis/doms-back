@@ -37,9 +37,10 @@ public class GetFilteredAppointmentsHandler
         if (request.DateEnd is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.Date <= request.DateEnd);
         if (request.Type is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Type.Name == request.Type);
+            appointmentsQueryable = appointmentsQueryable.Where(a => a.Type.Name.ToUpper() == request.Type.ToUpper());
         if (request.Status is not null)
-            appointmentsQueryable = appointmentsQueryable.Where(a => a.Status.Name == request.Status);
+            appointmentsQueryable =
+                appointmentsQueryable.Where(a => a.Status.Name.ToUpper() == request.Status.ToUpper());
         if (request.PatientId is not null)
             appointmentsQueryable = appointmentsQueryable.Where(a => a.PatientId == request.PatientId);
         if (request.DoctorId is not null)

@@ -1,11 +1,15 @@
 ﻿using System.Security.Claims;
+using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Utils;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using FileResult = DoctorsOffice.Domain.Utils.FileResult;
 
 namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
+[Produces(ContentTypes.ApplicationJson)]
+[Consumes(ContentTypes.ApplicationJson)]
 public abstract class BaseController : ControllerBase
 {
     protected readonly IMediator Mediator;
@@ -24,6 +28,36 @@ public abstract class BaseController : ControllerBase
             _ when result.HasValidationErrors => StatusCode(result.StatusCode, new {Errors = result.ValidationErrors}),
             _ => throw new Exception("Failed to created response")
         };
+    }
+
+    protected ActionResult<MemoryStream> CreateResponse(HttpResult<FileResult> result)
+    {
+        return result.StatusCode switch
+        {
+            >= 200 and < 300 => CreateFileStreamResult(result.Value!),
+            _ when result.IsError => StatusCode(result.StatusCode, result.Error),
+            _ when result.HasValidationErrors => StatusCode(result.StatusCode, new {Errors = result.ValidationErrors}),
+            _ => throw new Exception("Failed to created response")
+        };
+    }
+
+    private FileStreamResult CreateFileStreamResult(FileResult fileResult)
+    {
+        AddExposedHeader("Content-Disposition");
+        return new FileStreamResult(fileResult.Stream, fileResult.ContentType)
+        {
+            FileDownloadName = fileResult.FileName
+        };
+    }
+
+    private void AddExposedHeader(string header)
+    {
+        var exposedHeaders = Response.Headers["Access-Control-Expose-Headers"];
+        if (string.IsNullOrEmpty(exposedHeaders))
+            exposedHeaders = header;
+        else
+            exposedHeaders += $",{header}";
+        Response.Headers["Access-Control-Expose-Headers"] = exposedHeaders;
     }
 
     protected Guid JwtSubject()

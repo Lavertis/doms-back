@@ -1,6 +1,7 @@
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.CreatePrescription;
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.DeletePrescription;
 using DoctorsOffice.Application.CQRS.Commands.Prescriptions.UpdatePrescription;
+using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GeneratePrescriptionPdf;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByAppointmentId;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByDoctorId;
 using DoctorsOffice.Application.CQRS.Queries.Prescriptions.GetPrescriptionsByPatientId;
@@ -91,6 +92,20 @@ public class PrescriptionController : BaseController
         {
             DoctorId = JwtSubject(),
             PaginationFilter = paginationFilter
+        }));
+
+    /// <summary>
+    /// Returns prescription as PDF file.
+    /// </summary>
+    [HttpGet("{prescriptionId:guid}/download")]
+    [Authorize]
+    [Produces(ContentTypes.ApplicationPdf, ContentTypes.ApplicationJson)]
+    public async Task<ActionResult<MemoryStream>> GeneratePrescriptionPdf(Guid prescriptionId)
+        => CreateResponse(await Mediator.Send(new GeneratePrescriptionPdfQuery
+        {
+            PrescriptionId = prescriptionId,
+            AppUserId = JwtSubject(),
+            Role = JwtRole()
         }));
 
     /// <summary>
