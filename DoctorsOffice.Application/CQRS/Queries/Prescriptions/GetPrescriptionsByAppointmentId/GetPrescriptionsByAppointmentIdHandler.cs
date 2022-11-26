@@ -24,8 +24,8 @@ public class GetPrescriptionsByAppointmentIdHandler : IRequestHandler<GetPrescri
         CancellationToken cancellationToken)
     {
         var prescriptionsQueryable = _prescriptionRepository.GetAll()
-            .Include(p => p.DrugItems)
-            .Where(p => p.AppointmentId == request.AppointmentId);
+            .Include(prescription => prescription.DrugItems)
+            .Where(prescription => prescription.AppointmentId == request.AppointmentId);
 
         if (request.DoctorId != null)
             prescriptionsQueryable = prescriptionsQueryable.Where(p => p.DoctorId == request.DoctorId);

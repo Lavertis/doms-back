@@ -16,7 +16,7 @@ public class UpdateSickLeaveRequestValidator : AbstractValidator<UpdateSickLeave
             .When(x => x.PatientId is not null);
 
         RuleFor(x => x.DateEnd)
-            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.AddDays(-1))
             .WithMessage("End date cannot be in the past")
             .When(x => x.DateStart is not null)
             .GreaterThan(x => x.DateStart)
@@ -24,7 +24,7 @@ public class UpdateSickLeaveRequestValidator : AbstractValidator<UpdateSickLeave
             .When(x => x.DateEnd is not null && x.DateStart is not null);
 
         RuleFor(x => x.DateStart)
-            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.AddDays(-1))
             .WithMessage("Start date cannot be in the past")
             .When(x => x.DateStart is not null)
             .LessThan(x => x.DateEnd)

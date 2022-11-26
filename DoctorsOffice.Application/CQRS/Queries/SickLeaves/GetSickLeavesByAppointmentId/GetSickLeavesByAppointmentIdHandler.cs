@@ -4,7 +4,6 @@ using DoctorsOffice.Domain.Repositories;
 using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByAppointmentId;
 
@@ -23,9 +22,15 @@ public class GetSickLeavesByAppointmentIdHandler : IRequestHandler<GetSickLeaves
     public Task<HttpResult<PagedResponse<SickLeaveResponse>>> Handle(GetSickLeavesByAppointmentIdQuery request,
         CancellationToken cancellationToken)
     {
-        var sickLeaveResponsesQueryable = _sickLeaveRepository.GetAll()
-            .Where(p => p.DoctorId == request.DoctorId && p.AppointmentId == request.AppointmentId)
-            .Select(p => _mapper.Map<SickLeaveResponse>(p));
+        var sickLeavesQueryable = _sickLeaveRepository.GetAll()
+            .Where(sickLeave => sickLeave.AppointmentId == request.AppointmentId);
+
+        if (request.DoctorId != null)
+            sickLeavesQueryable = sickLeavesQueryable.Where(p => p.DoctorId == request.DoctorId);
+        if (request.PatientId != null)
+            sickLeavesQueryable = sickLeavesQueryable.Where(p => p.PatientId == request.PatientId);
+
+        var sickLeaveResponsesQueryable = sickLeavesQueryable.Select(s => _mapper.Map<SickLeaveResponse>(s));
 
         return Task.FromResult(
             PaginationUtils.CreatePagedHttpResult(sickLeaveResponsesQueryable, request.PaginationFilter)

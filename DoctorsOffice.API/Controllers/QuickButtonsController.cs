@@ -18,12 +18,12 @@ public class QuickButtonsController : BaseController
     }
 
     /// <summary>
-    /// Returns all quick buttons for authenticated doctor in groups.
+    /// Returns all quick buttons for specified doctor in groups.
     /// </summary>
-    [HttpGet("doctor/current")]
+    [HttpGet("doctor/{doctorId:guid}")]
     [Authorize]
-    public async Task<ActionResult<DoctorQuickButtonsResponse>> GetDoctorQuickButtons()
-        => CreateResponse(await Mediator.Send(new GetDoctorQuickButtonsQuery(JwtSubject())));
+    public async Task<ActionResult<DoctorQuickButtonsResponse>> GetDoctorQuickButtons(Guid doctorId)
+        => CreateResponse(await Mediator.Send(new GetDoctorQuickButtonsQuery(doctorId)));
 
     /// <summary>
     /// Creates new quick button for authenticated doctor.

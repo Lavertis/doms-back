@@ -19,7 +19,7 @@ public class CreateSickLeaveRequestValidator : AbstractValidator<CreateSickLeave
         RuleFor(x => x.DateEnd)
             .NotEmpty()
             .WithMessage("End date is required")
-            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.AddDays(-1))
             .WithMessage("End date cannot be in the past")
             .GreaterThan(x => x.DateStart)
             .WithMessage("End date must be after start date");
@@ -27,7 +27,7 @@ public class CreateSickLeaveRequestValidator : AbstractValidator<CreateSickLeave
         RuleFor(x => x.DateStart)
             .NotEmpty()
             .WithMessage("End date is required")
-            .GreaterThanOrEqualTo(DateTime.UtcNow)
+            .GreaterThanOrEqualTo(DateTime.UtcNow.AddDays(-1))
             .WithMessage("Start date cannot be in the past");
     }
 }
