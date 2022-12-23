@@ -25,10 +25,11 @@ public static class AutoMapperModule
             options.CreateMap<Timetable, TimetableResponse>();
             options.CreateMap<DrugItem, DrugItemResponse>();
             options.CreateMap<SickLeave, SickLeaveResponse>();
+            options.CreateMap<QuickButton, QuickButtonResponse>();
             options.CreateMap<Appointment, AppointmentResponse>();
             options.CreateMap<AppointmentStatus, AppointmentStatusResponse>();
             options.CreateMap<AppointmentType, AppointmentTypeResponse>();
-            
+
             options.AddProfile<AdminResponseMappingProfile>();
             options.AddProfile<DoctorResponseMappingProfile>();
             options.AddProfile<PatientResponseMappingProfile>();
