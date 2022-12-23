@@ -16,12 +16,14 @@ public static class AppointmentTypeSeeder
             new()
             {
                 Id = Guid.Parse(CheckupTypeId),
-                Name = AppointmentTypes.Checkup
+                Name = AppointmentTypes.Checkup,
+                DurationMinutes = 60
             },
             new()
             {
                 Id = Guid.Parse(ConsultationTypeId),
-                Name = AppointmentTypes.Consultation
+                Name = AppointmentTypes.Consultation,
+                DurationMinutes = 30
             }
         };
 

@@ -84,6 +84,7 @@ public class AppointmentController : BaseController
             DateTime? dateEnd,
             string? type,
             string? status,
+            Guid? doctorId,
             [FromQuery] PaginationFilter paginationFilter)
         => CreateResponse(await Mediator.Send(new GetFilteredAppointmentsQuery
         {
@@ -92,6 +93,7 @@ public class AppointmentController : BaseController
             DateEnd = dateEnd,
             Type = type,
             Status = status,
+            DoctorId = doctorId,
             PatientId = JwtSubject()
         }));
 
@@ -105,7 +107,7 @@ public class AppointmentController : BaseController
         {
             RoleName = Roles.Doctor,
             UserId = JwtSubject(),
-            Status = AppointmentStatuses.Accepted
+            StatusId = AppointmentStatuses.Accepted.Id
         }));
 
     /// <summary>
@@ -118,7 +120,7 @@ public class AppointmentController : BaseController
         {
             RoleName = Roles.Patient,
             UserId = JwtSubject(),
-            Status = AppointmentStatuses.Pending
+            StatusId = AppointmentStatuses.Pending.Id
         }));
 
     /// <summary>

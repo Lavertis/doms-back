@@ -464,7 +464,7 @@ public class AppointmentHandlerTests : UnitTest
         {
             new() {Id = Guid.NewGuid(), Name = "Type1"},
             new() {Id = Guid.NewGuid(), Name = "Type2"},
-            new() {Id = Guid.NewGuid(), Name = "Type2"}
+            new() {Id = Guid.NewGuid(), Name = "Type3"}
         };
         const int appointmentCount = 10;
 
@@ -478,7 +478,9 @@ public class AppointmentHandlerTests : UnitTest
                 Doctor = doctor,
                 Patient = patient,
                 Status = status,
+                StatusId = status.Id,
                 Type = types[i % types.Count],
+                TypeId = types[i % types.Count].Id,
                 Description = ""
             });
         }
@@ -498,7 +500,7 @@ public class AppointmentHandlerTests : UnitTest
 
         // assert
         result.Value!.Records.Should().NotBeEmpty();
-        result.Value!.Records.Should().OnlyContain(a => a.Type == selectedType.Name);
+        result.Value!.Records.Should().OnlyContain(a => a.TypeId == selectedType.Id);
     }
 
     [Fact]
@@ -517,7 +519,7 @@ public class AppointmentHandlerTests : UnitTest
         {
             new() {Id = Guid.NewGuid(), Name = "Status1"},
             new() {Id = Guid.NewGuid(), Name = "Status2"},
-            new() {Id = Guid.NewGuid(), Name = "Status2"}
+            new() {Id = Guid.NewGuid(), Name = "Status3"}
         };
         var type = new AppointmentType {Id = Guid.NewGuid(), Name = "Consultation"};
         const int appointmentCount = 10;
@@ -532,7 +534,9 @@ public class AppointmentHandlerTests : UnitTest
                 Doctor = doctor,
                 Patient = patient,
                 Status = statuses[i % statuses.Count],
+                StatusId = statuses[i % statuses.Count].Id,
                 Type = type,
+                TypeId = type.Id,
                 Description = ""
             });
         }
@@ -551,7 +555,7 @@ public class AppointmentHandlerTests : UnitTest
 
         // assert
         result.Value!.Records.Should().NotBeEmpty();
-        result.Value!.Records.Should().OnlyContain(a => a.Status == selectedStatus.Name);
+        result.Value!.Records.Should().OnlyContain(a => a.StatusId == selectedStatus.Id);
     }
 
     [Fact]
@@ -857,12 +861,12 @@ public class AppointmentHandlerTests : UnitTest
             Date = DateTime.UtcNow.AddDays(1),
             DoctorId = doctor.Id,
             PatientId = patient.Id,
-            Type = type.Name,
+            TypeId = type.Id,
             Description = ""
         };
         var command = new CreateAppointmentCommand(request)
         {
-            Status = status.Name,
+            StatusId = status.Id,
             RoleName = string.Empty,
             UserId = Guid.NewGuid()
         };
@@ -885,8 +889,8 @@ public class AppointmentHandlerTests : UnitTest
     [Theory]
     [InlineData("DoctorId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
-    [InlineData("Status", "NonExistingStatus")]
-    [InlineData("Type", "NonExistingType")]
+    [InlineData("StatusId", "00000000-0000-0000-0000-000000000000")]
+    [InlineData("TypeId", "00000000-0000-0000-0000-000000000000")]
     public async Task CreateAppointmentHandler_ContainsNonExistingFieldValue_ReturnsNotFound404StatusCode(
         string fieldName, string fieldValue)
     {
@@ -901,25 +905,25 @@ public class AppointmentHandlerTests : UnitTest
             Date = DateTime.UtcNow.AddDays(1),
             DoctorId = doctor.Id,
             PatientId = patient.Id,
-            Type = type.Name,
+            TypeId = type.Id,
             Description = ""
         };
 
-        if (fieldName == "Status")
+        if (fieldName == "StatusId")
         {
             AppointmentStatus? nullStatus = null;
-            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullStatus);
+            A.CallTo(() => _fakeAppointmentStatusRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(nullStatus);
         }
         else
-            A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored)).Returns(status);
+            A.CallTo(() => _fakeAppointmentStatusRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(status);
 
-        if (fieldName == "Type")
+        if (fieldName == "TypeId")
         {
             AppointmentType? nullType = null;
-            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(nullType);
+            A.CallTo(() => _fakeAppointmentTypeRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(nullType);
         }
         else
-            A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(type);
+            A.CallTo(() => _fakeAppointmentTypeRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(type);
 
         if (fieldName == "PatientId")
         {
@@ -937,7 +941,7 @@ public class AppointmentHandlerTests : UnitTest
         else
             A.CallTo(() => _fakeDoctorRepository.GetByIdAsync(A<Guid>.Ignored)).Returns(doctor);
 
-        if (fieldName != "Status")
+        if (fieldName != "StatusId")
         {
             if (Guid.TryParse(fieldValue, out var guid))
             {
@@ -954,12 +958,12 @@ public class AppointmentHandlerTests : UnitTest
         }
 
         CreateAppointmentCommand command;
-        if (fieldName == "Status")
+        if (fieldName == "StatusId")
         {
             command = new CreateAppointmentCommand(request)
             {
                 UserId = Guid.NewGuid(),
-                Status = fieldValue,
+                StatusId = Guid.Parse(fieldValue),
                 RoleName = string.Empty
             };
         }
@@ -968,7 +972,7 @@ public class AppointmentHandlerTests : UnitTest
             command = new CreateAppointmentCommand(request)
             {
                 UserId = Guid.NewGuid(),
-                Status = status.Name,
+                StatusId = status.Id,
                 RoleName = string.Empty
             };
         }
@@ -1006,9 +1010,9 @@ public class AppointmentHandlerTests : UnitTest
         var request = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(100),
-            Type = newAppointmentType.Name,
+            TypeId = newAppointmentType.Id,
             Description = "newDescription",
-            Status = newAppointmentStatus.Name
+            StatusId = newAppointmentStatus.Id
         };
         var updateAppointmentCommand = new UpdateAppointmentCommand(request)
         {
@@ -1046,9 +1050,9 @@ public class AppointmentHandlerTests : UnitTest
         var request = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(100),
-            Type = "new type",
+            TypeId = Guid.NewGuid(),
             Description = "newDescription",
-            Status = "new status"
+            StatusId = Guid.NewGuid()
         };
         var updateAppointmentCommand = new UpdateAppointmentCommand(request)
         {
@@ -1077,9 +1081,9 @@ public class AppointmentHandlerTests : UnitTest
 
     [Theory]
     [InlineData("Date", "2022-07-03T12:12:52Z")]
-    [InlineData("Type", "new type")]
-    [InlineData("Status", "new status")]
-    [InlineData("Description", "new description")]
+    [InlineData("TypeId", "e58cabc9-e259-42ff-a2a1-0e8d39bb900e")]
+    [InlineData("StatusId", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    [InlineData("Description", "newDescription")]
     public async Task UpdateAppointmentHandler_SingleFieldIsPresent_UpdatesRequestedField(string fieldName,
         string fieldValue)
     {
@@ -1092,8 +1096,17 @@ public class AppointmentHandlerTests : UnitTest
         var request = new UpdateAppointmentRequest();
         if (fieldName == "Date")
             request.Date = DateTime.Parse(fieldValue);
+        else if (fieldName.EndsWith("Id"))
+        {
+            var guid = Guid.Parse(fieldValue);
+            typeof(UpdateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(request, guid);
+        }
         else
-            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(request, fieldValue);
+            typeof(UpdateAppointmentRequest)
+                .GetProperty(fieldName)!
+                .SetValue(request, fieldValue);
 
         var updateAppointmentCommand = new UpdateAppointmentCommand(request)
         {
@@ -1136,7 +1149,7 @@ public class AppointmentHandlerTests : UnitTest
         var request = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(100),
-            Type = "nonExistingType",
+            TypeId = Guid.NewGuid(),
             Description = ""
         };
         var updateAppointmentCommand = new UpdateAppointmentCommand(request)
@@ -1180,7 +1193,7 @@ public class AppointmentHandlerTests : UnitTest
         var request = new UpdateAppointmentRequest
         {
             Date = DateTime.UtcNow.AddDays(100),
-            Status = "nonExistingStatus",
+            StatusId = Guid.NewGuid(),
             Description = ""
         };
         var updateAppointmentCommand = new UpdateAppointmentCommand(request)

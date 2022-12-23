@@ -460,11 +460,10 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("dateStart", "2022-07-04T15:12:52Z")]
     [InlineData("dateEnd", "2022-07-04T15:12:52Z")]
     [InlineData("patientId", "7945992e-3b96-4f0b-9143-f8db38cd8b5e")]
-    [InlineData("type", "Checkup")]
-    [InlineData("status", "Accepted")]
-    public async Task
-        GetAppointmentsFiltered_SingleFilterProvided_ReturnsAppointmentsMatchingProvidedFilterForProvidedDoctor(
-            string filterName, string filterValue)
+    [InlineData("typeId", "e58cabc9-e259-42ff-a2a1-0e8d39bb900e")]
+    [InlineData("statusId", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    public async Task GetAppointmentsFiltered_SingleFilterProvided_ReturnsAppointmentsMatchingProvidedFilter(
+        string filterName, string filterValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -547,10 +546,10 @@ public class AppointmentControllerTests : IntegrationTest
                 responseContent.Records.Should().OnlyContain(a => a.PatientId.ToString() == filterValue);
                 break;
             case "type":
-                responseContent.Records.Should().OnlyContain(a => a.Type == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.TypeId.ToString() == filterValue);
                 break;
             case "status":
-                responseContent.Records.Should().OnlyContain(a => a.Status == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.StatusId.ToString() == filterValue);
                 break;
         }
     }
@@ -984,8 +983,8 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData("dateStart", "2022-07-04T15:12:52Z")]
     [InlineData("dateEnd", "2022-07-04T15:12:52Z")]
-    [InlineData("type", "Checkup")]
-    [InlineData("status", "Pending")]
+    [InlineData("typeId", "e58cabc9-e259-42ff-a2a1-0e8d39bb900e")]
+    [InlineData("statusId", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
     public async Task
         GetAppointmentsForAuthenticatedPatientFiltered_SingleFieldProvided_ReturnsAppointmentsMatchingProvidedFilter(
             string filterName, string filterValue)
@@ -1051,10 +1050,10 @@ public class AppointmentControllerTests : IntegrationTest
                 responseContent.Records.Should().OnlyContain(a => a.Date <= DateTime.Parse(filterValue));
                 break;
             case "type":
-                responseContent.Records.Should().OnlyContain(a => a.Type == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.TypeId.ToString() == filterValue);
                 break;
             case "status":
-                responseContent.Records.Should().OnlyContain(a => a.Status == filterValue);
+                responseContent.Records.Should().OnlyContain(a => a.StatusId.ToString() == filterValue);
                 break;
         }
     }
@@ -1203,7 +1202,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = authenticatedUserId,
             PatientId = patient.Id,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         // act
@@ -1226,7 +1225,7 @@ public class AppointmentControllerTests : IntegrationTest
         createdAppointment.Description.Should().Be(createAppointmentRequest.Description);
         createdAppointment.Doctor.Id.Should().Be(createAppointmentRequest.DoctorId);
         createdAppointment.Patient.Id.Should().Be(createAppointmentRequest.PatientId);
-        createdAppointment.Type.Name.Should().Be(createAppointmentRequest.Type);
+        createdAppointment.Type.Id.Should().Be(createAppointmentRequest.TypeId);
     }
 
     [Theory]
@@ -1235,8 +1234,8 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("DoctorId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("PatientId", "")]
     [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
-    [InlineData("Type", "")]
-    [InlineData("Type", "nonExistingTypeName")]
+    [InlineData("TypeId", "")]
+    [InlineData("TypeId", "00000000-0000-0000-0000-000000000000")]
     public async Task CreateAppointment_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
         string fieldName, object fieldValue)
     {
@@ -1251,7 +1250,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = authenticatedUserId,
             PatientId = patient.Id,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         if (fieldName.EndsWith("Id"))
@@ -1324,7 +1323,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = otherDoctor.Id,
             PatientId = patient.Id,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         // act
@@ -1348,7 +1347,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = doctor.Id,
             PatientId = authenticatedUserId,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         // act
@@ -1362,7 +1361,7 @@ public class AppointmentControllerTests : IntegrationTest
             .ToList();
 
         authenticatedUsersAppointments.Should().Contain(a => a.Id == createdAppointment.Id);
-        createdAppointment.Status.Should().Be(AppointmentStatuses.Pending);
+        createdAppointment.StatusId.Should().Be(AppointmentStatuses.Pending.Id);
     }
 
     [Theory]
@@ -1371,8 +1370,8 @@ public class AppointmentControllerTests : IntegrationTest
     [InlineData("DoctorId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
     [InlineData("PatientId", "")]
     [InlineData("PatientId", "f99d9ea4-333f-4f19-affd-7a8886188ce8")]
-    [InlineData("Type", "")]
-    [InlineData("Type", "nonExistingTypeName")]
+    [InlineData("TypeId", "")]
+    [InlineData("TypeId", "00000000-0000-0000-0000-000000000000")]
     public async Task CreateAppointmentRequest_SingleFieldInRequestIsInvalid_ReturnsBadRequest(
         string fieldName, string fieldValue)
     {
@@ -1387,7 +1386,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = doctor.Id,
             PatientId = authenticatedUserId,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         if (fieldName.EndsWith("Id"))
@@ -1461,7 +1460,7 @@ public class AppointmentControllerTests : IntegrationTest
             Description = "Description",
             DoctorId = doctor.Id,
             PatientId = otherPatient.Id,
-            Type = DbContext.AppointmentTypes.First().Name
+            TypeId = DbContext.AppointmentTypes.First().Id
         };
 
         // act
@@ -1478,7 +1477,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
-        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
+        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Id == AppointmentStatuses.Pending.Id);
 
         var appointment = new Appointment
         {
@@ -1499,8 +1498,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(2),
             Description = "UpdatedDescription",
-            Type = DbContext.AppointmentTypes.Last().Name,
-            Status = AppointmentStatuses.Cancelled
+            TypeId = DbContext.AppointmentTypes.Last().Id,
+            StatusId = AppointmentStatuses.Cancelled.Id
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1520,8 +1519,8 @@ public class AppointmentControllerTests : IntegrationTest
 
         updatedAppointment.Date.Should().Be(updateAppointmentRequest.Date);
         updatedAppointment.Description.Should().Be(updateAppointmentRequest.Description);
-        updatedAppointment.Type.Name.Should().Be(updateAppointmentRequest.Type);
-        updatedAppointment.Status.Name.Should().Be(updateAppointmentRequest.Status);
+        updatedAppointment.Type.Id.Should().Be(updateAppointmentRequest.TypeId.Value);
+        updatedAppointment.Status.Id.Should().Be(updateAppointmentRequest.StatusId.Value);
     }
 
     [Fact]
@@ -1536,8 +1535,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(2),
             Description = "UpdatedDescription",
-            Type = DbContext.AppointmentTypes.Last().Name,
-            Status = AppointmentStatuses.Cancelled
+            TypeId = DbContext.AppointmentTypes.Last().Id,
+            StatusId = AppointmentStatuses.Cancelled.Id
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1551,12 +1550,12 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData(AppointmentStatuses.Accepted)]
-    [InlineData(AppointmentStatuses.Completed)]
-    [InlineData(AppointmentStatuses.Pending)]
-    [InlineData(AppointmentStatuses.Rejected)]
+    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b")]
+    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
     public async Task UpdateAppointmentById_AuthenticatedUserIsPatientAndStatusIsNotCancelled_ReturnsBadRequest(
-        string status)
+        string statusId)
     {
         // arrange
         var client = await GetHttpClientAsync();
@@ -1567,8 +1566,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(2),
             Description = "UpdatedDescription",
-            Type = DbContext.AppointmentTypes.Last().Name,
-            Status = status
+            TypeId = DbContext.AppointmentTypes.Last().Id,
+            StatusId = Guid.Parse(statusId)
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1588,7 +1587,7 @@ public class AppointmentControllerTests : IntegrationTest
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
-        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
+        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Id == AppointmentStatuses.Pending.Id);
 
         var appointment = new Appointment
         {
@@ -1607,7 +1606,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentId = appointment.Id;
         var updateAppointmentRequest = new UpdateAppointmentRequest
         {
-            Status = AppointmentStatuses.Cancelled
+            StatusId = AppointmentStatuses.Cancelled.Id
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1624,34 +1623,34 @@ public class AppointmentControllerTests : IntegrationTest
             .Include(a => a.Status)
             .First(a => a.Id == appointmentId);
 
-        updatedAppointment.Status.Name.Should().Be(updateAppointmentRequest.Status);
+        updatedAppointment.Status.Id.Should().Be(updateAppointmentRequest.StatusId.Value);
     }
 
     [Theory]
-    [InlineData(AppointmentStatuses.Pending, AppointmentStatuses.Cancelled)]
-    [InlineData(AppointmentStatuses.Pending, AppointmentStatuses.Completed)]
-    [InlineData(AppointmentStatuses.Accepted, AppointmentStatuses.Pending)]
-    [InlineData(AppointmentStatuses.Accepted, AppointmentStatuses.Rejected)]
-    [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Pending)]
-    [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Accepted)]
-    [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Cancelled)]
-    [InlineData(AppointmentStatuses.Rejected, AppointmentStatuses.Completed)]
-    [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Pending)]
-    [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Accepted)]
-    [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Rejected)]
-    [InlineData(AppointmentStatuses.Cancelled, AppointmentStatuses.Completed)]
-    [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Pending)]
-    [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Accepted)]
-    [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Rejected)]
-    [InlineData(AppointmentStatuses.Completed, AppointmentStatuses.Cancelled)]
+    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
+    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
+    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
+    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
     public async Task UpdateAppointmentById_AuthenticatedUserIsDoctorAndStatusTransitionIsInvalid_ReturnsBadRequest(
-        string initialStatus, string newStatus)
+        string initialStatusId, string newStatusId)
     {
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsDoctorAsync(client);
         var authenticatedDoctor = DbContext.Doctors.First(u => u.Id == authenticatedUserId);
-        var initialAppointmentStatus = DbContext.AppointmentStatuses.First(s => s.Name == initialStatus);
+        var initialAppointmentStatus = DbContext.AppointmentStatuses.First(s => s.Id.ToString() == initialStatusId);
 
         var appointment = new Appointment
         {
@@ -1670,7 +1669,7 @@ public class AppointmentControllerTests : IntegrationTest
         var appointmentId = appointment.Id;
         var updateAppointmentRequest = new UpdateAppointmentRequest
         {
-            Status = newStatus
+            StatusId = Guid.Parse(newStatusId)
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1686,15 +1685,15 @@ public class AppointmentControllerTests : IntegrationTest
     [Theory]
     [InlineData("Date", "2022-07-09T10:49:11Z")]
     [InlineData("Description", "UpdatedDescription")]
-    [InlineData("Type", AppointmentTypes.Checkup)]
-    [InlineData("Status", AppointmentStatuses.Cancelled)]
+    [InlineData("TypeId", "e58cabc9-e259-42ff-a2a1-0e8d39bb900e")]
+    [InlineData("StatusId", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
     public async Task UpdateAppointmentById_SingleFieldInRequest_UpdatesAppointment(string fieldName, string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
-        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
+        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Id == AppointmentStatuses.Pending.Id);
 
         var appointment = new Appointment
         {
@@ -1716,6 +1715,9 @@ public class AppointmentControllerTests : IntegrationTest
         if (fieldName == "Date")
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
                 DateTime.Parse(fieldValue));
+        else if (fieldName.EndsWith("Id"))
+            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
+                Guid.Parse(fieldValue));
         else
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, fieldValue);
 
@@ -1742,25 +1744,25 @@ public class AppointmentControllerTests : IntegrationTest
             case nameof(UpdateAppointmentRequest.Description):
                 updatedAppointment.Description.Should().Be(fieldValue);
                 break;
-            case nameof(UpdateAppointmentRequest.Type):
-                updatedAppointment.Type.Name.Should().Be(fieldValue);
+            case nameof(UpdateAppointmentRequest.TypeId):
+                updatedAppointment.Type.Id.Should().Be(Guid.Parse(fieldValue));
                 break;
-            case nameof(UpdateAppointmentRequest.Status):
-                updatedAppointment.Status.Name.Should().Be(fieldValue);
+            case nameof(UpdateAppointmentRequest.StatusId):
+                updatedAppointment.Status.Id.Should().Be(Guid.Parse(fieldValue));
                 break;
         }
     }
 
     [Theory]
-    [InlineData("Type", "NonExistingType")]
-    [InlineData("Status", "NonExistingStatus")]
+    [InlineData("TypeId", "00000000-0000-0000-0000-000000000000")]
+    [InlineData("StatusId", "00000000-0000-0000-0000-000000000000")]
     public async Task UpdateAppointmentById_SingleFieldIsInvalid_ReturnsBadRequest(string fieldName, string fieldValue)
     {
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedUserId = await AuthenticateAsPatientAsync(client);
         var authenticatedPatient = DbContext.Patients.First(u => u.Id == authenticatedUserId);
-        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Name == AppointmentStatuses.Pending);
+        var pendingStatus = DbContext.AppointmentStatuses.First(s => s.Id == AppointmentStatuses.Pending.Id);
 
         var appointment = new Appointment
         {
@@ -1782,6 +1784,9 @@ public class AppointmentControllerTests : IntegrationTest
         if (fieldName == "Date")
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
                 DateTime.Parse(fieldValue));
+        else if (fieldName.EndsWith("Id"))
+            typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest,
+                Guid.Parse(fieldValue));
         else
             typeof(UpdateAppointmentRequest).GetProperty(fieldName)!.SetValue(updateAppointmentRequest, fieldValue);
 
@@ -1806,8 +1811,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(2),
             Description = "UpdatedDescription",
-            Type = DbContext.AppointmentTypes.Last().Name,
-            Status = AppointmentStatuses.Cancelled
+            TypeId = DbContext.AppointmentTypes.Last().Id,
+            StatusId = AppointmentStatuses.Cancelled.Id
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);
@@ -1832,8 +1837,8 @@ public class AppointmentControllerTests : IntegrationTest
         {
             Date = DateTime.UtcNow.AddDays(2),
             Description = "UpdatedDescription",
-            Type = DbContext.AppointmentTypes.Last().Name,
-            Status = AppointmentStatuses.Cancelled
+            TypeId = DbContext.AppointmentTypes.Last().Id,
+            StatusId = AppointmentStatuses.Cancelled.Id
         };
 
         var serializedContent = JsonConvert.SerializeObject(updateAppointmentRequest);

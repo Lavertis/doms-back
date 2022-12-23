@@ -17,10 +17,6 @@ public class AppointmentSearchResponseMappingProfile : Profile
                 opt.MapFrom(appointment => appointment.Patient.AppUser.Email))
             .ForMember(d => d.PatientPhoneNumber, opt =>
                 opt.MapFrom(appointment => appointment.Patient.AppUser.PhoneNumber))
-            .ForMember(d => d.Status, opt =>
-                opt.MapFrom(appointment => appointment.Status.Name))
-            .ForMember(d => d.Type, opt =>
-                opt.MapFrom(appointment => appointment.Type.Name))
             .ForMember(appointment => appointment.DoctorFirstName, opt =>
                 opt.MapFrom(appointment => appointment.Doctor.AppUser.FirstName))
             .ForMember(appointment => appointment.DoctorLastName, opt =>

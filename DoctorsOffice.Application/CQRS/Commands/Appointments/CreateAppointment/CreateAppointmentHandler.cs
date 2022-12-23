@@ -68,19 +68,19 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        var appointmentStatus = await _appointmentStatusRepository.GetByNameAsync(request.Status);
+        var appointmentStatus = await _appointmentStatusRepository.GetByIdAsync(request.StatusId);
         if (appointmentStatus is null)
         {
             return result
-                .WithError(new Error { Message = $"AppointmentStatus with name {request.Status} not found" })
+                .WithError(new Error { Message = $"AppointmentStatus with name {request.StatusId} not found" })
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
-        var appointmentType = await _appointmentTypeRepository.GetByNameAsync(request.Type);
+        var appointmentType = await _appointmentTypeRepository.GetByIdAsync(request.TypeId);
         if (appointmentType is null)
         {
             return result
-                .WithError(new Error { Message = $"AppointmentType with name {request.Type} not found" })
+                .WithError(new Error { Message = $"AppointmentType with name {request.TypeId} not found" })
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 

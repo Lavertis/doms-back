@@ -24,10 +24,10 @@ public class DoctorController : BaseController
     }
 
     /// <summary>
-    /// Returns filtered doctors matching search criteria. Only for admins.
+    /// Returns filtered doctors matching search criteria.
     /// </summary>
     [HttpGet("")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize]
     public async Task<ActionResult<PagedResponse<DoctorResponse>>> GetDoctorsFilteredAsync(
         [FromQuery] DoctorQueryParams queryParams, [FromQuery] PaginationFilter paginationFilter)
         => CreateResponse(await Mediator.Send(new GetDoctorsFilteredQuery

@@ -3,8 +3,8 @@
 public class AppointmentResponse
 {
     public Guid Id { get; set; }
-    public string Status { get; set; } = null!;
-    public string Type { get; set; } = null!;
+    public Guid StatusId { get; set; }
+    public Guid TypeId { get; set; }
     public DateTime Date { get; set; }
     public string Description { get; set; } = null!;
     public string Interview { get; set; } = null!;

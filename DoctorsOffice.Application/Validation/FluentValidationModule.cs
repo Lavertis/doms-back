@@ -29,5 +29,7 @@ public static class FluentValidationModule
         services.AddScoped<IValidator<UpdatePrescriptionRequest>, UpdatePrescriptionRequestValidator>();
         services.AddScoped<IValidator<CreateSickLeaveRequest>, CreateSickLeaveRequestValidator>();
         services.AddScoped<IValidator<UpdateSickLeaveRequest>, UpdateSickLeaveRequestValidator>();
+        services.AddScoped<IValidator<CreateTimetableRequestList>, CreateTimetableValidator>();
+        services.AddScoped<IValidator<UpdateTimetableBatchRequestList>, UpdateTimetableValidator>();
     }
 }

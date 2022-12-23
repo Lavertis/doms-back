@@ -35,10 +35,10 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
             .MustAsync((doctorId, _) => appUserManager.ExistsByIdAsync(doctorId))
             .WithMessage("Doctor does not exist");
 
-        RuleFor(e => e.Type)
+        RuleFor(e => e.TypeId)
             .NotEmpty()
             .WithMessage("Type is required")
-            .MustAsync((type, _) => appointmentTypeRepository.ExistsByNameAsync(type))
+            .MustAsync((typeId, _) => appointmentTypeRepository.ExistsByIdAsync(typeId))
             .WithMessage("Type does not exist");
     }
 }

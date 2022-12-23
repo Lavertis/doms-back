@@ -12,6 +12,6 @@ public class AppointmentSearchResponse
     public string PatientPhoneNumber { get; set; } = null!;
     public string DoctorFirstName { get; set; } = null!;
     public string DoctorLastName { get; set; } = null!;
-    public string Status { get; set; } = null!;
-    public string Type { get; set; } = null!;
+    public Guid StatusId { get; set; }
+    public Guid TypeId { get; set; }
 }

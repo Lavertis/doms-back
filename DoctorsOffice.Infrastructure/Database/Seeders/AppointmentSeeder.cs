@@ -1,4 +1,5 @@
 ﻿using DoctorsOffice.Domain.Entities;
+using DoctorsOffice.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Infrastructure.Database.Seeders;
@@ -22,11 +23,11 @@ public static class AppointmentSeeder
             var appointment = new Appointment
             {
                 Id = Guid.Parse(AppointmentIds[i]),
-                Date = new DateTime(2022, 11, i + 1, 0, 0, 0, DateTimeKind.Utc),
+                Date = new DateTime(2022, 11, i + 7, 7 + i, 0, 0, DateTimeKind.Utc),
                 Description = (i * 1_000_000).ToString(),
                 DoctorId = Guid.Parse(UserSeeder.DoctorUserId),
                 PatientId = Guid.Parse(UserSeeder.PatientUserId),
-                StatusId = Guid.Parse(AppointmentStatusSeeder.PendingStatusId),
+                StatusId = AppointmentStatuses.All[i % AppointmentStatuses.All.Count].Id,
                 TypeId = Guid.Parse(AppointmentTypeSeeder.CheckupTypeId),
                 CreatedAt = DatabaseSeeder.TimeStamp,
                 UpdatedAt = DatabaseSeeder.TimeStamp

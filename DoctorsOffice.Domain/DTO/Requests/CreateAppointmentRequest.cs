@@ -6,5 +6,5 @@ public class CreateAppointmentRequest
     public string Description { get; set; } = null!;
     public Guid PatientId { get; set; }
     public Guid DoctorId { get; set; }
-    public string Type { get; set; } = null!;
+    public Guid TypeId { get; set; }
 }

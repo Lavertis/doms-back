@@ -62,7 +62,7 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         if (appointmentToUpdate is null)
         {
             return result
-                .WithError(new Error {Message = $"Appointment with id {request.AppointmentId} not found"})
+                .WithError(new Error { Message = $"Appointment with id {request.AppointmentId} not found" })
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -70,22 +70,24 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         {
             case Roles.Doctor when appointmentToUpdate.DoctorId != request.UserId:
                 return result
-                    .WithError(new Error {Message = "Trying to update appointment of another doctor"})
+                    .WithError(new Error { Message = "Trying to update appointment of another doctor" })
                     .WithStatusCode(StatusCodes.Status403Forbidden);
             case Roles.Patient when appointmentToUpdate.PatientId != request.UserId:
                 return result
-                    .WithError(new Error {Message = "Trying to update appointment of another patient"})
+                    .WithError(new Error { Message = "Trying to update appointment of another patient" })
                     .WithStatusCode(StatusCodes.Status403Forbidden);
         }
 
-        if (!string.IsNullOrEmpty(request.Status) &&
+        if (request.StatusId is not null &&
             request.RoleName == Roles.Doctor &&
-            !AppointmentStatuses.AllowedTransitions[appointmentToUpdate.Status.Name].Contains(request.Status))
+            !AppointmentStatuses.AllowedTransitions[appointmentToUpdate.Status.Name].Contains(
+                (await _appointmentStatusRepository.GetByIdAsync(request.StatusId.Value))!.Name)
+           )
         {
             return result
                 .WithError(new Error
                 {
-                    Message = $"Status change from {appointmentToUpdate.Status.Name} to {request.Status} is not allowed"
+                    Message = $"Status change from {appointmentToUpdate.Status.Name} to {request.StatusId} is not allowed"
                 })
                 .WithStatusCode(StatusCodes.Status400BadRequest);
         }
@@ -96,26 +98,27 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
         appointmentToUpdate.Diagnosis = request.Diagnosis ?? appointmentToUpdate.Diagnosis;
         appointmentToUpdate.Recommendations = request.Recommendations ?? appointmentToUpdate.Recommendations;
 
-        if (request.Type is not null)
+        if (request.TypeId is not null)
         {
-            var appointmentType = await _appointmentTypeRepository.GetByNameAsync(request.Type);
+            var appointmentType = await _appointmentTypeRepository.GetByIdAsync(request.TypeId.Value);
             if (appointmentType is null)
             {
                 return result
-                    .WithError(new Error {Message = $"AppointmentType with name {request.Type} not found"})
+                    .WithError(new Error { Message = $"AppointmentType with name {request.TypeId} not found" })
                     .WithStatusCode(StatusCodes.Status404NotFound);
             }
 
-            appointmentToUpdate.Type = appointmentType;
+            appointmentToUpdate.TypeId = appointmentType.Id;
+            appointmentToUpdate.Type = null!;
         }
 
-        if (request.Status is not null)
+        if (request.StatusId is not null)
         {
-            var appointmentStatus = await _appointmentStatusRepository.GetByNameAsync(request.Status);
+            var appointmentStatus = await _appointmentStatusRepository.GetByIdAsync(request.StatusId.Value);
             if (appointmentStatus is null)
             {
                 return result
-                    .WithError(new Error {Message = $"AppointmentStatus with name {request.Status} not found"})
+                    .WithError(new Error { Message = $"AppointmentStatus with name {request.StatusId} not found" })
                     .WithStatusCode(StatusCodes.Status404NotFound);
             }
 
@@ -127,12 +130,13 @@ public class UpdateAppointmentHandler : IRequestHandler<UpdateAppointmentCommand
                     patient: appointmentToUpdate.Patient,
                     date: appointmentToUpdate.Date,
                     previousStatus: previousStatus,
-                    currentStatus: request.Status,
+                    currentStatus: appointmentStatus.Name,
                     websiteAddress: _urlSettings.FrontendDomain
                 );
             }
 
-            appointmentToUpdate.Status = appointmentStatus;
+            appointmentToUpdate.StatusId = appointmentStatus.Id;
+            appointmentToUpdate.Status = null!;
         }
 
         var appointmentEntity = await _appointmentRepository.UpdateAsync(appointmentToUpdate);

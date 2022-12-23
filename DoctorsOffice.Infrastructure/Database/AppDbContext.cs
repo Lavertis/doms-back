@@ -23,7 +23,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>
     public virtual DbSet<Prescription> Prescriptions { get; set; } = default!;
     public virtual DbSet<DrugItem> DrugItems { get; set; } = default!;
     public virtual DbSet<QuickButton> QuickButtons { get; set; } = default!;
-
+    public DbSet<Timetable> Timetables { get; set; } = default!;
     public virtual DbSet<SickLeave> SickLeaves { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder builder)

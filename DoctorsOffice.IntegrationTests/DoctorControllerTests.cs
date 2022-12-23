@@ -152,22 +152,6 @@ public class DoctorControllerTests : IntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Theory]
-    [InlineData(Roles.Patient)]
-    [InlineData(Roles.Doctor)]
-    public async Task GetAllDoctors_AuthenticatedUserIsNotAdmin_ReturnsForbidden(string roleName)
-    {
-        // arrange
-        var client = await GetHttpClientAsync();
-        await AuthenticateAsRoleAsync(client, roleName);
-
-        // act
-        var response = await client.GetAsync($"{UrlPrefix}");
-
-        // assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
     [Fact]
     public async Task GetAllDoctors_NoPaginationProvided_ReturnsAllDoctors()
     {

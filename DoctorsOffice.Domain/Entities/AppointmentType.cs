@@ -6,4 +6,5 @@ namespace DoctorsOffice.Domain.Entities;
 public class AppointmentType : BaseEntity
 {
     public string Name { get; set; } = null!;
+    public ushort DurationMinutes { get; set; }
 }

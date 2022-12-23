@@ -48,6 +48,13 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return updatedEntity;
     }
 
+    public virtual async Task<IEnumerable<TEntity>> UpdateRangeAsync(List<TEntity> entities)
+    {
+        DbContext.Set<TEntity>().UpdateRange(entities);
+        await DbContext.SaveChangesAsync();
+        return entities;
+    }
+
     public virtual async Task<bool> DeleteByIdAsync(Guid id)
     {
         var entity = await GetByIdAsync(id);
@@ -58,7 +65,13 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEnti
         return true;
     }
 
-    public async Task<bool> ExistsByIdAsync(Guid id)
+    public virtual async Task DeleteRange(IEnumerable<TEntity> entities)
+    {
+        DbContext.Set<TEntity>().RemoveRange(entities);
+        await DbContext.SaveChangesAsync();
+    }
+
+    public virtual async Task<bool> ExistsByIdAsync(Guid id)
     {
         return await DbContext.Set<TEntity>().FindAsync(id) is not null;
     }

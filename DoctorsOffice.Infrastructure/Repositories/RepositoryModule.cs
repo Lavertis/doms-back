@@ -14,6 +14,7 @@ public static class RepositoryModule
         services.AddScoped<IAppointmentStatusRepository, AppointmentStatusRepository>();
         services.AddScoped<IAppointmentTypeRepository, AppointmentTypeRepository>();
         services.AddScoped<IPrescriptionRepository, PrescriptionRepository>();
+        services.AddScoped<ITimetableRepository, TimetableRepository>();
         services.AddScoped<IDrugItemRepository, DrugItemRepository>();
         services.AddScoped<ISickLeaveRepository, SickLeaveRepository>();
         services.AddScoped<IQuickButtonRepository, QuickButtonRepository>();

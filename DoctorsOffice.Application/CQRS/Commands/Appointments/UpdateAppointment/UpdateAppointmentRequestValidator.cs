@@ -24,23 +24,23 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
 
         RuleFor(e => e.Description);
 
-        RuleFor(e => e.Type)
-            .MustAsync((type, _) => appointmentTypeRepository.ExistsByNameAsync(type!))
+        RuleFor(e => e.TypeId)
+            .MustAsync((typeId, _) => appointmentTypeRepository.ExistsByIdAsync(typeId!.Value))
             .WithMessage("Type does not exist")
-            .Unless(e => string.IsNullOrEmpty(e.Type));
+            .Unless(e => e.TypeId is null);
 
-        When(req => !string.IsNullOrEmpty(req.Status), () =>
+        When(req => req.StatusId is not null, () =>
         {
-            RuleFor(e => e.Status)
-                .MustAsync((status, _) => appointmentStatusRepository.ExistsByNameAsync(status!))
+            RuleFor(e => e.StatusId)
+                .MustAsync((statusId, _) => appointmentStatusRepository.ExistsByIdAsync(statusId!.Value))
                 .WithMessage("Status does not exist");
 
-            RuleFor(e => e.Status)
-                .Must(status => status != AppointmentStatuses.Pending)
+            RuleFor(e => e.StatusId)
+                .Must(statusId => statusId != AppointmentStatuses.Pending.Id)
                 .WithMessage("Status does not exist");
 
-            RuleFor(e => e.Status)
-                .Must(status => status == AppointmentStatuses.Cancelled)
+            RuleFor(e => e.StatusId)
+                .Must(statusId => statusId == AppointmentStatuses.Cancelled.Id)
                 .WithMessage("Only allowed status is Cancelled")
                 .When(e => userRole == Roles.Patient);
         });

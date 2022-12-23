@@ -79,7 +79,7 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("56a26dea-caf2-4a4b-a013-ed9e776d25dc"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 7, 7, 0, 0, 0, DateTimeKind.Utc),
                             Description = "0",
                             DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
@@ -91,11 +91,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("9e1cf297-b90f-436a-8cd3-8ca95276872f"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 8, 8, 0, 0, 0, DateTimeKind.Utc),
                             Description = "1000000",
                             DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            StatusId = new Guid("8445a2f4-97cd-45c9-921f-f649f85cc0be"),
                             TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
@@ -103,11 +103,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("4f319bc2-a6d9-4a52-9357-0772d0edd639"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 3, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 9, 9, 0, 0, 0, DateTimeKind.Utc),
                             Description = "2000000",
                             DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            StatusId = new Guid("1cf993e4-73f2-497f-ad38-bccb4b4d0eee"),
                             TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
@@ -115,11 +115,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("f32e24af-265d-4748-be59-769db539cb07"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 4, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 10, 10, 0, 0, 0, DateTimeKind.Utc),
                             Description = "3000000",
                             DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            StatusId = new Guid("ccbb0db5-1661-4f9b-9482-67280ebdb6b5"),
                             TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
@@ -127,11 +127,11 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("2cf674a8-9311-4515-a6bb-8d8094ade09c"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Date = new DateTime(2022, 11, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Date = new DateTime(2022, 11, 11, 11, 0, 0, 0, DateTimeKind.Utc),
                             Description = "4000000",
                             DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
                             PatientId = new Guid("4facc425-b1ef-416a-979f-56da897448c5"),
-                            StatusId = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
+                            StatusId = new Guid("5de8a7ba-fb65-464f-9583-181d20d44b1b"),
                             TypeId = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
@@ -162,35 +162,35 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("8445a2f4-97cd-45c9-921f-f649f85cc0be"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Accepted",
+                            Name = "ACCEPTED",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("ccbb0db5-1661-4f9b-9482-67280ebdb6b5"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Cancelled",
+                            Name = "CANCELLED",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("5de8a7ba-fb65-464f-9583-181d20d44b1b"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Completed",
+                            Name = "COMPLETED",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("b7a08d2e-116d-42e3-9ec5-1aa0636d116c"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Pending",
+                            Name = "PENDING",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Id = new Guid("1cf993e4-73f2-497f-ad38-bccb4b4d0eee"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Rejected",
+                            Name = "REJECTED",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
@@ -203,6 +203,9 @@ namespace DoctorsOffice.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -220,6 +223,7 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("e58cabc9-e259-42ff-a2a1-0e8d39bb900e"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DurationMinutes = 60,
                             Name = "Checkup",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
@@ -227,6 +231,7 @@ namespace DoctorsOffice.Infrastructure.Migrations
                         {
                             Id = new Guid("532ec4d6-a4ad-4ece-a0b5-9f03e1033bf5"),
                             CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DurationMinutes = 30,
                             Name = "Consultation",
                             UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
@@ -908,6 +913,81 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.ToTable("SickLeaves");
                 });
 
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Timetable", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DoctorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("Timetables");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("1b35a855-e2c1-4b52-abfb-5ff0a8835151"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            EndDateTime = new DateTime(2022, 11, 7, 10, 0, 0, 0, DateTimeKind.Utc),
+                            StartDateTime = new DateTime(2022, 11, 7, 7, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("359aa6bc-73aa-424b-a759-59f7f5da6dcf"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            EndDateTime = new DateTime(2022, 11, 8, 11, 0, 0, 0, DateTimeKind.Utc),
+                            StartDateTime = new DateTime(2022, 11, 8, 8, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("8967971c-193a-4c58-a326-9dced9182682"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            EndDateTime = new DateTime(2022, 11, 9, 12, 0, 0, 0, DateTimeKind.Utc),
+                            StartDateTime = new DateTime(2022, 11, 9, 9, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("fc2967c1-e0d8-4fa4-b7a0-f258ad53946e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            EndDateTime = new DateTime(2022, 11, 10, 13, 0, 0, 0, DateTimeKind.Utc),
+                            StartDateTime = new DateTime(2022, 11, 10, 10, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid("befcae26-e2c6-482f-b2bb-50309916b89e"),
+                            CreatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DoctorId = new Guid("c8934fff-2f5a-4198-893f-26023d8f4107"),
+                            EndDateTime = new DateTime(2022, 11, 11, 14, 0, 0, 0, DateTimeKind.Utc),
+                            StartDateTime = new DateTime(2022, 11, 11, 11, 0, 0, 0, DateTimeKind.Utc),
+                            UpdatedAt = new DateTime(2022, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Admin", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1341,6 +1421,17 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.Timetable", b =>
+                {
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Admin", b =>

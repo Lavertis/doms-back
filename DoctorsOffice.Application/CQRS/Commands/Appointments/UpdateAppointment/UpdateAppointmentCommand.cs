@@ -12,15 +12,15 @@ public class UpdateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>
     public readonly string? Diagnosis;
     public readonly string? Interview;
     public readonly string? Recommendations;
-    public readonly string? Status;
-    public readonly string? Type;
+    public readonly Guid? StatusId;
+    public readonly Guid? TypeId;
 
     public UpdateAppointmentCommand(UpdateAppointmentRequest request)
     {
         Date = request.Date;
         Description = request.Description;
-        Type = request.Type;
-        Status = request.Status;
+        TypeId = request.TypeId;
+        StatusId = request.StatusId;
         Interview = request.Interview;
         Diagnosis = request.Diagnosis;
         Recommendations = request.Recommendations;

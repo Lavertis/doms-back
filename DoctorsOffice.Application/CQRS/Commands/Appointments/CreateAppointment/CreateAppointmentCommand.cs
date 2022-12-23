@@ -11,7 +11,7 @@ public class CreateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>
     public readonly string Description;
     public readonly Guid DoctorId;
     public readonly Guid PatientId;
-    public readonly string Type;
+    public readonly Guid TypeId;
 
     public CreateAppointmentCommand(CreateAppointmentRequest request)
     {
@@ -19,10 +19,10 @@ public class CreateAppointmentCommand : IRequest<HttpResult<AppointmentResponse>
         Description = request.Description;
         PatientId = request.PatientId;
         DoctorId = request.DoctorId;
-        Type = request.Type;
+        TypeId = request.TypeId;
     }
 
     public string RoleName { get; set; } = null!;
-    public string Status { get; set; } = null!;
+    public Guid StatusId { get; set; }
     public Guid UserId { get; set; }
 }

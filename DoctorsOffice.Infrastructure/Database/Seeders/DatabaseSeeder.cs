@@ -14,5 +14,6 @@ public static class DatabaseSeeder
         AppointmentStatusSeeder.SeedAppointmentStatuses(builder);
         AppointmentSeeder.SeedAppointments(builder);
         QuickButtonSeeder.SeedQuickButtons(builder);
+        TimetableSeeder.SeedTimetables(builder);
     }
 }
