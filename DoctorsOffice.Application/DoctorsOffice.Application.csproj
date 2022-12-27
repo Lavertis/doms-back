@@ -20,8 +20,4 @@
         <ProjectReference Include="..\DoctorsOffice.SendGrid\DoctorsOffice.SendGrid.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="CQRS\Queries\Documents"/>
-    </ItemGroup>
-
 </Project>

@@ -17,10 +17,10 @@ public class AppointmentStatusController : BaseController
     }
 
     /// <summary>
-    /// Get all appointment statuses. Only for doctors and patients
+    /// Get all appointment statuses.
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = $"{Roles.Doctor}, {Roles.Patient}")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<AppointmentStatusResponse>>> GetAllAppointmentStatusesAsync()
         => CreateResponse(await Mediator.Send(new GetAllAppointmentStatusesQuery()));
 
