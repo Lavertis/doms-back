@@ -28,7 +28,7 @@ public class DeleteTimetablesHandler : IRequestHandler<DeleteTimetablesCommand, 
                 id => timetablesToDelete.FirstOrDefault(t => t.Id == id) is not null
             );
             return result
-                .WithError(new Error { Message = $"Timetable with id {missingId} not found" })
+                .WithError(new Error {Message = $"Timetable with id {missingId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 

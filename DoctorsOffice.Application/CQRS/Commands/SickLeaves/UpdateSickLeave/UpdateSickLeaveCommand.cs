@@ -7,12 +7,12 @@ namespace DoctorsOffice.Application.CQRS.Commands.SickLeaves.UpdateSickLeave;
 
 public class UpdateSickLeaveCommand : IRequest<HttpResult<SickLeaveResponse>>
 {
-    public readonly Guid? PatientId;
-    public readonly Guid? DoctorId;
     public readonly Guid? AppointmentId;
-    public readonly DateTime? DateStart;
     public readonly DateTime? DateEnd;
+    public readonly DateTime? DateStart;
     public readonly string? Diagnosis;
+    public readonly Guid? DoctorId;
+    public readonly Guid? PatientId;
     public readonly string? Purpose;
 
     public UpdateSickLeaveCommand(UpdateSickLeaveRequest request)
@@ -25,6 +25,6 @@ public class UpdateSickLeaveCommand : IRequest<HttpResult<SickLeaveResponse>>
         Diagnosis = request.Diagnosis;
         Purpose = request.Purpose;
     }
-    
+
     public Guid SickLeaveId { get; set; }
 }

@@ -1,10 +1,11 @@
 using DoctorsOffice.Application.CQRS.Commands.SickLeaves.CreateSickLeave;
 using DoctorsOffice.Application.CQRS.Commands.SickLeaves.DeleteSickLeave;
 using DoctorsOffice.Application.CQRS.Commands.SickLeaves.UpdateSickLeave;
-using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeaves;
-using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByDoctorId;
-using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByPatientId;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GenerateSickLeavePdf;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeaves;
 using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByAppointmentId;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByDoctorId;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByPatientId;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Enums;
@@ -29,9 +30,9 @@ public class SickLeaveController : BaseController
     /// </summary>
     [HttpGet]
     [Authorize(Roles = Roles.Doctor)]
-    public async Task<ActionResult<PagedResponse<SickLeaveResponse>>> GetAllAdminsAsync(
+    public async Task<ActionResult<PagedResponse<SickLeaveResponse>>> GetSickLeaves(
         [FromQuery] PaginationFilter paginationFilter)
-        => CreateResponse(await Mediator.Send(new GetAllSickLeavesQuery {PaginationFilter = paginationFilter}));
+        => CreateResponse(await Mediator.Send(new GetSickLeavesQuery {PaginationFilter = paginationFilter}));
 
     /// <summary>
     /// Returns all sick leaves for specified patient. Only for doctors.
@@ -136,5 +137,19 @@ public class SickLeaveController : BaseController
         {
             SickLeaveId = sickLeaveId,
             DoctorId = JwtSubject()
+        }));
+
+    /// <summary>
+    /// Returns sick leave as pdf file.
+    /// </summary>
+    [HttpGet("{sickLeaveId:guid}/download")]
+    [Authorize]
+    [Produces(ContentTypes.ApplicationPdf, ContentTypes.ApplicationJson)]
+    public async Task<ActionResult<MemoryStream>> GenerateSickLeavePdf(Guid sickLeaveId)
+        => CreateResponse(await Mediator.Send(new GenerateSickLeavePdfQuery
+        {
+            SickLeaveId = sickLeaveId,
+            AppUserId = JwtSubject(),
+            Role = JwtRole()
         }));
 }

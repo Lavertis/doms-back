@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.Timetables.GetTimetablesByDoctorId;
 
-public class GetTimetablesByDoctorIdHandler : IRequestHandler<GetTimetablesByDoctorIdQuery, HttpResult<IEnumerable<TimetableResponse>>>
+public class
+    GetTimetablesByDoctorIdHandler : IRequestHandler<GetTimetablesByDoctorIdQuery,
+        HttpResult<IEnumerable<TimetableResponse>>>
 {
     private readonly IMapper _mapper;
     private readonly ITimetableRepository _timetableRepository;
@@ -18,7 +20,8 @@ public class GetTimetablesByDoctorIdHandler : IRequestHandler<GetTimetablesByDoc
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<TimetableResponse>>> Handle(GetTimetablesByDoctorIdQuery request, CancellationToken cancellationToken)
+    public async Task<HttpResult<IEnumerable<TimetableResponse>>> Handle(GetTimetablesByDoctorIdQuery request,
+        CancellationToken cancellationToken)
     {
         var result = new HttpResult<IEnumerable<TimetableResponse>>();
 

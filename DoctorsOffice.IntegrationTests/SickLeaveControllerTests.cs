@@ -7,7 +7,6 @@ using DoctorsOffice.Domain.Entities.UserTypes;
 using DoctorsOffice.Domain.Enums;
 using DoctorsOffice.Domain.Wrappers;
 using FluentAssertions;
-using FluentAssertions.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
 using Xunit;
@@ -34,7 +33,7 @@ public class SickLeaveControllerTests : IntegrationTest
         {
             Address = "",
             NationalId = "",
-            AppUser = new AppUser { Id = patientId, FirstName = "", LastName = "" }
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
@@ -43,7 +42,7 @@ public class SickLeaveControllerTests : IntegrationTest
         {
             Address = "",
             NationalId = "",
-            AppUser = new AppUser { Id = otherPatientId, FirstName = "", LastName = "", }
+            AppUser = new AppUser {Id = otherPatientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -109,7 +108,7 @@ public class SickLeaveControllerTests : IntegrationTest
         var patient = new Patient
         {
             Address = "",
-            AppUser = new AppUser { Id = patientId, FirstName = "", LastName = "", }
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(patient);
 
@@ -166,7 +165,7 @@ public class SickLeaveControllerTests : IntegrationTest
         {
             Address = "",
             NationalId = "",
-            AppUser = new AppUser { Id = patientId, FirstName = "", LastName = "" }
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
@@ -215,7 +214,7 @@ public class SickLeaveControllerTests : IntegrationTest
         {
             Address = "",
             NationalId = "",
-            AppUser = new AppUser { Id = patientId, FirstName = "", LastName = "" }
+            AppUser = new AppUser {Id = patientId, FirstName = "", LastName = ""}
         };
         DbContext.Patients.Add(patient);
 
@@ -269,7 +268,7 @@ public class SickLeaveControllerTests : IntegrationTest
         {
             Address = "",
             NationalId = "",
-            AppUser = new AppUser { Id = otherPatientId, FirstName = "", LastName = "", }
+            AppUser = new AppUser {Id = otherPatientId, FirstName = "", LastName = "",}
         };
         DbContext.Patients.Add(otherPatient);
 
@@ -847,7 +846,7 @@ public class SickLeaveControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         var authenticatedDoctorId = await AuthenticateAsDoctorAsync(client);
-    
+
         var sickLeaveToUpdate = new SickLeave()
         {
             Id = Guid.NewGuid(),
@@ -862,9 +861,9 @@ public class SickLeaveControllerTests : IntegrationTest
 
         DbContext.SickLeaves.Add(sickLeaveToUpdate);
         await DbContext.SaveChangesAsync();
-    
+
         var updateSickLeaveRequest = new UpdateSickLeaveRequest();
-    
+
         if (fieldName.EndsWith("Id"))
         {
             Guid.TryParse(fieldValue, out var id);
@@ -878,23 +877,23 @@ public class SickLeaveControllerTests : IntegrationTest
                 .GetProperty(fieldName)!
                 .SetValue(updateSickLeaveRequest, fieldValue);
         }
-    
+
         var serializedContent = JsonConvert.SerializeObject(updateSickLeaveRequest);
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-    
+
         // act
         var response = await client.PatchAsync($"{UrlPrefix}/{sickLeaveToUpdate.Id}", content);
-    
+
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
-    
+
     [Fact]
     public async Task UpdateSickLeaveById_NoAuthenticatedUser_ReturnsUnauthorized()
     {
         // arrange
         var client = await GetHttpClientAsync();
-    
+
         var updateSickLeaveRequest = new UpdateSickLeaveRequest()
         {
             PatientId = DbContext.Patients.First().Id,
@@ -904,17 +903,17 @@ public class SickLeaveControllerTests : IntegrationTest
             Diagnosis = "Diagnosis2",
             Purpose = "Purpose3"
         };
-    
+
         var serializedContent = JsonConvert.SerializeObject(updateSickLeaveRequest);
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-    
+
         // act
         var response = await client.PatchAsync($"{UrlPrefix}/{Guid.NewGuid()}", content);
-    
+
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
-    
+
     [Theory]
     [InlineData(Roles.Admin)]
     [InlineData(Roles.Patient)]
@@ -923,7 +922,7 @@ public class SickLeaveControllerTests : IntegrationTest
         // arrange
         var client = await GetHttpClientAsync();
         await AuthenticateAsRoleAsync(client, roleName);
-    
+
         var updateSickLeaveRequest = new UpdateSickLeaveRequest()
         {
             PatientId = DbContext.Patients.First().Id,
@@ -933,13 +932,13 @@ public class SickLeaveControllerTests : IntegrationTest
             Diagnosis = "Diagnosis2",
             Purpose = "Purpose3"
         };
-    
+
         var serializedContent = JsonConvert.SerializeObject(updateSickLeaveRequest);
         var content = new StringContent(serializedContent, Encoding.UTF8, "application/json");
-    
+
         // act
         var response = await client.PatchAsync($"{UrlPrefix}/{Guid.NewGuid()}", content);
-    
+
         // assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }

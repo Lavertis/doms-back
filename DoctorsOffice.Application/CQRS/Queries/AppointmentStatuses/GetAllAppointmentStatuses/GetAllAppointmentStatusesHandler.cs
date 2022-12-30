@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.AppointmentStatuses.GetAllAppointmentStatuses;
 
-public class GetAllAppointmentStatusesHandler : IRequestHandler<GetAllAppointmentStatusesQuery, HttpResult<IEnumerable<AppointmentStatusResponse>>>
+public class GetAllAppointmentStatusesHandler : IRequestHandler<GetAllAppointmentStatusesQuery,
+    HttpResult<IEnumerable<AppointmentStatusResponse>>>
 {
     private readonly IAppointmentStatusRepository _appointmentStatusRepository;
     private readonly IMapper _mapper;
@@ -18,7 +19,8 @@ public class GetAllAppointmentStatusesHandler : IRequestHandler<GetAllAppointmen
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<AppointmentStatusResponse>>> Handle(GetAllAppointmentStatusesQuery request, CancellationToken cancellationToken)
+    public async Task<HttpResult<IEnumerable<AppointmentStatusResponse>>> Handle(GetAllAppointmentStatusesQuery request,
+        CancellationToken cancellationToken)
     {
         var appointmentStatusResponses = await _appointmentStatusRepository
             .GetAll()

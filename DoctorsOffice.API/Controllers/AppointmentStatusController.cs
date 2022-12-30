@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DoctorsOffice.API.Controllers;
 
 [ApiController]
-[Route("api/appointmentStatuses")]
+[Route("api/appointment-statuses")]
 public class AppointmentStatusController : BaseController
 {
     public AppointmentStatusController(IMediator mediator) : base(mediator)

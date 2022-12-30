@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace DoctorsOffice.Application.CQRS.Queries.AppointmentTypes.GetAppointmentTypeById;
 
-public class GetAppointmentTypeByIdHandler : IRequestHandler<GetAppointmentTypeByIdQuery, HttpResult<AppointmentTypeResponse>>
+public class
+    GetAppointmentTypeByIdHandler : IRequestHandler<GetAppointmentTypeByIdQuery, HttpResult<AppointmentTypeResponse>>
 {
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
     private readonly IMapper _mapper;
@@ -18,7 +19,8 @@ public class GetAppointmentTypeByIdHandler : IRequestHandler<GetAppointmentTypeB
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<AppointmentTypeResponse>> Handle(GetAppointmentTypeByIdQuery request, CancellationToken cancellationToken)
+    public async Task<HttpResult<AppointmentTypeResponse>> Handle(GetAppointmentTypeByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var result = new HttpResult<AppointmentTypeResponse>();
 

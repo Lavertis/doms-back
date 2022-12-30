@@ -31,13 +31,13 @@ public class AdminHandlerTests : UnitTest
             new()
             {
                 Id = adminId,
-                AppUser = new AppUser { Id = adminId }
+                AppUser = new AppUser {Id = adminId}
             }
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeAdminRepository.GetAll())
             .Returns(adminsQueryable);
 
-        var expectedResponse = new AdminResponse { Id = adminId };
+        var expectedResponse = new AdminResponse {Id = adminId};
 
         var query = new GetAdminByIdQuery(adminId);
         var handler = new GetAdminByIdHandler(_fakeAdminRepository, Mapper);
@@ -73,9 +73,9 @@ public class AdminHandlerTests : UnitTest
         // arrange
         var adminsQueryable = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         }.AsQueryable().BuildMock();
 
         A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
@@ -88,7 +88,7 @@ public class AdminHandlerTests : UnitTest
 
         // assert
         foreach (var admin in adminsQueryable)
-            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
     }
 
     [Fact]
@@ -114,9 +114,9 @@ public class AdminHandlerTests : UnitTest
         // arrange
         var adminsQueryable = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
 
@@ -128,7 +128,7 @@ public class AdminHandlerTests : UnitTest
 
         // assert
         foreach (var admin in adminsQueryable)
-            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse { Id = admin.Id });
+            result.Value!.Records.Should().ContainEquivalentOf(new AdminResponse {Id = admin.Id});
     }
 
     [Fact]
@@ -137,12 +137,12 @@ public class AdminHandlerTests : UnitTest
         // arrange
         var adminsQueryable = new List<Admin>
         {
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } },
-            new() { AppUser = new AppUser { Id = Guid.NewGuid() } }
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}},
+            new() {AppUser = new AppUser {Id = Guid.NewGuid()}}
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeAdminRepository.GetAll()).Returns(adminsQueryable);
 
@@ -156,7 +156,7 @@ public class AdminHandlerTests : UnitTest
 
         var query = new GetAllAdminsQuery
         {
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
         var handler = new GetAllAdminsHandler(_fakeAdminRepository, Mapper);
 

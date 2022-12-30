@@ -1,0 +1,72 @@
+@model DoctorsOffice.DocumentGenerator.DocumentTemplates.SickLeave.SickLeaveTemplateData
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sick Leave - @Model.CreatedAt.ToShortDateString() @Model.CreatedAt.ToShortTimeString()</title>
+    <!-- CSS only -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi"
+        crossorigin="anonymous">
+    <!-- JavaScript Bundle with Popper -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+    <style>
+        html {
+          font-size: 62.5%;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-2">
+    <h1 class="mb-5 text-center">Sick Leave</h1>
+    <div class="d-flex justify-content-around text-center">
+        <span>
+            <strong>Issue date</strong><br/>
+            @Model.CreatedAt.ToShortDateString() @Model.CreatedAt.ToShortTimeString()
+        </span>
+        <span>
+            <strong>Duration</strong><br/>
+            @Model.StartDate.ToShortDateString() - @Model.EndDate.ToShortDateString()
+        </span>
+    </div>
+    <hr/>
+    <table class="col-5 ms-3">
+        <tbody>
+        <tr>
+            <td>
+                <strong>Doctor</strong>
+            </td>
+            <td>@Model.DoctorFullName</td>
+        </tr>
+        <tr>
+            <td class="align-top">
+                <strong>Patient</strong>
+            </td>
+            <td>
+                <p class="mb-0">@Model.PatientFullName</p>
+                <p class="mb-0">@Model.PatientNationalId</p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <hr/>
+    <div class="mx-3">
+        <h6>
+            <strong>Diagnosis</strong>
+        </h6>
+        <p>@Model.Diagnosis</p>
+    </div>
+    <hr/>
+    <div class="mx-3">
+        <h6>
+            <strong>Purpose</strong>
+        </h6>
+        <p>@Model.Purpose</p>
+    </div>
+</div>
+</body>
+</html>

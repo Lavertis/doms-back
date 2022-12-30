@@ -1000,10 +1000,11 @@ public class AppointmentHandlerTests : UnitTest
         var appointment = GetAppointments(1)[0];
         var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
         var newAppointmentType = new AppointmentType {Id = Guid.NewGuid(), Name = "new type"};
-        var newAppointmentStatus = new AppointmentStatus {Id = Guid.NewGuid(), Name = "new status"};
+        var newAppointmentStatus = new AppointmentStatus
+            {Id = AppointmentStatuses.Accepted.Id, Name = AppointmentStatuses.Accepted.Name};
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
-        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(newAppointmentStatus);
         A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
 
@@ -1091,7 +1092,8 @@ public class AppointmentHandlerTests : UnitTest
         var appointment = GetAppointments(1)[0];
         var appointmentsQueryable = new List<Appointment> {appointment}.AsQueryable().BuildMock();
         var newAppointmentType = new AppointmentType {Id = Guid.NewGuid(), Name = "new type"};
-        var newAppointmentStatus = new AppointmentStatus {Id = Guid.NewGuid(), Name = "new status"};
+        var newAppointmentStatus = new AppointmentStatus
+            {Id = AppointmentStatuses.Accepted.Id, Name = AppointmentStatuses.Accepted.Name};
 
         var request = new UpdateAppointmentRequest();
         if (fieldName == "Date")
@@ -1116,7 +1118,7 @@ public class AppointmentHandlerTests : UnitTest
         };
 
         A.CallTo(() => _fakeAppointmentRepository.GetAll()).Returns(appointmentsQueryable);
-        A.CallTo(() => _fakeAppointmentStatusRepository.GetByNameAsync(A<string>.Ignored))
+        A.CallTo(() => _fakeAppointmentStatusRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(newAppointmentStatus);
         A.CallTo(() => _fakeAppointmentTypeRepository.GetByNameAsync(A<string>.Ignored)).Returns(newAppointmentType);
 
@@ -1249,8 +1251,8 @@ public class AppointmentHandlerTests : UnitTest
             Address = "",
             AppUser = new AppUser {Email = "", PhoneNumber = "", FirstName = "", LastName = "",}
         };
-        var status = new AppointmentStatus {Id = appointmentStatusId, Name = "Pending"};
-        var type = new AppointmentType {Id = appointmentTypeId, Name = "Consultation"};
+        var status = new AppointmentStatus {Id = appointmentStatusId, Name = AppointmentStatuses.Pending.Name};
+        var type = new AppointmentType {Id = appointmentTypeId, Name = AppointmentTypes.Consultation};
 
         var appointments = new List<Appointment>();
         for (var i = 0; i < count; i++)

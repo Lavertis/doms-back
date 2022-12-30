@@ -31,7 +31,7 @@ public class GetAppointmentsByUserHandler
             Roles.Doctor => GetDoctorAppointmentsPagedResult(request.UserId, request.PaginationFilter),
             Roles.Patient => GetPatientAppointmentsPagedResult(request.UserId, request.PaginationFilter),
             _ => new HttpResult<PagedResponse<AppointmentResponse>>()
-                .WithError(new Error { Message = "Invalid role" })
+                .WithError(new Error {Message = "Invalid role"})
                 .WithStatusCode(StatusCodes.Status400BadRequest)
         };
         return Task.FromResult(result);

@@ -1,4 +1,5 @@
 using DoctorsOffice.DocumentGenerator.DocumentTemplates.Prescription;
+using DoctorsOffice.DocumentGenerator.DocumentTemplates.SickLeave;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
 using Razor.Templating.Core;
@@ -12,6 +13,14 @@ public class DocumentGenerator : IDocumentGenerator
         const string templatePath = "DocumentTemplates/Prescription/Prescription.cshtml";
         var prescriptionHtmlString = await RazorTemplateEngine.RenderAsync(templatePath, data);
         var pdfStream = await ConvertHtmlToPdfAsync(prescriptionHtmlString);
+        return pdfStream;
+    }
+
+    public async Task<MemoryStream> GenerateSickLeaveAsPdf(SickLeaveTemplateData data)
+    {
+        const string templatePath = "DocumentTemplates/SickLeave/SickLeave.cshtml";
+        var sickLeaveHtmlString = await RazorTemplateEngine.RenderAsync(templatePath, data);
+        var pdfStream = await ConvertHtmlToPdfAsync(sickLeaveHtmlString);
         return pdfStream;
     }
 

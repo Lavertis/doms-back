@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsOffice.Application.CQRS.Queries.AppointmentTypes.GetAllAppointmentTypes;
 
-public class GetAllAppointmentTypesHandler : IRequestHandler<GetAllAppointmentTypesQuery, HttpResult<IEnumerable<AppointmentTypeResponse>>>
+public class GetAllAppointmentTypesHandler : IRequestHandler<GetAllAppointmentTypesQuery,
+    HttpResult<IEnumerable<AppointmentTypeResponse>>>
 {
     private readonly IAppointmentTypeRepository _appointmentTypeRepository;
     private readonly IMapper _mapper;
@@ -18,7 +19,8 @@ public class GetAllAppointmentTypesHandler : IRequestHandler<GetAllAppointmentTy
         _mapper = mapper;
     }
 
-    public async Task<HttpResult<IEnumerable<AppointmentTypeResponse>>> Handle(GetAllAppointmentTypesQuery request, CancellationToken cancellationToken)
+    public async Task<HttpResult<IEnumerable<AppointmentTypeResponse>>> Handle(GetAllAppointmentTypesQuery request,
+        CancellationToken cancellationToken)
     {
         var appointmentTypeResponses = await _appointmentTypeRepository
             .GetAll()

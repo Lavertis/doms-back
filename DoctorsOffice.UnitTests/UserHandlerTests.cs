@@ -114,7 +114,7 @@ public class UserHandlerTests : UnitTest
 
         var query = new GetAllUsersQuery
         {
-            PaginationFilter = new PaginationFilter { PageNumber = pageNumber, PageSize = pageSize }
+            PaginationFilter = new PaginationFilter {PageNumber = pageNumber, PageSize = pageSize}
         };
         var handler = new GetAllUsersHandler(_fakeAppUserManager, Mapper);
 

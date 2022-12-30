@@ -1627,22 +1627,29 @@ public class AppointmentControllerTests : IntegrationTest
     }
 
     [Theory]
-    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
-    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
-    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
-    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
-    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
-    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
-    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
-    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
-    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
-    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
-    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
-    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "5de8a7ba-fb65-464f-9583-181d20d44b1b")]
-    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")]
-    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "8445a2f4-97cd-45c9-921f-f649f85cc0be")]
-    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")]
-    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")]
+    [InlineData("b7a08d2e-116d-42e3-9ec5-1aa0636d116c", "5de8a7ba-fb65-464f-9583-181d20d44b1b")] // pending -> completed
+    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")] // accepted -> pending
+    [InlineData("8445a2f4-97cd-45c9-921f-f649f85cc0be", "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")] // accepted -> rejected
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")] // rejected -> pending
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee", "8445a2f4-97cd-45c9-921f-f649f85cc0be")] // rejected -> accepted
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee",
+        "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")] // rejected -> cancelled
+    [InlineData("1cf993e4-73f2-497f-ad38-bccb4b4d0eee",
+        "5de8a7ba-fb65-464f-9583-181d20d44b1b")] // rejected -> completed
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")] // cancelled -> pending
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5",
+        "8445a2f4-97cd-45c9-921f-f649f85cc0be")] // cancelled -> accepted
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5",
+        "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")] // cancelled -> rejected
+    [InlineData("ccbb0db5-1661-4f9b-9482-67280ebdb6b5",
+        "5de8a7ba-fb65-464f-9583-181d20d44b1b")] // cancelled -> completed
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b", "b7a08d2e-116d-42e3-9ec5-1aa0636d116c")] // completed -> pending
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b",
+        "8445a2f4-97cd-45c9-921f-f649f85cc0be")] // completed -> accepted
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b",
+        "1cf993e4-73f2-497f-ad38-bccb4b4d0eee")] // completed -> rejected
+    [InlineData("5de8a7ba-fb65-464f-9583-181d20d44b1b",
+        "ccbb0db5-1661-4f9b-9482-67280ebdb6b5")] // completed -> cancelled
     public async Task UpdateAppointmentById_AuthenticatedUserIsDoctorAndStatusTransitionIsInvalid_ReturnsBadRequest(
         string initialStatusId, string newStatusId)
     {

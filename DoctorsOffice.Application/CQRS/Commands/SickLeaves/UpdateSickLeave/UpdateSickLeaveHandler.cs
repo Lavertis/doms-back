@@ -10,8 +10,8 @@ namespace DoctorsOffice.Application.CQRS.Commands.SickLeaves.UpdateSickLeave;
 
 public class UpdateSickLeaveHandler : IRequestHandler<UpdateSickLeaveCommand, HttpResult<SickLeaveResponse>>
 {
-    private readonly ISickLeaveRepository _sickLeaveRepository;
     private readonly IMapper _mapper;
+    private readonly ISickLeaveRepository _sickLeaveRepository;
 
     public UpdateSickLeaveHandler(
         ISickLeaveRepository sickLeaveRepository,
@@ -20,8 +20,9 @@ public class UpdateSickLeaveHandler : IRequestHandler<UpdateSickLeaveCommand, Ht
         _sickLeaveRepository = sickLeaveRepository;
         _mapper = mapper;
     }
-    
-    public async Task<HttpResult<SickLeaveResponse>> Handle(UpdateSickLeaveCommand request, CancellationToken cancellationToken)
+
+    public async Task<HttpResult<SickLeaveResponse>> Handle(UpdateSickLeaveCommand request,
+        CancellationToken cancellationToken)
     {
         var result = new HttpResult<SickLeaveResponse>();
 
@@ -41,11 +42,11 @@ public class UpdateSickLeaveHandler : IRequestHandler<UpdateSickLeaveCommand, Ht
                 .WithError(new Error {Message = $"Date start must before {sickLeaveToUpdate.DateEnd}"})
                 .WithStatusCode(StatusCodes.Status400BadRequest);
         }
-        
+
         if (request.DateEnd <= sickLeaveToUpdate.DateStart)
         {
             return result
-                .WithError(new Error { Message = $"Date end must after {sickLeaveToUpdate.DateStart}" })
+                .WithError(new Error {Message = $"Date end must after {sickLeaveToUpdate.DateStart}"})
                 .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 

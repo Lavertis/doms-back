@@ -1,7 +1,7 @@
 using DoctorsOffice.Application.CQRS.Commands.SickLeaves.CreateSickLeave;
 using DoctorsOffice.Application.CQRS.Commands.SickLeaves.UpdateSickLeave;
-using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByDoctorId;
-using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByPatientId;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByDoctorId;
+using DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByPatientId;
 using DoctorsOffice.Domain.DTO.Requests;
 using DoctorsOffice.Domain.DTO.Responses;
 using DoctorsOffice.Domain.Entities;
@@ -19,9 +19,9 @@ namespace DoctorsOffice.UnitTests;
 
 public class SickLeaveHandlerTests : UnitTest
 {
-    private readonly ISickLeaveRepository _fakeSickLeaveRepository;
-    private readonly IPatientRepository _fakePatientRepository;
     private readonly IDoctorRepository _fakeDoctorRepository;
+    private readonly IPatientRepository _fakePatientRepository;
+    private readonly ISickLeaveRepository _fakeSickLeaveRepository;
 
     public SickLeaveHandlerTests()
     {
@@ -37,7 +37,7 @@ public class SickLeaveHandlerTests : UnitTest
         var dummySickLeaveQueryable = A.CollectionOfDummy<SickLeave>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(dummySickLeaveQueryable);
 
-        var query = new GetSickLeavesByPatientIdQuery() { PatientId = Guid.NewGuid() };
+        var query = new GetSickLeavesByPatientIdQuery() {PatientId = Guid.NewGuid()};
         var handler = new GetSickLeavesByPatientIdHandler(_fakeSickLeaveRepository, Mapper);
 
         // act
@@ -54,9 +54,9 @@ public class SickLeaveHandlerTests : UnitTest
         var patientId = Guid.NewGuid();
         var sickLeavesQueryable = new List<SickLeave>
         {
-            new() { PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
-            new() { PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
-            new() { PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
+            new() {PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
+            new() {PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
+            new() {PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(sickLeavesQueryable);
 
@@ -64,7 +64,7 @@ public class SickLeaveHandlerTests : UnitTest
             .Select(s => Mapper.Map<SickLeaveResponse>(s))
             .ToListAsync();
 
-        var query = new GetSickLeavesByPatientIdQuery() { PatientId = patientId };
+        var query = new GetSickLeavesByPatientIdQuery() {PatientId = patientId};
         var handler = new GetSickLeavesByPatientIdHandler(_fakeSickLeaveRepository, Mapper);
 
         // act
@@ -83,7 +83,7 @@ public class SickLeaveHandlerTests : UnitTest
         for (var i = 0; i < 20; i++)
         {
             sickLeaves.Add(new SickLeave
-                { PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) });
+                {PatientId = patientId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)});
         }
 
         var sickLeavesQueryable = sickLeaves.AsQueryable().BuildMock();
@@ -101,7 +101,7 @@ public class SickLeaveHandlerTests : UnitTest
         var query = new GetSickLeavesByPatientIdQuery
         {
             PatientId = patientId,
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
         var handler = new GetSickLeavesByPatientIdHandler(_fakeSickLeaveRepository, Mapper);
 
@@ -119,13 +119,13 @@ public class SickLeaveHandlerTests : UnitTest
         var doctorId = Guid.NewGuid();
         var sickLeavesQueryable = new List<SickLeave>
         {
-            new() { DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
-            new() { DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
-            new() { DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) },
+            new() {DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
+            new() {DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
+            new() {DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)},
         }.AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(sickLeavesQueryable);
 
-        var query = new GetSickLeavesByDoctorIdQuery() { DoctorId = doctorId };
+        var query = new GetSickLeavesByDoctorIdQuery() {DoctorId = doctorId};
         var handler = new GetSickLeavesByDoctorIdHandler(_fakeSickLeaveRepository, Mapper);
 
         // act
@@ -143,7 +143,7 @@ public class SickLeaveHandlerTests : UnitTest
         var dummySickLeaveQueryable = A.CollectionOfDummy<SickLeave>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(dummySickLeaveQueryable);
 
-        var query = new GetSickLeavesByDoctorIdQuery() { DoctorId = doctorId };
+        var query = new GetSickLeavesByDoctorIdQuery() {DoctorId = doctorId};
         var handler = new GetSickLeavesByDoctorIdHandler(_fakeSickLeaveRepository, Mapper);
 
         // act
@@ -162,7 +162,7 @@ public class SickLeaveHandlerTests : UnitTest
         for (var i = 0; i < 20; i++)
         {
             sickLeaves.Add(new SickLeave
-                { DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) });
+                {DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)});
         }
 
         var sickLeavesQueryable = sickLeaves.AsQueryable().BuildMock();
@@ -173,7 +173,7 @@ public class SickLeaveHandlerTests : UnitTest
             .Select(s => Mapper.Map<SickLeaveResponse>(s))
             .ToListAsync();
 
-        var query = new GetSickLeavesByDoctorIdQuery() { DoctorId = doctorId };
+        var query = new GetSickLeavesByDoctorIdQuery() {DoctorId = doctorId};
         var handler = new GetSickLeavesByDoctorIdHandler(_fakeSickLeaveRepository, Mapper);
 
         // act
@@ -192,7 +192,7 @@ public class SickLeaveHandlerTests : UnitTest
         for (var i = 0; i < 20; i++)
         {
             sickLeaves.Add(new SickLeave
-                { DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2) });
+                {DoctorId = doctorId, DateStart = DateTime.UtcNow, DateEnd = DateTime.UtcNow.AddDays(2)});
         }
 
         var sickLeavesQueryable = sickLeaves.AsQueryable().BuildMock();
@@ -210,7 +210,7 @@ public class SickLeaveHandlerTests : UnitTest
         var query = new GetSickLeavesByDoctorIdQuery
         {
             DoctorId = doctorId,
-            PaginationFilter = new PaginationFilter { PageSize = pageSize, PageNumber = pageNumber }
+            PaginationFilter = new PaginationFilter {PageSize = pageSize, PageNumber = pageNumber}
         };
         var handler = new GetSickLeavesByDoctorIdHandler(_fakeSickLeaveRepository, Mapper);
 
@@ -225,8 +225,8 @@ public class SickLeaveHandlerTests : UnitTest
     public async Task CreateSickLeaveHandler_ValidRequest_CreatesSickLeave()
     {
         // arrange
-        var doctor = new Doctor { Id = Guid.NewGuid() };
-        var patient = new Patient { Id = Guid.NewGuid() };
+        var doctor = new Doctor {Id = Guid.NewGuid()};
+        var patient = new Patient {Id = Guid.NewGuid()};
         var expectedSickLeave = new SickLeave
         {
             PatientId = patient.Id,
@@ -285,7 +285,7 @@ public class SickLeaveHandlerTests : UnitTest
             Diagnosis = "Diagnosis",
             Purpose = "Purpose"
         };
-    
+
         var expectedSickLeave = new SickLeave
         {
             Id = sickLeaveId,
@@ -297,14 +297,14 @@ public class SickLeaveHandlerTests : UnitTest
             Diagnosis = "Diagnosis2",
             Purpose = "Purpose2"
         };
-    
+
         A.CallTo(() => _fakeSickLeaveRepository.GetByIdAsync(A<Guid>.Ignored))
             .Returns(oldSickLeave);
-        var sickLeavesQueryable = new List<SickLeave> { oldSickLeave }.AsQueryable().BuildMock();
+        var sickLeavesQueryable = new List<SickLeave> {oldSickLeave}.AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(sickLeavesQueryable);
         A.CallTo(() => _fakeSickLeaveRepository.UpdateAsync(A<SickLeave>.Ignored))
             .Returns(expectedSickLeave);
-    
+
         var request = new UpdateSickLeaveRequest
         {
             PatientId = expectedSickLeave.PatientId,
@@ -314,46 +314,44 @@ public class SickLeaveHandlerTests : UnitTest
             DateEnd = expectedSickLeave.DateEnd,
             Diagnosis = expectedSickLeave.Diagnosis,
             Purpose = expectedSickLeave.Purpose
-            
         };
         var command = new UpdateSickLeaveCommand(request)
         {
             SickLeaveId = sickLeaveId,
         };
         var handler = new UpdateSickLeaveHandler(_fakeSickLeaveRepository, Mapper);
-    
+
         // act
         var result = await handler.Handle(command, default);
-    
+
         // assert
         A.CallTo(() => _fakeSickLeaveRepository.UpdateAsync(A<SickLeave>.Ignored))
             .MustHaveHappenedOnceExactly();
         result.Value.Should().BeEquivalentTo(Mapper.Map<SickLeaveResponse>(expectedSickLeave));
     }
-    
+
     [Fact]
     public async Task UpdateSickLeaveHandler_SickLeaveWithSpecifiedIdDoesntExist_ReturnsNotFound404StatusCode()
     {
         // arrange
         var sickLeaveQueryable = A.CollectionOfDummy<SickLeave>(0).AsQueryable().BuildMock();
         A.CallTo(() => _fakeSickLeaveRepository.GetAll()).Returns(sickLeaveQueryable);
-    
+
         var request = new UpdateSickLeaveRequest
         {
             PatientId = new Guid(),
             DoctorId = new Guid(),
             AppointmentId = new Guid(),
-
         };
         var command = new UpdateSickLeaveCommand(request)
         {
             SickLeaveId = Guid.NewGuid()
         };
         var handler = new UpdateSickLeaveHandler(_fakeSickLeaveRepository, Mapper);
-    
+
         // act
         var result = await handler.Handle(command, default);
-    
+
         // assert
         result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
     }

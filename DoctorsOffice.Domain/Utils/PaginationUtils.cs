@@ -27,11 +27,11 @@ public static class PaginationUtils
         {
             case null:
                 return result
-                    .WithError(new Error { Message = "No page number provided" })
+                    .WithError(new Error {Message = "No page number provided"})
                     .WithStatusCode(StatusCodes.Status400BadRequest);
             case < 1:
                 return result
-                    .WithError(new Error { Message = "Invalid page number" })
+                    .WithError(new Error {Message = "Invalid page number"})
                     .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 
@@ -39,17 +39,17 @@ public static class PaginationUtils
         {
             case null:
                 return result
-                    .WithError(new Error { Message = "No page size provided" })
+                    .WithError(new Error {Message = "No page size provided"})
                     .WithStatusCode(StatusCodes.Status400BadRequest);
             case < 1:
                 return result
-                    .WithError(new Error { Message = "Invalid page size" })
+                    .WithError(new Error {Message = "Invalid page size"})
                     .WithStatusCode(StatusCodes.Status400BadRequest);
         }
 
-        if (paginationFilter.PageNumber > (int)Math.Ceiling((double)totalRecords / paginationFilter.PageSize.Value))
+        if (paginationFilter.PageNumber > (int) Math.Ceiling((double) totalRecords / paginationFilter.PageSize.Value))
             return result
-                .WithError(new Error { Message = "Range not satisfiable" })
+                .WithError(new Error {Message = "Range not satisfiable"})
                 .WithStatusCode(StatusCodes.Status416RangeNotSatisfiable);
 
         var pageNumber = paginationFilter.PageNumber.Value;

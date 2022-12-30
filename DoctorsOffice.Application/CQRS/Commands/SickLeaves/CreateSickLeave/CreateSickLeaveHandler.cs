@@ -10,10 +10,10 @@ namespace DoctorsOffice.Application.CQRS.Commands.SickLeaves.CreateSickLeave;
 
 public class CreateSickLeaveHandler : IRequestHandler<CreateSickLeaveCommand, HttpResult<SickLeaveResponse>>
 {
-    private readonly ISickLeaveRepository _sickLeaveRepository;
     private readonly IDoctorRepository _doctorRepository;
-    private readonly IPatientRepository _patientRepository;
     private readonly IMapper _mapper;
+    private readonly IPatientRepository _patientRepository;
+    private readonly ISickLeaveRepository _sickLeaveRepository;
 
     public CreateSickLeaveHandler(
         ISickLeaveRepository sickLeaveRepository,
@@ -26,16 +26,17 @@ public class CreateSickLeaveHandler : IRequestHandler<CreateSickLeaveCommand, Ht
         _patientRepository = patientRepository;
         _mapper = mapper;
     }
-    
-    public async Task<HttpResult<SickLeaveResponse>> Handle(CreateSickLeaveCommand request, CancellationToken cancellationToken)
+
+    public async Task<HttpResult<SickLeaveResponse>> Handle(CreateSickLeaveCommand request,
+        CancellationToken cancellationToken)
     {
         var result = new HttpResult<SickLeaveResponse>();
-        
+
         var patient = await _patientRepository.GetByIdAsync(request.PatientId);
         if (patient is null)
         {
             return result
-                .WithError(new Error { Message = $"Patient with id {request.PatientId} not found" })
+                .WithError(new Error {Message = $"Patient with id {request.PatientId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -43,7 +44,7 @@ public class CreateSickLeaveHandler : IRequestHandler<CreateSickLeaveCommand, Ht
         if (doctor is null)
         {
             return result
-                .WithError(new Error { Message = $"Doctor with id {request.DoctorId} not found" })
+                .WithError(new Error {Message = $"Doctor with id {request.DoctorId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 

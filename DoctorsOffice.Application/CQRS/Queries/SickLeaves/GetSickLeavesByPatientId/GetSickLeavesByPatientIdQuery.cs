@@ -4,7 +4,7 @@ using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 
-namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByPatientId;
+namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByPatientId;
 
 public class GetSickLeavesByPatientIdQuery : IRequest<HttpResult<PagedResponse<SickLeaveResponse>>>
 {

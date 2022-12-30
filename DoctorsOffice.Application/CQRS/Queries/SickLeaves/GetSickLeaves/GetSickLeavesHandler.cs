@@ -5,27 +5,27 @@ using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 
-namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeaves;
+namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeaves;
 
-public class GetAllSickLeavesHandler : IRequestHandler<GetAllSickLeavesQuery, HttpResult<PagedResponse<SickLeaveResponse>>>
+public class GetSickLeavesHandler : IRequestHandler<GetSickLeavesQuery, HttpResult<PagedResponse<SickLeaveResponse>>>
 {
-    private readonly ISickLeaveRepository _sickLeaveRepository;
     private readonly IMapper _mapper;
+    private readonly ISickLeaveRepository _sickLeaveRepository;
 
-    public GetAllSickLeavesHandler(ISickLeaveRepository sickLeaveRepository, IMapper mapper)
+    public GetSickLeavesHandler(ISickLeaveRepository sickLeaveRepository, IMapper mapper)
     {
         _sickLeaveRepository = sickLeaveRepository;
         _mapper = mapper;
     }
 
     public Task<HttpResult<PagedResponse<SickLeaveResponse>>> Handle(
-        GetAllSickLeavesQuery request, CancellationToken cancellationToken)
+        GetSickLeavesQuery request, CancellationToken cancellationToken)
     {
-        var sickLeavesResponsesQuerable = _sickLeaveRepository.GetAll()
+        var sickLeavesResponsesQueryable = _sickLeaveRepository.GetAll()
             .Select(s => _mapper.Map<SickLeaveResponse>(s));
 
         return Task.FromResult(PaginationUtils.CreatePagedHttpResult(
-            sickLeavesResponsesQuerable,
+            sickLeavesResponsesQueryable,
             request.PaginationFilter
         ));
     }

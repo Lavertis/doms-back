@@ -6,12 +6,13 @@ using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 
-namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeavesByDoctorId;
+namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeavesByDoctorId;
 
-public class GetSickLeavesByDoctorIdHandler : IRequestHandler<GetSickLeavesByDoctorIdQuery, HttpResult<PagedResponse<SickLeaveResponse>>>
+public class GetSickLeavesByDoctorIdHandler : IRequestHandler<GetSickLeavesByDoctorIdQuery,
+    HttpResult<PagedResponse<SickLeaveResponse>>>
 {
-    private readonly ISickLeaveRepository _sickLeaveRepository;
     private readonly IMapper _mapper;
+    private readonly ISickLeaveRepository _sickLeaveRepository;
 
     public GetSickLeavesByDoctorIdHandler(ISickLeaveRepository sickLeaveRepository, IMapper mapper)
     {
@@ -19,15 +20,16 @@ public class GetSickLeavesByDoctorIdHandler : IRequestHandler<GetSickLeavesByDoc
         _mapper = mapper;
     }
 
-    public Task<HttpResult<PagedResponse<SickLeaveResponse>>> Handle(GetSickLeavesByDoctorIdQuery request, CancellationToken cancellationToken)
+    public Task<HttpResult<PagedResponse<SickLeaveResponse>>> Handle(GetSickLeavesByDoctorIdQuery request,
+        CancellationToken cancellationToken)
     {
-         var sickLeaves = _sickLeaveRepository.GetAll()
+        var sickLeaves = _sickLeaveRepository.GetAll()
             .Where(s => s.DoctorId == request.DoctorId)
             .OrderBy(s => s.DateStart);
 
         var sickLeavesResponsesQueryable = sickLeaves
             .Select(s => _mapper.Map<SickLeaveResponse>(s));
-        
+
         return Task.FromResult(
             PaginationUtils.CreatePagedHttpResult(sickLeavesResponsesQueryable, request.PaginationFilter)
         );

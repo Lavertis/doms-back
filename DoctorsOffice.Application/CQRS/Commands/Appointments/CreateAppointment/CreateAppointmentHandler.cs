@@ -44,11 +44,11 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         {
             case Roles.Doctor when request.DoctorId != request.UserId:
                 return result
-                    .WithError(new Error { Message = "Cannot create appointment for another doctor" })
+                    .WithError(new Error {Message = "Cannot create appointment for another doctor"})
                     .WithStatusCode(StatusCodes.Status403Forbidden);
             case Roles.Patient when request.PatientId != request.UserId:
                 return result
-                    .WithError(new Error { Message = "Cannot create appointment request for another patient" })
+                    .WithError(new Error {Message = "Cannot create appointment request for another patient"})
                     .WithStatusCode(StatusCodes.Status403Forbidden);
         }
 
@@ -56,7 +56,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         if (patient is null)
         {
             return result
-                .WithError(new Error { Message = $"Patient with id {request.PatientId} not found" })
+                .WithError(new Error {Message = $"Patient with id {request.PatientId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -64,7 +64,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         if (doctor is null)
         {
             return result
-                .WithError(new Error { Message = $"Doctor with id {request.DoctorId} not found" })
+                .WithError(new Error {Message = $"Doctor with id {request.DoctorId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -72,7 +72,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         if (appointmentStatus is null)
         {
             return result
-                .WithError(new Error { Message = $"AppointmentStatus with name {request.StatusId} not found" })
+                .WithError(new Error {Message = $"AppointmentStatus with name {request.StatusId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 
@@ -80,7 +80,7 @@ public class CreateAppointmentHandler : IRequestHandler<CreateAppointmentCommand
         if (appointmentType is null)
         {
             return result
-                .WithError(new Error { Message = $"AppointmentType with name {request.TypeId} not found" })
+                .WithError(new Error {Message = $"AppointmentType with name {request.TypeId} not found"})
                 .WithStatusCode(StatusCodes.Status404NotFound);
         }
 

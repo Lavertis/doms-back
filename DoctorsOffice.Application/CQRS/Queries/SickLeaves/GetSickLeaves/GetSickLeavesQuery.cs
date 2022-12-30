@@ -4,9 +4,9 @@ using DoctorsOffice.Domain.Utils;
 using DoctorsOffice.Domain.Wrappers;
 using MediatR;
 
-namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetAllSickLeaves;
+namespace DoctorsOffice.Application.CQRS.Queries.SickLeaves.GetSickLeaves;
 
-public class GetAllSickLeavesQuery : IRequest<HttpResult<PagedResponse<SickLeaveResponse>>>
+public class GetSickLeavesQuery : IRequest<HttpResult<PagedResponse<SickLeaveResponse>>>
 {
     public PaginationFilter? PaginationFilter { get; set; }
 }

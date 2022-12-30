@@ -39,5 +39,5 @@ public class AdminController : BaseController
     [HttpGet]
     public async Task<ActionResult<PagedResponse<AdminResponse>>> GetAllAdminsAsync(
         [FromQuery] PaginationFilter paginationFilter)
-        => CreateResponse(await Mediator.Send(new GetAllAdminsQuery { PaginationFilter = paginationFilter }));
+        => CreateResponse(await Mediator.Send(new GetAllAdminsQuery {PaginationFilter = paginationFilter}));
 }
