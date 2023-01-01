@@ -6,16 +6,16 @@ namespace DoctorsOffice.Domain.Entities;
 [Table(("SickLeaves"))]
 public class SickLeave : BaseEntity
 {
-    public virtual Patient Patient { get; set; } = default!;
+    public Patient Patient { get; set; } = default!;
 
-    public virtual Guid PatientId { get; set; }
+    public Guid PatientId { get; set; }
 
-    public virtual Doctor Doctor { get; set; } = default!;
+    public Doctor Doctor { get; set; } = default!;
 
-    public virtual Appointment? Appointment { get; set; }
+    public Appointment? Appointment { get; set; }
 
-    public virtual Guid? AppointmentId { get; set; }
-    public virtual Guid DoctorId { get; set; }
+    public Guid? AppointmentId { get; set; }
+    public Guid DoctorId { get; set; }
 
     public DateTime DateStart { get; set; }
 

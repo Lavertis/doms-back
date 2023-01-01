@@ -26,6 +26,7 @@ public static class AutoMapperModule
             options.CreateMap<DrugItem, DrugItemResponse>();
             options.CreateMap<SickLeave, SickLeaveResponse>();
             options.CreateMap<QuickButton, QuickButtonResponse>();
+            options.CreateMap<ChatMessage, ChatMessageResponse>();
             options.CreateMap<Appointment, AppointmentResponse>();
             options.CreateMap<AppointmentStatus, AppointmentStatusResponse>();
             options.CreateMap<AppointmentType, AppointmentTypeResponse>();

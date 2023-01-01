@@ -7,5 +7,5 @@ namespace DoctorsOffice.Domain.Entities.UserTypes;
 public class Admin : BaseEntity
 {
     [Key] [ForeignKey(nameof(AppUser))] public new Guid Id { get; set; }
-    public virtual AppUser AppUser { get; set; } = default!;
+    public AppUser AppUser { get; set; } = default!;
 }

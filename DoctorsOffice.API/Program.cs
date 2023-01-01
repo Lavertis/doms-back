@@ -3,6 +3,7 @@ using DoctorsOffice.API.Swagger;
 using DoctorsOffice.Application.CQRS;
 using DoctorsOffice.Application.Middleware;
 using DoctorsOffice.Application.Services;
+using DoctorsOffice.Application.Services.Chat;
 using DoctorsOffice.Application.Validation;
 using DoctorsOffice.Application.Workers;
 using DoctorsOffice.DocumentGenerator;
@@ -15,6 +16,7 @@ using DoctorsOffice.SendGrid;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSignalR();
 builder.Services.AddWorkers();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerModule();
@@ -46,6 +48,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ChatHub>("/api/chat");
 app.Run();
 
 public partial class Program

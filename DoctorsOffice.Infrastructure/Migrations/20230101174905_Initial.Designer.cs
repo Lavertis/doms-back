@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DoctorsOffice.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221223014914_Initial")]
+    [Migration("20230101174905_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -287,6 +287,37 @@ namespace DoctorsOffice.Infrastructure.Migrations
                             Name = "Doctor",
                             NormalizedName = "DOCTOR"
                         });
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ReceiverId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.DrugItem", b =>
@@ -1353,6 +1384,25 @@ namespace DoctorsOffice.Infrastructure.Migrations
                     b.Navigation("Type");
                 });
 
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DoctorsOffice.Domain.Entities.UserTypes.AppUser", "Sender")
+                        .WithMany("SendMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.DrugItem", b =>
                 {
                     b.HasOne("DoctorsOffice.Domain.Entities.Prescription", "Prescription")
@@ -1582,6 +1632,13 @@ namespace DoctorsOffice.Infrastructure.Migrations
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.Prescription", b =>
                 {
                     b.Navigation("DrugItems");
+                });
+
+            modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.AppUser", b =>
+                {
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SendMessages");
                 });
 
             modelBuilder.Entity("DoctorsOffice.Domain.Entities.UserTypes.Doctor", b =>

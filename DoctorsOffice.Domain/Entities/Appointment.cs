@@ -13,17 +13,17 @@ public class Appointment : BaseEntity
     public string? Diagnosis { get; set; }
     public string? Recommendations { get; set; }
 
-    public virtual Patient Patient { get; set; } = default!;
-    public virtual Guid PatientId { get; set; }
+    public Patient Patient { get; set; } = default!;
+    public Guid PatientId { get; set; }
 
-    public virtual Doctor Doctor { get; set; } = default!;
-    public virtual Guid DoctorId { get; set; }
+    public Doctor Doctor { get; set; } = default!;
+    public Guid DoctorId { get; set; }
 
-    public virtual AppointmentStatus Status { get; set; } = default!;
-    public virtual Guid StatusId { get; set; }
+    public AppointmentStatus Status { get; set; } = default!;
+    public Guid StatusId { get; set; }
 
-    public virtual AppointmentType Type { get; set; } = default!;
-    public virtual Guid TypeId { get; set; }
+    public AppointmentType Type { get; set; } = default!;
+    public Guid TypeId { get; set; }
 
     public List<Prescription> Prescriptions { get; set; } = new();
 
